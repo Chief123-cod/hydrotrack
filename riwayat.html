@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Konsumsi | HydroTrack</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Remix Icon CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN (Pendukung) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            prefix: 'tw-'
+        };
+    </script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+    <!-- ========== SIDEBAR NAVIGATION ========== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__logo">
+            <i class="ri-drop-fill"></i>
+            <span>HYDROTRACK</span>
+        </div>
+
+        <nav class="sidebar__nav">
+            <ul>
+                <li>
+                    <a href="index.html" class="nav-link" data-view="dashboard">
+                        <i class="ri-dashboard-3-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="riwayat.html" class="nav-link active" data-view="history">
+                        <i class="ri-history-line"></i>
+                        <span>Riwayat</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" data-view="analytics">
+                        <i class="ri-bar-chart-2-line"></i>
+                        <span>Analisis</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link" data-view="settings">
+                        <i class="ri-settings-4-line"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar__user" id="sidebarUser">
+            <div class="sidebar__user-avatar">
+                <i class="ri-user-3-fill"></i>
+            </div>
+            <div class="sidebar__user-info">
+                <span class="sidebar__user-name" id="sidebarUserName">User</span>
+                <span class="sidebar__user-label">Hydration Tracker</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========== MOBILE HEADER ========== -->
+    <header class="mobile-header" id="mobileHeader">
+        <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Toggle menu">
+            <i class="ri-menu-line"></i>
+        </button>
+        <div class="mobile-header__logo">
+            <i class="ri-drop-fill"></i>
+            <span>HYDROTRACK</span>
+        </div>
+        <div class="mobile-header__date" id="mobileDate"></div>
+    </header>
+
+    <!-- ========== SIDEBAR OVERLAY (Mobile) ========== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content">
+
+        <!-- Top Header Bar -->
+        <header class="top-header">
+            <div class="top-header__left">
+                <h1 class="top-header__greeting">Riwayat Konsumsi</h1>
+                <p class="top-header__subtitle">Kelola dan pantau seluruh catatan air minum harianmu.</p>
+            </div>
+            <div class="top-header__right">
+                <button class="btn btn--primary" id="btnOpenAddForm">
+                    <i class="ri-add-line"></i>
+                    <span>Tambah Log</span>
+                </button>
+                <div class="top-header__date" id="headerDate"></div>
+            </div>
+        </header>
+
+        <!-- ===== VIEW: HISTORY ===== -->
+        <section class="view view--active" id="view-history">
+
+            <!-- Add / Edit Log Form -->
+            <div class="card history-form-card hidden" id="historyFormCard">
+                <div class="history-form__header">
+                    <h3 class="card__title" id="historyFormTitle">Tambah Catatan Baru</h3>
+                    <button class="history-form__close" id="btnCloseForm" aria-label="Tutup form">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+                <form class="history-form" id="historyForm" novalidate>
+                    <input type="hidden" id="formLogId" value="">
+
+                    <div class="history-form__grid">
+                        <!-- Amount -->
+                        <div class="form-group">
+                            <label class="form-label" for="formAmount">Jumlah (ml) <span
+                                    class="form-required">*</span></label>
+                            <div class="form-input-wrapper">
+                                <i class="ri-drop-fill"></i>
+                                <input type="number" id="formAmount" class="form-input" placeholder="Contoh: 250"
+                                    min="50" max="3000" required>
+                            </div>
+                            <span class="form-error" id="errorAmount"></span>
+                        </div>
+
+                        <!-- Drink Type -->
+                        <div class="form-group">
+                            <label class="form-label" for="formType">Jenis Minuman <span
+                                    class="form-required">*</span></label>
+                            <div class="form-input-wrapper">
+                                <i class="ri-goblet-fill"></i>
+                                <select id="formType" class="form-input form-select" required>
+                                    <option value="water">Air Mineral</option>
+                                    <option value="tea">Teh Hijau</option>
+                                    <option value="coffee">Kopi</option>
+                                    <option value="juice">Jus Buah</option>
+                                    <option value="milk">Susu</option>
+                                    <option value="coconut">Air Kelapa</option>
+                                </select>
+                            </div>
+                            <span class="form-error" id="errorType"></span>
+                        </div>
+
+                        <!-- Timestamp -->
+                        <div class="form-group">
+                            <label class="form-label" for="formTime">Waktu Konsumsi <span
+                                    class="form-required">*</span></label>
+                            <div class="form-input-wrapper">
+                                <i class="ri-time-line"></i>
+                                <input type="datetime-local" id="formTime" class="form-input" required>
+                            </div>
+                            <span class="form-error" id="errorTime"></span>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="form-group">
+                            <label class="form-label" for="formNote">Catatan <span
+                                    class="tw-text-xs tw-text-gray-400">(opsional)</span></label>
+                            <div class="form-input-wrapper">
+                                <i class="ri-sticky-note-line"></i>
+                                <input type="text" id="formNote" class="form-input"
+                                    placeholder="Contoh: Setelah olahraga" maxlength="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-form__actions">
+                        <button type="button" class="btn btn--secondary" id="btnCancelForm">Batal</button>
+                        <button type="submit" class="btn btn--primary" id="btnSubmitForm">
+                            <i class="ri-save-line"></i>
+                            <span>Simpan</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="card history-filter-card">
+                <div class="history-filter">
+                    <!-- Search -->
+                    <div class="history-filter__search">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="historySearch" class="form-input"
+                            placeholder="Cari catatan atau jenis minuman...">
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="history-filter__selects">
+                        <div class="filter-group">
+                            <label class="filter-label">Rentang Waktu</label>
+                            <select id="filterDateRange" class="form-input form-select form-select--sm">
+                                <option value="today">Hari Ini</option>
+                                <option value="7days" selected>7 Hari Terakhir</option>
+                                <option value="30days">30 Hari Terakhir</option>
+                                <option value="all">Semua</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Jenis Minuman</label>
+                            <select id="filterDrinkType" class="form-input form-select form-select--sm">
+                                <option value="all">Semua Jenis</option>
+                                <option value="water">Air Mineral</option>
+                                <option value="tea">Teh Hijau</option>
+                                <option value="coffee">Kopi</option>
+                                <option value="juice">Jus Buah</option>
+                                <option value="milk">Susu</option>
+                                <option value="coconut">Air Kelapa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="history-summary" id="historySummary">
+                <div class="history-summary__item">
+                    <span class="history-summary__label">Total Log</span>
+                    <span class="history-summary__value" id="summaryTotalLogs">0</span>
+                </div>
+                <div class="history-summary__item">
+                    <span class="history-summary__label">Total Volume</span>
+                    <span class="history-summary__value" id="summaryTotalVolume">0 ml</span>
+                </div>
+                <div class="history-summary__item">
+                    <span class="history-summary__label">Rata-rata / Hari</span>
+                    <span class="history-summary__value" id="summaryAvgDaily">0 ml</span>
+                </div>
+            </div>
+
+            <!-- History Log Table -->
+            <div class="card history-table-card">
+                <div class="history-table-wrapper">
+                    <table class="history-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Waktu</th>
+                                <th>Jenis</th>
+                                <th>Volume</th>
+                                <th>Catatan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Rows rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div class="history-empty hidden" id="historyEmpty">
+                    <i class="ri-inbox-line"></i>
+                    <h3>Tidak ada data ditemukan</h3>
+                    <p>Belum ada catatan yang sesuai dengan filter. Coba ubah filter atau tambah log baru.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- ========== TOAST NOTIFICATION ========== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========== MODAL KONFIRMASI ========== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title" id="modalTitle">Konfirmasi</h3>
+                <button class="modal__close" id="modalClose" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal__body" id="modalBody">
+                <p>Apakah Anda yakin?</p>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" id="modalCancel">Batal</button>
+                <button class="btn btn--danger" id="modalConfirm">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>

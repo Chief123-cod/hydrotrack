@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | HydroTrack</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN (Pendukung) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      prefix: 'tw-'
+    };
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+  <!-- ========== SIDEBAR NAVIGATION ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo">
+      <i class="ri-drop-fill"></i>
+      <span>HYDROTRACK</span>
+    </div>
+
+    <nav class="sidebar__nav">
+      <ul>
+        <li>
+          <a href="index.html" class="nav-link active" data-view="dashboard">
+            <i class="ri-dashboard-3-line"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="riwayat.html" class="nav-link" data-view="history">
+            <i class="ri-history-line"></i>
+            <span>Riwayat</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-view="analytics">
+            <i class="ri-bar-chart-2-line"></i>
+            <span>Analisis</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-view="settings">
+            <i class="ri-settings-4-line"></i>
+            <span>Pengaturan</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar__user" id="sidebarUser">
+      <div class="sidebar__user-avatar">
+        <i class="ri-user-3-fill"></i>
+      </div>
+      <div class="sidebar__user-info">
+        <span class="sidebar__user-name" id="sidebarUserName">User</span>
+        <span class="sidebar__user-label">Hydration Tracker</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== MOBILE HEADER ========== -->
+  <header class="mobile-header" id="mobileHeader">
+    <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Toggle menu">
+      <i class="ri-menu-line"></i>
+    </button>
+    <div class="mobile-header__logo">
+      <i class="ri-drop-fill"></i>
+      <span>HYDROTRACK</span>
+    </div>
+    <div class="mobile-header__date" id="mobileDate"></div>
+  </header>
+
+  <!-- ========== SIDEBAR OVERLAY (Mobile) ========== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <!-- Top Header Bar -->
+    <header class="top-header">
+      <div class="top-header__left">
+        <h1 class="top-header__greeting" id="greetingText">Welcome back, <span id="headerUserName">User</span>!</h1>
+        <p class="top-header__subtitle">Pantau konsumsi air harianmu dan tetap terhidrasi.</p>
+      </div>
+      <div class="top-header__right">
+        <div class="top-header__search">
+          <i class="ri-search-line"></i>
+          <input type="text" id="globalSearch" placeholder="Cari..." aria-label="Cari">
+        </div>
+        <div class="top-header__date" id="headerDate"></div>
+      </div>
+    </header>
+
+    <!-- ===== VIEW: DASHBOARD ===== -->
+    <section class="view view--active" id="view-dashboard">
+
+      <!-- Motivational Banner -->
+      <div class="banner">
+        <div class="banner__content">
+          <div class="banner__icon"><i class="ri-sun-line"></i></div>
+          <div class="banner__text">
+            <h3>Hai, jangan lupa minum air hari ini! 💧</h3>
+            <p>Tetap terhidrasi agar tubuh dan pikiranmu selalu segar sepanjang hari.</p>
+          </div>
+        </div>
+        <button class="banner__close" id="bannerClose" aria-label="Tutup banner">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <!-- Metric Cards Row -->
+      <div class="metrics-row">
+        <div class="metric-card metric-card--primary">
+          <div class="metric-card__icon"><i class="ri-drop-fill"></i></div>
+          <div class="metric-card__info">
+            <span class="metric-card__label">Konsumsi Hari Ini</span>
+            <span class="metric-card__value" id="metricTodayIntake">0 ml</span>
+          </div>
+        </div>
+        <div class="metric-card metric-card--success">
+          <div class="metric-card__icon"><i class="ri-percent-line"></i></div>
+          <div class="metric-card__info">
+            <span class="metric-card__label">Target Tercapai</span>
+            <span class="metric-card__value" id="metricPercentage">0%</span>
+          </div>
+        </div>
+        <div class="metric-card metric-card--warning">
+          <div class="metric-card__icon"><i class="ri-contrast-drop-line"></i></div>
+          <div class="metric-card__info">
+            <span class="metric-card__label">Sisa Target</span>
+            <span class="metric-card__value" id="metricRemaining">0 ml</span>
+          </div>
+        </div>
+        <div class="metric-card metric-card--info">
+          <div class="metric-card__icon"><i class="ri-goblet-fill"></i></div>
+          <div class="metric-card__info">
+            <span class="metric-card__label">Jumlah Gelas</span>
+            <span class="metric-card__value" id="metricGlasses">0 gelas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Grid: Bottle + Quick Log + Goal -->
+      <div class="dashboard-grid">
+
+        <!-- Water Bottle Visualization -->
+        <div class="card bottle-card">
+          <h3 class="card__title">Level Hidrasi</h3>
+          <div class="bottle-container">
+            <div class="bottle">
+              <div class="bottle__cap"></div>
+              <div class="bottle__neck"></div>
+              <div class="bottle__body">
+                <div class="bottle__fill" id="bottleFill">
+                  <div class="bottle__wave"></div>
+                </div>
+                <span class="bottle__percentage" id="bottlePercentage">0%</span>
+              </div>
+            </div>
+            <p class="bottle__status" id="bottleStatus">Ayo mulai minum air! 💧</p>
+          </div>
+        </div>
+
+        <!-- Quick Log + Intake Goal -->
+        <div class="dashboard-right">
+
+          <!-- Quick Add Buttons -->
+          <div class="card quick-log-card">
+            <h3 class="card__title">Tambah Cepat</h3>
+            <div class="quick-log__buttons">
+              <button class="quick-btn" data-amount="100">
+                <i class="ri-add-line"></i>
+                <span>100 ml</span>
+              </button>
+              <button class="quick-btn" data-amount="250">
+                <i class="ri-goblet-fill"></i>
+                <span>250 ml</span>
+                <small>1 Gelas</small>
+              </button>
+              <button class="quick-btn" data-amount="500">
+                <i class="ri-bottle-"></i>
+                <span>500 ml</span>
+              </button>
+              <button class="quick-btn" data-amount="600">
+                <i class="ri-cup-fill"></i>
+                <span>600 ml</span>
+                <small>1 Tumbler</small>
+              </button>
+            </div>
+          </div>
+
+          <!-- Intake Goal Progress -->
+          <div class="card goal-card">
+            <div class="goal-card__header">
+              <h3 class="card__title">Target Harian</h3>
+              <span class="goal-card__target" id="goalTarget">0 / 0 ml</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar__fill" id="progressBarFill"></div>
+            </div>
+            <p class="goal-card__message" id="goalMessage">Mulai minum air untuk mencapai targetmu!</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Drink Log Today -->
+      <div class="card drink-log-card">
+        <div class="drink-log__header">
+          <h3 class="card__title">Log Minum Hari Ini</h3>
+          <span class="drink-log__count" id="drinkLogCount">0 catatan</span>
+        </div>
+        <div class="drink-log__list" id="drinkLogList">
+          <div class="drink-log__empty" id="drinkLogEmpty">
+            <i class="ri-drop-line"></i>
+            <p>Belum ada catatan hari ini. Mulai catat konsumsi airmu!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hydration Tips -->
+      <div class="tips-section">
+        <h3 class="card__title tips-section__title">Hydration Tips 💡</h3>
+        <div class="tips-grid">
+          <div class="tip-card">
+            <div class="tip-card__icon"><i class="ri-alarm-line"></i></div>
+            <h4>Minum Rutin</h4>
+            <p>Biasakan minum air setiap 1-2 jam sekali meskipun tidak merasa haus.</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-card__icon"><i class="ri-sun-foggy-line"></i></div>
+            <h4>Mulai dari Pagi</h4>
+            <p>Minum segelas air putih segera setelah bangun tidur untuk mengaktifkan metabolisme.</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-card__icon"><i class="ri-restaurant-line"></i></div>
+            <h4>Sebelum Makan</h4>
+            <p>Minum air 30 menit sebelum makan untuk membantu pencernaan dan mengontrol nafsu makan.</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-card__icon"><i class="ri-run-line"></i></div>
+            <h4>Saat Aktivitas</h4>
+            <p>Tingkatkan asupan air saat berolahraga atau aktivitas fisik berat.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== MODAL KONFIRMASI ========== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modalTitle">Konfirmasi</h3>
+        <button class="modal__close" id="modalClose" aria-label="Tutup modal">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="modal__body" id="modalBody">
+        <p>Apakah Anda yakin?</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="modalCancel">Batal</button>
+        <button class="btn btn--danger" id="modalConfirm">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
