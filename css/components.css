@@ -156,6 +156,7 @@
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
+  align-items: stretch;
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
 }
@@ -171,13 +172,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .bottle-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-md);
+  flex: 1;
+  width: 100%;
 }
 
 .bottle {
@@ -547,37 +553,42 @@
   box-shadow: 0 2px 6px rgba(30, 58, 138, 0.12);
 }
 
-/* ==================== ADD CONTAINER MODAL (Screenshot Replica) ==================== */
-#containerModalOverlay {
+/* ==================== ADD CONTAINER & WATER ENTRY MODALS (Theme HydroTrack) ==================== */
+#containerModalOverlay,
+#editLogModalOverlay,
+#deleteLogModalOverlay {
   display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(5px);
   z-index: 3000;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  box-sizing: border-box;
 }
 
-#containerModalOverlay.active {
+#containerModalOverlay.active,
+#editLogModalOverlay.active,
+#deleteLogModalOverlay.active {
   display: flex !important;
 }
 
 .container-modal-box {
-  background: #14171D;
-  color: #FFFFFF;
+  background: #FFFFFF;
+  color: #1E293B;
   width: 100%;
   max-width: 420px;
   border-radius: 28px;
-  padding: 16px 24px 28px 24px;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6);
+  padding: 18px 24px 28px 24px;
+  box-shadow: 0 24px 60px rgba(44, 62, 80, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.04);
   position: relative;
   animation: containerModalUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border);
 }
 
 @keyframes containerModalUp {
@@ -592,9 +603,9 @@
 }
 
 .modal-sheet__handle {
-  width: 40px;
-  height: 4px;
-  background: #475569;
+  width: 44px;
+  height: 5px;
+  background: #CBD5E1;
   border-radius: 99px;
   margin: 0 auto 16px auto;
 }
@@ -609,7 +620,7 @@
 .container-modal__title {
   font-size: 22px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #1E3A8A;
   margin: 0;
   letter-spacing: -0.3px;
 }
@@ -618,47 +629,48 @@
 .container-preview-badge {
   width: 48px;
   height: 48px;
-  background: #1E3A8A;
-  color: #FFFFFF;
+  background: #EAF4FD;
+  color: #2E86DE;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.4);
+  box-shadow: 0 0 0 4px rgba(46, 134, 222, 0.15);
   position: relative;
 }
 
 .container-preview-badge .custom-icon {
   width: 24px;
   height: 24px;
+  background-color: #2E86DE;
 }
 
-/* Floating Label Input Group (Identik dengan Gambar 2) */
+/* Floating Label Input Group (Sesuai Tema Web) */
 .container-input-group {
   position: relative;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .container-input {
   width: 100%;
-  height: 56px;
-  background: transparent;
-  border: 1.5px solid #4B5563;
+  height: 54px;
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
   border-radius: 999px;
-  padding: 0 24px;
-  font-size: 16px;
-  color: #FFFFFF;
+  padding: 0 22px;
+  font-size: 15px;
+  color: #1E293B;
   outline: none;
   transition: all 0.2s ease;
 }
 
 .container-input:focus {
-  border-color: #93C5FD;
-  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.15);
+  border-color: #2E86DE;
+  box-shadow: 0 0 0 3px rgba(46, 134, 222, 0.15);
 }
 
 .container-input::placeholder {
-  color: #64748B;
+  color: #94A3B8;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -669,30 +681,41 @@
 
 .container-label {
   position: absolute;
-  left: 20px;
+  left: 18px;
   top: 50%;
   transform: translateY(-50%);
-  background: #14171D;
-  padding: 0 8px;
-  font-size: 15px;
-  color: #94A3B8;
+  background: #FFFFFF;
+  padding: 0 6px;
+  font-size: 14px;
+  color: #64748B;
   pointer-events: none;
   transition: all 0.2s ease;
+  z-index: 3;
 }
 
-/* When focused or input has content, float label on top border */
+/* Float label on top border when active/has value */
 .container-input:focus ~ .container-label,
-.container-input:not(:placeholder-shown) ~ .container-label {
+.container-input:not(:placeholder-shown) ~ .container-label,
+.select-input-wrapper ~ .container-label {
   top: 0;
   font-size: 12px;
-  color: #93C5FD;
-  font-weight: 500;
+  color: #64748B;
+  font-weight: 600;
+}
+
+/* Highlight label in primary blue when input group is focused */
+.container-input-group:focus-within .container-label,
+.container-input:focus ~ .container-label {
+  top: 0;
+  font-size: 12px;
+  color: #2E86DE;
+  font-weight: 600;
 }
 
 .container-override-text {
   font-size: 13px;
-  color: #94A3B8;
-  margin-bottom: 14px;
+  color: #64748B;
+  margin-bottom: 12px;
   text-align: left;
 }
 
@@ -702,17 +725,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   overflow-x: auto;
   padding-bottom: 6px;
 }
 
 .container-icon-picker::-webkit-scrollbar {
-  height: 3px;
+  height: 4px;
 }
 
 .container-icon-picker::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #CBD5E1;
   border-radius: 99px;
 }
 
@@ -720,9 +743,9 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: #1E232B;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94A3B8;
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  color: #64748B;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -732,14 +755,16 @@
 }
 
 .icon-picker-btn:hover {
-  background: #2D3442;
-  color: #FFFFFF;
+  background: #EAF4FD;
+  color: #2E86DE;
+  border-color: #BFDBFE;
 }
 
 .icon-picker-btn.active {
   background: #BFDBFE;
   color: #1E3A8A;
   border-color: #93C5FD;
+  box-shadow: 0 2px 6px rgba(46, 134, 222, 0.2);
 }
 
 .icon-picker-btn .custom-icon {
@@ -750,22 +775,24 @@
 /* Submit Button */
 .btn-submit-container {
   width: 100%;
-  height: 52px;
-  background: #BFDBFE;
-  color: #1E3A8A;
+  height: 50px;
+  background: #2E86DE;
+  color: #FFFFFF;
   border: none;
   border-radius: 999px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(46, 134, 222, 0.25);
 }
 
 .btn-submit-container:hover {
-  background: #93C5FD;
+  background: #1B6EC2;
+  box-shadow: 0 6px 16px rgba(46, 134, 222, 0.35);
   transform: translateY(-1px);
 }
 
@@ -783,13 +810,13 @@
 
 .btn-delete-container {
   flex: 1;
-  height: 52px;
-  background: rgba(239, 68, 68, 0.16);
-  color: #F87171;
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  height: 50px;
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
   border-radius: 999px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -811,6 +838,182 @@
 
 .container-modal__actions .btn-submit-container {
   flex: 1.2;
+}
+
+/* ==================== THEME MODAL POPUP (Edit & Delete Sesuai Tema Web) ==================== */
+.dark-modal-box,
+.theme-modal-box {
+  background: #FFFFFF;
+  color: #1E293B;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 28px;
+  padding: 20px 24px 26px 24px;
+  box-shadow: 0 24px 60px rgba(44, 62, 80, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  position: relative;
+  animation: containerModalUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--color-border);
+}
+
+.dark-modal__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1E3A8A;
+  margin-bottom: 22px;
+  letter-spacing: -0.3px;
+}
+
+.dark-modal__desc,
+.theme-modal__desc {
+  font-size: 15px;
+  color: #64748B;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  padding: 0 6px;
+  text-align: center;
+}
+
+.delete-icon-badge {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px auto;
+  border-radius: 50%;
+  background: #FEE2E2;
+  color: #DC2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.select-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.select-input-icon {
+  position: absolute;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2E86DE;
+  font-size: 19px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.select-input-icon .custom-icon {
+  width: 22px;
+  height: 22px;
+  background-color: #2E86DE;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 18px;
+  color: #64748B;
+  font-size: 20px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.container-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-left: 50px !important;
+  padding-right: 42px !important;
+  cursor: pointer;
+  background: #FFFFFF;
+  color: #1E293B;
+}
+
+.container-select option {
+  background: #FFFFFF;
+  color: #1E293B;
+  padding: 10px;
+}
+
+.container-input--with-icon {
+  padding-left: 50px !important;
+}
+
+.dark-modal__actions,
+.theme-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  height: 50px;
+  border-radius: 999px;
+  background: #F1F5F9;
+  color: #475569;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-modal-cancel:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.btn-modal-save {
+  flex: 1.2;
+  height: 50px;
+  border-radius: 999px;
+  background: #2E86DE;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(46, 134, 222, 0.25);
+}
+
+.btn-modal-save:hover {
+  background: #1B6EC2;
+  box-shadow: 0 6px 16px rgba(46, 134, 222, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-modal-delete {
+  flex: 1;
+  height: 50px;
+  border-radius: 999px;
+  background: #FEE2E2;
+  color: #DC2626;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #FECACA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-modal-delete:hover {
+  background: #EF4444;
+  color: #FFFFFF;
+  border-color: #EF4444;
 }
 
 /* Quick Add & Goal Row (Top of Home) */
@@ -912,7 +1115,11 @@
 
 /* ---------- Drink Log ---------- */
 .drink-log-card {
-  margin-bottom: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0;
 }
 
 .drink-log__header {
@@ -920,6 +1127,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-md);
+  flex-shrink: 0;
 }
 
 .drink-log__header .card__title {
@@ -939,8 +1147,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  max-height: 320px;
+  flex: 1;
   overflow-y: auto;
+  max-height: 290px;
 }
 
 .drink-log__empty {
@@ -948,7 +1157,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-2xl) var(--spacing-md);
+  flex: 1;
+  min-height: 180px;
+  padding: var(--spacing-xl) var(--spacing-md);
   color: var(--color-text-muted);
   text-align: center;
   gap: var(--spacing-sm);
@@ -992,35 +1203,41 @@
 
 .drink-log__item-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .drink-log__item-type {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.drink-log__item-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.2;
 }
 
 .drink-log__item-note {
   font-size: 12px;
   color: var(--color-text-secondary);
+  line-height: 1.2;
 }
 
 .drink-log__item-meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .drink-log__item-amount {
   font-size: 15px;
   font-weight: 700;
   color: var(--color-primary);
-}
-
-.drink-log__item-time {
-  font-size: 12px;
-  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .drink-log__item-actions {

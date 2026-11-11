@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
   UI.updateDateDisplay();
   UI.updateUserInfo();
 
-  // Render dashboard if on dashboard page
-  if (document.getElementById('metricTodayIntake')) {
+  // Render dashboard if on dashboard page (index.html)
+  if (document.getElementById('drinkLogList') || document.getElementById('progressBarFill')) {
     UI.refreshDashboard();
   }
 
@@ -500,6 +500,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Cancel button inside container modal
+  const btnCancelContainer = document.getElementById('btnCancelContainer');
+  if (btnCancelContainer && containerModal) {
+    btnCancelContainer.addEventListener('click', () => {
+      containerModal.classList.remove('active');
+      editingContainerId = null;
+    });
+  }
+
   // Icon picker click (manual override)
   iconPickerBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -623,8 +632,228 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ==================== DRINK LOG — DELETE & EDIT (Event Delegation) ==================== */
+  /* ==================== DRINK LOG — DELETE & EDIT (Popup di Home Sesuai Gambar 1 & 2) ==================== */
 
+  const editLogModalOverlay = document.getElementById('editLogModalOverlay');
+  const deleteLogModalOverlay = document.getElementById('deleteLogModalOverlay');
+  const formEditLog = document.getElementById('formEditLog');
+  const editLogId = document.getElementById('editLogId');
+  const editLogModalTitle = document.getElementById('editLogModalTitle');
+  const editLogPreviewBadge = document.getElementById('editLogPreviewBadge');
+  const editLogContainerSelect = document.getElementById('editLogContainerSelect');
+  const editLogContainerIcon = document.getElementById('editLogContainerIcon');
+  const editLogBeverageSelect = document.getElementById('editLogBeverageSelect');
+  const editLogBeverageIcon = document.getElementById('editLogBeverageIcon');
+  const editLogTimeInput = document.getElementById('editLogTimeInput');
+  const editLogAmountInput = document.getElementById('editLogAmountInput');
+  const btnCancelEditLog = document.getElementById('btnCancelEditLog');
+
+  const deleteLogModalTitle = document.getElementById('deleteLogModalTitle');
+  const deleteLogModalDesc = document.getElementById('deleteLogModalDesc');
+  const btnCancelDeleteLog = document.getElementById('btnCancelDeleteLog');
+  const btnConfirmDeleteLog = document.getElementById('btnConfirmDeleteLog');
+
+  let pendingDeleteLogId = null;
+
+  // Open Edit Water Entry Modal right on Home (Gambar 2)
+  function openEditLogModal(log) {
+    if (!editLogModalOverlay || !log) return;
+
+    if (editLogId) editLogId.value = log.id;
+    if (editLogModalTitle) editLogModalTitle.textContent = 'Edit Water Entry';
+
+    // Populate Container Type dropdown
+    const containers = Storage.getAllContainers ? Storage.getAllContainers() : [];
+    if (editLogContainerSelect) {
+      editLogContainerSelect.innerHTML = '';
+      let matched = false;
+
+      containers.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.dataset.amount = c.amount;
+        opt.dataset.icon = c.icon;
+        opt.textContent = `${c.name} (${c.amount >= 1000 ? (c.amount / 1000) + ' L' : c.amount + ' ml'})`;
+        if (c.amount === log.amount) {
+          opt.selected = true;
+          matched = true;
+          if (editLogContainerIcon) {
+            editLogContainerIcon.innerHTML = `<i class="custom-icon ${c.icon}"></i>`;
+          }
+          if (editLogPreviewBadge) {
+            editLogPreviewBadge.innerHTML = `<i class="custom-icon ${c.icon}"></i>`;
+          }
+        }
+        editLogContainerSelect.appendChild(opt);
+      });
+
+      if (!matched) {
+        const customOpt = document.createElement('option');
+        customOpt.value = 'custom';
+        customOpt.dataset.amount = log.amount;
+        customOpt.dataset.icon = 'icon-glass-60';
+        customOpt.textContent = `Custom (${log.amount} ml)`;
+        customOpt.selected = true;
+        editLogContainerSelect.appendChild(customOpt);
+        if (editLogContainerIcon) {
+          editLogContainerIcon.innerHTML = `<i class="custom-icon icon-glass-60"></i>`;
+        }
+        if (editLogPreviewBadge) {
+          editLogPreviewBadge.innerHTML = `<i class="custom-icon icon-glass-60"></i>`;
+        }
+      }
+    }
+
+    // Set Beverage Type
+    if (editLogBeverageSelect) {
+      editLogBeverageSelect.value = log.type || 'water';
+      const bevIcon = Storage.DRINK_TYPES[log.type]?.icon || 'ri-drop-fill';
+      if (editLogBeverageIcon) {
+        editLogBeverageIcon.innerHTML = `<i class="${bevIcon}"></i>`;
+      }
+    }
+
+    // Set Time
+    if (editLogTimeInput) {
+      const d = new Date(log.timestamp);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      editLogTimeInput.value = `${hh}:${mm}`;
+    }
+
+    // Set Amount
+    if (editLogAmountInput) {
+      editLogAmountInput.value = log.amount;
+    }
+
+    editLogModalOverlay.classList.add('active');
+  }
+
+  // When container selection changes in Edit modal
+  if (editLogContainerSelect) {
+    editLogContainerSelect.addEventListener('change', () => {
+      const selectedOpt = editLogContainerSelect.selectedOptions[0];
+      if (!selectedOpt) return;
+      const amt = selectedOpt.dataset.amount;
+      const icon = selectedOpt.dataset.icon || 'icon-glass-60';
+
+      if (amt && editLogAmountInput) {
+        editLogAmountInput.value = amt;
+      }
+      if (editLogContainerIcon) {
+        editLogContainerIcon.innerHTML = `<i class="custom-icon ${icon}"></i>`;
+      }
+      if (editLogPreviewBadge) {
+        editLogPreviewBadge.innerHTML = `<i class="custom-icon ${icon}"></i>`;
+      }
+    });
+  }
+
+  // When beverage selection changes in Edit modal
+  if (editLogBeverageSelect) {
+    editLogBeverageSelect.addEventListener('change', () => {
+      const bev = editLogBeverageSelect.value;
+      const bevIcon = Storage.DRINK_TYPES[bev]?.icon || 'ri-drop-fill';
+      if (editLogBeverageIcon) {
+        editLogBeverageIcon.innerHTML = `<i class="${bevIcon}"></i>`;
+      }
+    });
+  }
+
+  // Save changes from Edit modal
+  if (formEditLog) {
+    formEditLog.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const logId = editLogId ? editLogId.value : null;
+      if (!logId) return;
+
+      const amount = parseInt(editLogAmountInput?.value) || 0;
+      const type = editLogBeverageSelect?.value || 'water';
+      const timeVal = editLogTimeInput?.value;
+
+      if (!amount || amount <= 0) {
+        UI.showToast('Masukkan jumlah volume yang valid (ml)!', 'warning');
+        return;
+      }
+
+      const existingLog = Storage.getLogById(logId);
+      const dateObj = existingLog ? new Date(existingLog.timestamp) : new Date();
+      if (timeVal) {
+        const [hh, mm] = timeVal.split(':');
+        dateObj.setHours(parseInt(hh), parseInt(mm), 0, 0);
+      }
+
+      Storage.updateLog(logId, {
+        amount: amount,
+        type: type,
+        timestamp: dateObj.toISOString()
+      });
+
+      UI.refreshDashboard();
+      if (editLogModalOverlay) editLogModalOverlay.classList.remove('active');
+      UI.showToast('Catatan berhasil diperbarui! ✨', 'success');
+    });
+  }
+
+  // Cancel button on Edit modal
+  if (btnCancelEditLog && editLogModalOverlay) {
+    btnCancelEditLog.addEventListener('click', () => {
+      editLogModalOverlay.classList.remove('active');
+    });
+  }
+
+  // Open Delete Confirmation Modal (Sesuai Gambar 1)
+  function openDeleteLogModal(log) {
+    if (!deleteLogModalOverlay || !log) return;
+    pendingDeleteLogId = log.id;
+
+    const containers = Storage.getAllContainers ? Storage.getAllContainers() : [];
+    const matched = containers.find(c => c.amount === log.amount);
+    const drinkLabel = Storage.DRINK_TYPES[log.type]?.label || 'Water';
+    const containerName = matched ? matched.name : drinkLabel;
+    const amountStr = log.amount >= 1000 ? `${log.amount / 1000} L` : `${log.amount} ml`;
+
+    if (deleteLogModalTitle) deleteLogModalTitle.textContent = 'Edit Water Entry';
+    if (deleteLogModalDesc) {
+      deleteLogModalDesc.textContent = `Are you sure you want to delete this ${containerName} ${amountStr} entry?`;
+    }
+
+    deleteLogModalOverlay.classList.add('active');
+  }
+
+  // Confirm delete button handler
+  if (btnConfirmDeleteLog) {
+    btnConfirmDeleteLog.addEventListener('click', () => {
+      if (!pendingDeleteLogId) return;
+      Storage.deleteLog(pendingDeleteLogId);
+      UI.refreshDashboard();
+      if (deleteLogModalOverlay) deleteLogModalOverlay.classList.remove('active');
+      pendingDeleteLogId = null;
+      UI.showToast('Catatan berhasil dihapus! 🗑️', 'info');
+    });
+  }
+
+  // Cancel delete button handler
+  if (btnCancelDeleteLog && deleteLogModalOverlay) {
+    btnCancelDeleteLog.addEventListener('click', () => {
+      deleteLogModalOverlay.classList.remove('active');
+      pendingDeleteLogId = null;
+    });
+  }
+
+  // Close modals on overlay backdrop click
+  [editLogModalOverlay, deleteLogModalOverlay].forEach(overlay => {
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+          pendingDeleteLogId = null;
+        }
+      });
+    }
+  });
+
+  // Event delegation on drinkLogList
   const drinkLogList = document.getElementById('drinkLogList');
   if (drinkLogList) {
     drinkLogList.addEventListener('click', (e) => {
@@ -636,18 +865,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const log = Storage.getLogById(logId);
         if (!log) return;
 
-        const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
-        UI.showModal(
-          'Hapus Catatan',
-          `Apakah Anda yakin ingin menghapus catatan <strong>${drinkType.label} (${log.amount} ml)</strong>?`,
-          'Hapus',
-          () => {
-            Storage.deleteLog(logId);
-            UI.refreshDashboard();
-            refreshHistory();
-            UI.showToast('Catatan berhasil dihapus.', 'warning');
-          }
-        );
+        if (deleteLogModalOverlay) {
+          openDeleteLogModal(log);
+        } else {
+          const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
+          UI.showModal(
+            'Hapus Catatan',
+            `Apakah Anda yakin ingin menghapus catatan <strong>${drinkType.label} (${log.amount} ml)</strong>?`,
+            'Hapus',
+            () => {
+              Storage.deleteLog(logId);
+              UI.refreshDashboard();
+              refreshHistory();
+              UI.showToast('Catatan berhasil dihapus.', 'warning');
+            }
+          );
+        }
       }
 
       if (editBtn) {
@@ -655,7 +888,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const log = Storage.getLogById(logId);
         if (!log) return;
 
-        if (document.getElementById('historyFormCard')) {
+        if (editLogModalOverlay) {
+          // Open popup directly on Home without navigating away!
+          openEditLogModal(log);
+        } else if (document.getElementById('historyFormCard')) {
           UI.switchView('history');
           refreshHistory();
           UI.openHistoryForm(log);

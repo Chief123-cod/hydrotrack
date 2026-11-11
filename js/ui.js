@@ -182,11 +182,11 @@ const UI = (() => {
       </div>
       <div class="drink-log__item-info">
         <span class="drink-log__item-type">${drinkType.label}</span>
+        <span class="drink-log__item-time">${time}</span>
         ${log.note ? `<span class="drink-log__item-note">${escapeHtml(log.note)}</span>` : ''}
       </div>
       <div class="drink-log__item-meta">
         <span class="drink-log__item-amount">${log.amount} ml</span>
-        <span class="drink-log__item-time">${time}</span>
       </div>
       <div class="drink-log__item-actions">
         <button class="btn-edit" data-id="${log.id}" title="Edit">
