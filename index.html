@@ -14,15 +14,6 @@
   <!-- Remix Icon CDN -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN (Pendukung) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      corePlugins: { preflight: false },
-      prefix: 'tw-'
-    };
-  </script>
-
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
@@ -45,26 +36,26 @@
       <ul>
         <li>
           <a href="index.html" class="nav-link active" data-view="dashboard">
-            <i class="ri-dashboard-3-line"></i>
-            <span>Dashboard</span>
+            <i class="ri-home-3-line"></i>
+            <span>Home</span>
           </a>
         </li>
         <li>
           <a href="riwayat.html" class="nav-link" data-view="history">
             <i class="ri-history-line"></i>
-            <span>Riwayat</span>
+            <span>History</span>
           </a>
         </li>
         <li>
-          <a href="#" class="nav-link" data-view="analytics">
+          <a href="analisis.html" class="nav-link" data-view="analytics">
             <i class="ri-bar-chart-2-line"></i>
-            <span>Analisis</span>
+            <span>Statistics</span>
           </a>
         </li>
         <li>
-          <a href="#" class="nav-link" data-view="settings">
+          <a href="pengaturan.html" class="nav-link" data-view="settings">
             <i class="ri-settings-4-line"></i>
-            <span>Pengaturan</span>
+            <span>Settings</span>
           </a>
         </li>
       </ul>
@@ -102,15 +93,9 @@
     <!-- Top Header Bar -->
     <header class="top-header">
       <div class="top-header__left">
-        <h1 class="top-header__greeting" id="greetingText">Welcome back, <span id="headerUserName">User</span>!</h1>
+        <h1 class="top-header__greeting" id="greetingText"><span id="greetingTime"></span>, <span
+            id="headerUserName">User</span></h1>
         <p class="top-header__subtitle">Pantau konsumsi air harianmu dan tetap terhidrasi.</p>
-      </div>
-      <div class="top-header__right">
-        <div class="top-header__search">
-          <i class="ri-search-line"></i>
-          <input type="text" id="globalSearch" placeholder="Cari..." aria-label="Cari">
-        </div>
-        <div class="top-header__date" id="headerDate"></div>
       </div>
     </header>
 
@@ -131,39 +116,77 @@
         </button>
       </div>
 
-      <!-- Metric Cards Row -->
-      <div class="metrics-row">
-        <div class="metric-card metric-card--primary">
-          <div class="metric-card__icon"><i class="ri-drop-fill"></i></div>
-          <div class="metric-card__info">
-            <span class="metric-card__label">Konsumsi Hari Ini</span>
-            <span class="metric-card__value" id="metricTodayIntake">0 ml</span>
+      <!-- Intake Goal Progress (Target Harian Ditaruh di Atas) -->
+      <div class="card goal-card mb-4">
+        <div class="goal-card__header">
+          <div>
+            <h3 class="card__title">Target Harian</h3>
+            <p class="goal-card__message" id="goalMessage">Mulai minum air untuk mencapai targetmu!</p>
+          </div>
+          <div class="goal-card__stats text-end">
+            <span class="goal-card__target" id="goalTarget">0 / 0 ml</span>
+            <span class="goal-card__pct-badge" id="metricPercentage">0%</span>
           </div>
         </div>
-        <div class="metric-card metric-card--success">
-          <div class="metric-card__icon"><i class="ri-percent-line"></i></div>
-          <div class="metric-card__info">
-            <span class="metric-card__label">Target Tercapai</span>
-            <span class="metric-card__value" id="metricPercentage">0%</span>
-          </div>
-        </div>
-        <div class="metric-card metric-card--warning">
-          <div class="metric-card__icon"><i class="ri-contrast-drop-line"></i></div>
-          <div class="metric-card__info">
-            <span class="metric-card__label">Sisa Target</span>
-            <span class="metric-card__value" id="metricRemaining">0 ml</span>
-          </div>
-        </div>
-        <div class="metric-card metric-card--info">
-          <div class="metric-card__icon"><i class="ri-goblet-fill"></i></div>
-          <div class="metric-card__info">
-            <span class="metric-card__label">Jumlah Gelas</span>
-            <span class="metric-card__value" id="metricGlasses">0 gelas</span>
-          </div>
+        <div class="progress-bar progress-bar--lg">
+          <div class="progress-bar__fill" id="progressBarFill"></div>
         </div>
       </div>
 
-      <!-- Main Dashboard Grid: Bottle + Quick Log + Goal -->
+      <!-- Quick Add Buttons (Menu Kategori Minuman + Ukuran Cup) -->
+      <div class="card quick-log-card mb-4">
+        <!-- Beverage Category Tabs (Pills Sedang Sesuai Referensi) -->
+        <div class="beverage-tabs-wrapper">
+          <div class="beverage-tabs" id="beverageTabs">
+            <button type="button" class="beverage-tab active" data-type="water">
+              <i class="ri-drop-fill"></i>
+              <span>Water</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="coffee">
+              <i class="ri-cup-line"></i>
+              <span>Coffee</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="energy">
+              <i class="ri-flashlight-line"></i>
+              <span>Energy Drink</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="juice">
+              <i class="ri-goblet-fill"></i>
+              <span>Fruit Juice</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="milk">
+              <i class="ri-goblet-line"></i>
+              <span>Milk</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="qrs">
+              <i class="ri-heart-pulse-line"></i>
+              <span>QRS</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="soda">
+              <i class="ri-drinks-2-line"></i>
+              <span>Soft drink</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="sports">
+              <i class="ri-water-flash-line"></i>
+              <span>Sports Drink</span>
+            </button>
+            <button type="button" class="beverage-tab" data-type="tea">
+              <i class="ri-leaf-line"></i>
+              <span>Tea</span>
+            </button>
+          </div>
+        </div>
+        <div class="quick-log__buttons" id="quickLogButtons">
+          <!-- Container buttons rendered dynamically by renderAllContainers() in app.js -->
+          <button class="quick-btn quick-btn--add" id="btnAddContainer" type="button" title="Add Container">
+            <i class="ri-add-line" style="font-size: 26px;"></i>
+            <span>Add</span>
+            <small>Custom</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Grid: Bottle + Today's Drink Log -->
       <div class="dashboard-grid">
 
         <!-- Water Bottle Visualization -->
@@ -184,61 +207,23 @@
           </div>
         </div>
 
-        <!-- Quick Log + Intake Goal -->
-        <div class="dashboard-right">
-
-          <!-- Quick Add Buttons -->
-          <div class="card quick-log-card">
-            <h3 class="card__title">Tambah Cepat</h3>
-            <div class="quick-log__buttons">
-              <button class="quick-btn" data-amount="100">
-                <i class="ri-add-line"></i>
-                <span>100 ml</span>
-              </button>
-              <button class="quick-btn" data-amount="250">
-                <i class="ri-goblet-fill"></i>
-                <span>250 ml</span>
-                <small>1 Gelas</small>
-              </button>
-              <button class="quick-btn" data-amount="500">
-                <i class="ri-bottle-"></i>
-                <span>500 ml</span>
-              </button>
-              <button class="quick-btn" data-amount="600">
-                <i class="ri-cup-fill"></i>
-                <span>600 ml</span>
-                <small>1 Tumbler</small>
-              </button>
+        <!-- Drink Log Today -->
+        <div class="card drink-log-card">
+          <div class="drink-log__header">
+            <div>
+              <h3 class="card__title">Log Minum Hari Ini</h3>
+              <span class="text-muted small">Catatan konsumsi cairan per sesi</span>
+            </div>
+            <span class="drink-log__count" id="drinkLogCount">0 catatan</span>
+          </div>
+          <div class="drink-log__list" id="drinkLogList">
+            <div class="drink-log__empty" id="drinkLogEmpty">
+              <i class="ri-drop-line"></i>
+              <p>Belum ada catatan hari ini. Mulai catat konsumsi airmu!</p>
             </div>
           </div>
-
-          <!-- Intake Goal Progress -->
-          <div class="card goal-card">
-            <div class="goal-card__header">
-              <h3 class="card__title">Target Harian</h3>
-              <span class="goal-card__target" id="goalTarget">0 / 0 ml</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-bar__fill" id="progressBarFill"></div>
-            </div>
-            <p class="goal-card__message" id="goalMessage">Mulai minum air untuk mencapai targetmu!</p>
-          </div>
-
         </div>
-      </div>
 
-      <!-- Drink Log Today -->
-      <div class="card drink-log-card">
-        <div class="drink-log__header">
-          <h3 class="card__title">Log Minum Hari Ini</h3>
-          <span class="drink-log__count" id="drinkLogCount">0 catatan</span>
-        </div>
-        <div class="drink-log__list" id="drinkLogList">
-          <div class="drink-log__empty" id="drinkLogEmpty">
-            <i class="ri-drop-line"></i>
-            <p>Belum ada catatan hari ini. Mulai catat konsumsi airmu!</p>
-          </div>
-        </div>
       </div>
 
       <!-- Hydration Tips -->
@@ -267,15 +252,82 @@
           </div>
         </div>
       </div>
+
     </section>
   </main>
 
   <!-- ========== TOAST NOTIFICATION ========== -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- ========== MODAL ADD CONTAINER (Sesuai Referensi Gambar) ========== -->
+  <div class="modal-overlay" id="containerModalOverlay">
+    <div class="container-modal-box">
+      <div class="modal-sheet__handle"></div>
+
+      <div class="container-modal__header">
+        <h3 class="container-modal__title" id="containerModalTitle">Add Container</h3>
+        <div class="container-preview-badge" id="containerPreviewBadge">
+          <i class="custom-icon icon-glass-60"></i>
+        </div>
+      </div>
+
+      <form id="formAddContainer">
+        <!-- Input 1: Container Name (Floating Label) -->
+        <div class="container-input-group">
+          <input type="text" id="containerNameInput" class="container-input" placeholder="e.g., Coffee Mug" required
+            autocomplete="off">
+          <label for="containerNameInput" class="container-label">Container Name</label>
+        </div>
+
+        <!-- Input 2: Volume (ml) (Floating Label) -->
+        <div class="container-input-group">
+          <input type="number" id="containerVolumeInput" class="container-input" placeholder=" " min="10" max="5000"
+            required autocomplete="off">
+          <label for="containerVolumeInput" class="container-label">Volume (ml)</label>
+        </div>
+
+        <p class="container-override-text">Tap an icon below to override the automatic choice</p>
+
+        <!-- Icon Picker Row -->
+        <div class="container-icon-picker" id="containerIconPicker">
+          <button type="button" class="icon-picker-btn" data-icon="icon-coffee" title="Coffee Cup">
+            <i class="custom-icon icon-coffee"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="icon-cup-40" title="Tea Cup">
+            <i class="custom-icon icon-cup-40"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="icon-cup-50" title="Small Cup">
+            <i class="custom-icon icon-cup-50"></i>
+          </button>
+          <button type="button" class="icon-picker-btn active" data-icon="icon-glass-60" title="Medium Glass">
+            <i class="custom-icon icon-glass-60"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="icon-glass-75" title="Large Glass">
+            <i class="custom-icon icon-glass-75"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="icon-bottle" title="Water Bottle">
+            <i class="custom-icon icon-bottle"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="icon-bottle-lg" title="Large Bottle">
+            <i class="custom-icon icon-bottle-lg"></i>
+          </button>
+        </div>
+
+        <div class="container-modal__actions" id="containerModalActions">
+          <button type="button" class="btn-delete-container d-none" id="btnDeleteContainer">
+            Delete
+          </button>
+          <button type="submit" class="btn-submit-container" id="btnSubmitContainer">
+            Add Container
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ========== MODAL KONFIRMASI ========== -->
   <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
+    <div class="modal-box">
       <div class="modal__header">
         <h3 class="modal__title" id="modalTitle">Konfirmasi</h3>
         <button class="modal__close" id="modalClose" aria-label="Tutup modal">

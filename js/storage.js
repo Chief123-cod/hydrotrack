@@ -20,11 +20,15 @@ const Storage = (() => {
 
   // Drink Type Labels & Icons
   const DRINK_TYPES = {
-    water: { label: 'Air Mineral', icon: 'ri-drop-fill' },
-    tea: { label: 'Teh Hijau', icon: 'ri-cup-line' },
-    coffee: { label: 'Kopi', icon: 'ri-cup-fill' },
-    juice: { label: 'Jus Buah', icon: 'ri-goblet-fill' },
-    milk: { label: 'Susu', icon: 'ri-goblet-line' },
+    water: { label: 'Water', icon: 'ri-drop-fill' },
+    coffee: { label: 'Coffee', icon: 'ri-cup-line' },
+    energy: { label: 'Energy Drink', icon: 'ri-flashlight-line' },
+    juice: { label: 'Fruit Juice', icon: 'ri-goblet-fill' },
+    milk: { label: 'Milk', icon: 'ri-goblet-line' },
+    qrs: { label: 'QRS', icon: 'ri-heart-pulse-line' },
+    soda: { label: 'Soft Drink', icon: 'ri-drinks-2-line' },
+    sports: { label: 'Sports Drink', icon: 'ri-water-flash-line' },
+    tea: { label: 'Tea', icon: 'ri-leaf-line' },
     coconut: { label: 'Air Kelapa', icon: 'ri-plant-line' }
   };
 
@@ -189,6 +193,42 @@ const Storage = (() => {
     _save(KEYS.logs, []);
   }
 
+  // EXPORT — Download all logs as CSV file (Bonus Feature)
+  function exportLogsToCSV() {
+    const logs = getAllLogs();
+    if (logs.length === 0) return false;
+
+    const headers = ['ID', 'Tanggal', 'Waktu', 'Jenis Minuman', 'Volume (ml)', 'Catatan'];
+    const rows = logs.map(log => {
+      const typeLabel = DRINK_TYPES[log.type] ? DRINK_TYPES[log.type].label : log.type;
+      const dateObj = new Date(log.timestamp);
+      const formattedDate = dateObj.toLocaleDateString('id-ID');
+      const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const cleanNote = (log.note || '').replace(/"/g, '""');
+
+      return [
+        `"${log.id}"`,
+        `"${formattedDate}"`,
+        `"${formattedTime}"`,
+        `"${typeLabel}"`,
+        log.amount,
+        `"${cleanNote}"`
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `hydrotrack_logs_${_todayStr()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return true;
+  }
+
   /* ==================== SETTINGS ==================== */
 
   // Get settings (with defaults)
@@ -253,6 +293,56 @@ const Storage = (() => {
     return result;
   }
 
+  // Get drink distribution for last N days
+  function getDrinkDistribution(days) {
+    const logs = getLogsLastDays(days);
+    const distribution = {};
+
+    // Initialize all types with 0
+    Object.keys(DRINK_TYPES).forEach(type => {
+      distribution[type] = 0;
+    });
+
+    logs.forEach(log => {
+      const type = log.type && DRINK_TYPES[log.type] ? log.type : 'water';
+      distribution[type] = (distribution[type] || 0) + log.amount;
+    });
+
+    return distribution;
+  }
+
+  // Get comprehensive analytics statistics
+  function getAnalyticsStats(days) {
+    const daily = getDailyTotals(days);
+    const settings = getSettings();
+    const totalIntake = daily.reduce((sum, d) => sum + d.total, 0);
+    const avgDaily = days > 0 ? Math.round(totalIntake / days) : 0;
+
+    let bestDay = { dayName: '-', total: 0, date: '' };
+    let goalsMet = 0;
+
+    daily.forEach(d => {
+      if (d.total > bestDay.total) {
+        bestDay = { dayName: d.dayName, total: d.total, date: d.date };
+      }
+      if (d.total >= settings.dailyGoal) {
+        goalsMet++;
+      }
+    });
+
+    const completionRate = days > 0 ? Math.round((goalsMet / days) * 100) : 0;
+
+    return {
+      daily,
+      avgDaily,
+      bestDay,
+      goalsMet,
+      completionRate,
+      totalIntake,
+      dailyGoal: settings.dailyGoal
+    };
+  }
+
   /* ==================== SAMPLE DATA ==================== */
 
   function loadSampleData() {
@@ -287,6 +377,71 @@ const Storage = (() => {
     saveSettings({ userName: 'Matthew', dailyGoal: 2500 });
   }
 
+  // Auto initialize sample data on first run if localStorage is empty
+  if (localStorage.getItem(KEYS.logs) === null) {
+    loadSampleData();
+  }
+
+  /* ==================== CONTAINERS (DEFAULT & CUSTOM) ==================== */
+  const CONTAINERS_KEY = 'hydrotrack_containers';
+
+  const DEFAULT_CONTAINERS = [
+    { id: 'cup-coffee', name: 'Coffee Cup', amount: 100, icon: 'icon-coffee' },
+    { id: 'cup-tea', name: 'Tea Cup', amount: 150, icon: 'icon-cup-40' },
+    { id: 'cup-small', name: 'Small Cup', amount: 175, icon: 'icon-cup-50' },
+    { id: 'cup-medium', name: 'Medium Glass', amount: 200, icon: 'icon-glass-60' },
+    { id: 'cup-large', name: 'Large Glass', amount: 300, icon: 'icon-glass-75' },
+    { id: 'cup-bottle', name: 'Water Bottle', amount: 500, icon: 'icon-bottle' },
+    { id: 'cup-bottle-lg', name: 'Large Bottle', amount: 1000, icon: 'icon-bottle-lg' }
+  ];
+
+  function getAllContainers() {
+    const stored = localStorage.getItem(CONTAINERS_KEY);
+    if (!stored) {
+      const legacyCustom = _parse('hydrotrack_custom_containers', []);
+      const initial = [...DEFAULT_CONTAINERS, ...legacyCustom];
+      _save(CONTAINERS_KEY, initial);
+      return initial;
+    }
+    return _parse(CONTAINERS_KEY, DEFAULT_CONTAINERS);
+  }
+
+  function getCustomContainers() {
+    return getAllContainers();
+  }
+
+  function addCustomContainer(name, amount, icon = 'icon-glass-60') {
+    const list = getAllContainers();
+    const newContainer = {
+      id: 'container-' + Date.now(),
+      name: name.trim(),
+      amount: parseInt(amount),
+      icon: icon
+    };
+    list.push(newContainer);
+    _save(CONTAINERS_KEY, list);
+    return newContainer;
+  }
+
+  function updateCustomContainer(id, updates) {
+    const list = getAllContainers();
+    const index = list.findIndex(c => c.id === id);
+    if (index === -1) return null;
+    if (updates.name) list[index].name = updates.name.trim();
+    if (updates.amount) list[index].amount = parseInt(updates.amount);
+    if (updates.icon) list[index].icon = updates.icon;
+    _save(CONTAINERS_KEY, list);
+    return list[index];
+  }
+
+  function deleteCustomContainer(id) {
+    const list = getAllContainers();
+    const filtered = list.filter(c => c.id !== id);
+    if (filtered.length === list.length) return false;
+    _save(CONTAINERS_KEY, filtered);
+    return true;
+  }
+
   /* ==================== PUBLIC API ==================== */
   return {
     DRINK_TYPES,
@@ -300,6 +455,7 @@ const Storage = (() => {
     updateLog,
     deleteLog,
     clearAllLogs,
+    exportLogsToCSV,
     getSettings,
     saveSettings,
     getTodayTotal,
@@ -307,7 +463,14 @@ const Storage = (() => {
     getTodayRemaining,
     getTodayGlasses,
     getDailyTotals,
-    loadSampleData
+    getDrinkDistribution,
+    getAnalyticsStats,
+    loadSampleData,
+    getAllContainers,
+    getCustomContainers,
+    addCustomContainer,
+    updateCustomContainer,
+    deleteCustomContainer
   };
 })();
 

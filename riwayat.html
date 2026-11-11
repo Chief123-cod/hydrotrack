@@ -14,15 +14,6 @@
     <!-- Remix Icon CDN -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
 
-    <!-- Tailwind CSS CDN (Pendukung) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            corePlugins: { preflight: false },
-            prefix: 'tw-'
-        };
-    </script>
-
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
@@ -45,26 +36,26 @@
             <ul>
                 <li>
                     <a href="index.html" class="nav-link" data-view="dashboard">
-                        <i class="ri-dashboard-3-line"></i>
-                        <span>Dashboard</span>
+                        <i class="ri-home-3-line"></i>
+                        <span>Home</span>
                     </a>
                 </li>
                 <li>
                     <a href="riwayat.html" class="nav-link active" data-view="history">
                         <i class="ri-history-line"></i>
-                        <span>Riwayat</span>
+                        <span>History</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link" data-view="analytics">
+                    <a href="analisis.html" class="nav-link" data-view="analytics">
                         <i class="ri-bar-chart-2-line"></i>
-                        <span>Analisis</span>
+                        <span>Statistics</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link" data-view="settings">
+                    <a href="pengaturan.html" class="nav-link" data-view="settings">
                         <i class="ri-settings-4-line"></i>
-                        <span>Pengaturan</span>
+                        <span>Settings</span>
                     </a>
                 </li>
             </ul>
@@ -173,7 +164,7 @@
                         <!-- Note -->
                         <div class="form-group">
                             <label class="form-label" for="formNote">Catatan <span
-                                    class="tw-text-xs tw-text-gray-400">(opsional)</span></label>
+                                    class="text-muted small">(opsional)</span></label>
                             <div class="form-input-wrapper">
                                 <i class="ri-sticky-note-line"></i>
                                 <input type="text" id="formNote" class="form-input"
@@ -280,7 +271,7 @@
 
     <!-- ========== MODAL KONFIRMASI ========== -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
+        <div class="modal-box">
             <div class="modal__header">
                 <h3 class="modal__title" id="modalTitle">Konfirmasi</h3>
                 <button class="modal__close" id="modalClose" aria-label="Tutup modal">

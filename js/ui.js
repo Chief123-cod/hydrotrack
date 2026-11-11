@@ -13,12 +13,33 @@ const UI = (() => {
     if (headerUser) headerUser.textContent = settings.userName;
     const sidebarUser = document.getElementById('sidebarUserName');
     if (sidebarUser) sidebarUser.textContent = settings.userName;
+    updateGreeting();
+  }
+
+  // Update greeting dynamically based on hour of day
+  function updateGreeting() {
+    const greetingEl = document.getElementById('greetingTime');
+    if (!greetingEl) return;
+
+    const hour = new Date().getHours();
+    let greeting = 'Good Evening';
+
+    if (hour >= 4 && hour < 11) {
+      greeting = 'Good Morning';
+    } else if (hour >= 11 && hour < 15) {
+      greeting = 'Good Afternoon';
+    } else if (hour >= 15 && hour < 19) {
+      greeting = 'Good Evening';
+    } else {
+      greeting = 'Good Night';
+    }
+
+    greetingEl.textContent = greeting;
   }
 
   // Update all dashboard metric cards
   function updateDashboardMetrics() {
-    const intakeEl = document.getElementById('metricTodayIntake');
-    if (!intakeEl) return;
+    if (!document.getElementById('view-dashboard')) return;
 
     const todayTotal = Storage.getTodayTotal();
     const percentage = Storage.getTodayPercentage();
@@ -26,8 +47,9 @@ const UI = (() => {
     const glasses = Storage.getTodayGlasses();
     const settings = Storage.getSettings();
 
-    // Metric cards
-    intakeEl.textContent = formatMl(todayTotal);
+    // Metric cards (if present)
+    const intakeEl = document.getElementById('metricTodayIntake');
+    if (intakeEl) intakeEl.textContent = formatMl(todayTotal);
 
     const percEl = document.getElementById('metricPercentage');
     if (percEl) percEl.textContent = percentage + '%';
@@ -487,10 +509,109 @@ const UI = (() => {
     });
   }
 
+  /* ==================== ANALYTICS RENDERING ==================== */
+
+  function renderAnalytics(days = 7) {
+    const avgEl = document.getElementById('analyticsAvgDaily');
+    if (!avgEl) return;
+
+    const stats = Storage.getAnalyticsStats(days);
+
+    // Update stat cards
+    avgEl.textContent = formatMl(stats.avgDaily);
+
+    const bestDayEl = document.getElementById('analyticsBestDay');
+    if (bestDayEl) {
+      bestDayEl.textContent = stats.bestDay.total > 0
+        ? `${formatMl(stats.bestDay.total)} (${stats.bestDay.dayName})`
+        : '-';
+    }
+
+    const goalsMetEl = document.getElementById('analyticsGoalsMet');
+    if (goalsMetEl) {
+      goalsMetEl.textContent = `${stats.goalsMet} / ${days} Hari (${stats.completionRate}%)`;
+    }
+
+    const totalIntakeEl = document.getElementById('analyticsTotalIntake');
+    if (totalIntakeEl) {
+      totalIntakeEl.textContent = formatMl(stats.totalIntake);
+    }
+
+    // Status evaluation message
+    const evalMessage = document.getElementById('analyticsEvalMessage');
+    const evalBadge = document.getElementById('analyticsEvalBadge');
+    if (evalMessage) {
+      if (stats.completionRate >= 80) {
+        evalMessage.textContent = 'Luar biasa! Konsistensi hidrasimu sangat baik. Pertahankan kebiasaan sehat ini! 🌟';
+        if (evalBadge) {
+          evalBadge.className = 'analytics-badge analytics-badge--success';
+          evalBadge.textContent = 'Sangat Baik';
+        }
+      } else if (stats.completionRate >= 50) {
+        evalMessage.textContent = 'Progres yang cukup baik! Coba minum air lebih rutin di pagi dan siang hari untuk mencapai target harian. 💪';
+        if (evalBadge) {
+          evalBadge.className = 'analytics-badge analytics-badge--warning';
+          evalBadge.textContent = 'Cukup Baik';
+        }
+      } else {
+        evalMessage.textContent = 'Tingkat hidrasimu masih di bawah target. Pasang alarm atau bawa tumbler minum ke mana pun kamu beraktivitas! 💧';
+        if (evalBadge) {
+          evalBadge.className = 'analytics-badge analytics-badge--danger';
+          evalBadge.textContent = 'Perlu Ditingkatkan';
+        }
+      }
+    }
+
+    // Render charts
+    if (typeof ChartModule !== 'undefined' && ChartModule.initAnalyticsCharts) {
+      ChartModule.initAnalyticsCharts(days);
+    }
+  }
+
+  /* ==================== SETTINGS RENDERING ==================== */
+
+  function renderSettings() {
+    const settings = Storage.getSettings();
+
+    const nameInput = document.getElementById('inputUserName');
+    if (nameInput) nameInput.value = settings.userName || 'User';
+
+    const goalInput = document.getElementById('inputDailyGoal');
+    if (goalInput) goalInput.value = settings.dailyGoal || 2000;
+
+    const weightInput = document.getElementById('inputWeight');
+    if (weightInput) weightInput.value = settings.weight || 60;
+
+    const activitySelect = document.getElementById('selectActivity');
+    if (activitySelect) activitySelect.value = settings.activityLevel || 'moderate';
+
+    updateWaterCalculator();
+  }
+
+  function updateWaterCalculator() {
+    const weightInput = document.getElementById('inputWeight');
+    const activitySelect = document.getElementById('selectActivity');
+    const resultEl = document.getElementById('calcResultValue');
+
+    if (!weightInput || !activitySelect || !resultEl) return;
+
+    const weight = parseFloat(weightInput.value) || 60;
+    const activity = activitySelect.value;
+
+    let multiplier = 35;
+    if (activity === 'sedentary') multiplier = 30;
+    else if (activity === 'active') multiplier = 40;
+
+    const recommendedMl = Math.round((weight * multiplier) / 50) * 50;
+    resultEl.textContent = formatMl(recommendedMl);
+    resultEl.dataset.recommended = recommendedMl;
+  }
+
   /* ==================== PUBLIC API ==================== */
   return {
     updateDashboardMetrics,
     updateUserInfo,
+    updateGreeting,
     renderTodayLogs,
     updateDateDisplay,
     showToast,
@@ -505,6 +626,9 @@ const UI = (() => {
     renderHistoryTable,
     openHistoryForm,
     closeHistoryForm,
+    renderAnalytics,
+    renderSettings,
+    updateWaterCalculator,
     setFieldError,
     clearFormErrors,
     formatMl,

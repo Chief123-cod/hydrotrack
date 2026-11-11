@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis & Statistik | HydroTrack</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Remix Icon CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+    <!-- ========== SIDEBAR NAVIGATION ========== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__logo">
+            <i class="ri-drop-fill"></i>
+            <span>HYDROTRACK</span>
+        </div>
+
+        <nav class="sidebar__nav">
+            <ul>
+                <li>
+                    <a href="index.html" class="nav-link" data-view="dashboard">
+                        <i class="ri-home-3-line"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="riwayat.html" class="nav-link" data-view="history">
+                        <i class="ri-history-line"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="analisis.html" class="nav-link active" data-view="analytics">
+                        <i class="ri-bar-chart-2-line"></i>
+                        <span>Statistics</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="pengaturan.html" class="nav-link" data-view="settings">
+                        <i class="ri-settings-4-line"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar__user" id="sidebarUser">
+            <div class="sidebar__user-avatar">
+                <i class="ri-user-3-fill"></i>
+            </div>
+            <div class="sidebar__user-info">
+                <span class="sidebar__user-name" id="sidebarUserName">User</span>
+                <span class="sidebar__user-label">Hydration Tracker</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========== MOBILE HEADER ========== -->
+    <header class="mobile-header" id="mobileHeader">
+        <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Toggle menu">
+            <i class="ri-menu-line"></i>
+        </button>
+        <div class="mobile-header__logo">
+            <i class="ri-drop-fill"></i>
+            <span>HYDROTRACK</span>
+        </div>
+        <div class="mobile-header__date" id="mobileDate"></div>
+    </header>
+
+    <!-- ========== SIDEBAR OVERLAY (Mobile) ========== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content">
+
+        <!-- Top Header Bar -->
+        <header class="top-header">
+            <div class="top-header__left">
+                <h1 class="top-header__greeting">Analisis & Tren Hidrasi</h1>
+                <p class="top-header__subtitle">Visualisasi performa, grafik tren, dan komposisi konsumsi cairanmu.</p>
+            </div>
+            <div class="top-header__right">
+                <div class="filter-group">
+                    <label class="filter-label" for="analyticsPeriod">Periode:</label>
+                    <select id="analyticsPeriod" class="form-input form-select form-select--sm">
+                        <option value="7" selected>7 Hari Terakhir</option>
+                        <option value="14">14 Hari Terakhir</option>
+                        <option value="30">30 Hari Terakhir</option>
+                    </select>
+                </div>
+                <div class="top-header__date" id="headerDate"></div>
+            </div>
+        </header>
+
+        <!-- ===== VIEW: ANALYTICS ===== -->
+        <section class="view view--active" id="view-analytics">
+
+            <!-- Metric Cards Row -->
+            <div class="metrics-row">
+                <div class="metric-card metric-card--primary">
+                    <div class="metric-card__icon"><i class="ri-pulse-line"></i></div>
+                    <div class="metric-card__info">
+                        <span class="metric-card__label">Rata-rata Harian</span>
+                        <span class="metric-card__value" id="analyticsAvgDaily">0 ml</span>
+                    </div>
+                </div>
+                <div class="metric-card metric-card--success">
+                    <div class="metric-card__icon"><i class="ri-trophy-line"></i></div>
+                    <div class="metric-card__info">
+                        <span class="metric-card__label">Rekor Tertinggi</span>
+                        <span class="metric-card__value" id="analyticsBestDay">-</span>
+                    </div>
+                </div>
+                <div class="metric-card metric-card--info">
+                    <div class="metric-card__icon"><i class="ri-checkbox-circle-line"></i></div>
+                    <div class="metric-card__info">
+                        <span class="metric-card__label">Target Terpenuhi</span>
+                        <span class="metric-card__value" id="analyticsGoalsMet">0 / 0 Hari</span>
+                    </div>
+                </div>
+                <div class="metric-card metric-card--warning">
+                    <div class="metric-card__icon"><i class="ri-water-flash-line"></i></div>
+                    <div class="metric-card__info">
+                        <span class="metric-card__label">Total Asupan Periode</span>
+                        <span class="metric-card__value" id="analyticsTotalIntake">0 ml</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluation Insight Banner -->
+            <div class="analytics-eval-card">
+                <div class="analytics-eval__content">
+                    <div class="analytics-eval__icon">
+                        <i class="ri-sparkling-fill"></i>
+                    </div>
+                    <div class="analytics-eval__text">
+                        <h4>Evaluasi Status Hidrasi</h4>
+                        <p id="analyticsEvalMessage">Memuat evaluasi kebiasaan minum airmu...</p>
+                    </div>
+                </div>
+                <span id="analyticsEvalBadge" class="analytics-badge analytics-badge--success">Sangat Baik</span>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="analytics-grid">
+                <!-- Bar Chart: Daily Trend -->
+                <div class="card chart-card">
+                    <div class="chart-card__header">
+                        <div>
+                            <h3 class="card__title">Tren Konsumsi Harian</h3>
+                            <p class="chart-card__subtitle">Konsumsi air harian (hijau = target tercapai)</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="dailyTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart: Drink Distribution -->
+                <div class="card chart-card">
+                    <div class="chart-card__header">
+                        <div>
+                            <h3 class="card__title">Distribusi Jenis Minuman</h3>
+                            <p class="chart-card__subtitle">Proporsi asupan berdasarkan kategori minuman</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="drinkDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hydration Tips / Insights Footer -->
+            <div class="tips-section">
+                <h3 class="card__title tips-section__title">Insight & Rekomendasi 💡</h3>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <div class="tip-card__icon"><i class="ri-time-line"></i></div>
+                        <h4>Waktu Terbaik</h4>
+                        <p>Usahakan memenuhi 50% target cairanmu sebelum jam 13.00 siang.</p>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-card__icon"><i class="ri-cup-line"></i></div>
+                        <h4>Batasi Kafein</h4>
+                        <p>Kopi dan teh bersifat diuretik ringan, selalu seimbangi dengan air putih.</p>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-card__icon"><i class="ri-heart-pulse-line"></i></div>
+                        <h4>Fokus Konsistensi</h4>
+                        <p>Minum sedikit tapi sering jauh lebih baik dibanding minum banyak sekaligus.</p>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-card__icon"><i class="ri-temp-cold-line"></i></div>
+                        <h4>Suhu Air Ideal</h4>
+                        <p>Air bersuhu ruang atau sejuk paling mudah diserap oleh sel tubuh.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- ========== TOAST NOTIFICATION ========== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========== MODAL KONFIRMASI ========== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal__header">
+                <h3 class="modal__title" id="modalTitle">Konfirmasi</h3>
+                <button class="modal__close" id="modalClose" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal__body" id="modalBody">
+                <p>Apakah Anda yakin?</p>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" id="modalCancel">Batal</button>
+                <button class="btn btn--danger" id="modalConfirm">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
