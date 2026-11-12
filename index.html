@@ -12,10 +12,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Remix Icon CDN -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <!-- Chart.js CDN (Deferred for faster, flicker-free rendering) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- Native View Transition & Instant Page Speculation (Eliminates mobile page switch blink) -->
+  <meta name="view-transition" content="same-origin">
+  <script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "source": "list",
+        "urls": ["index.html", "riwayat.html", "analisis.html", "pengaturan.html"]
+      }
+    ]
+  }
+  </script>
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/style.css">
@@ -211,8 +225,7 @@
         <div class="card drink-log-card">
           <div class="drink-log__header">
             <div>
-              <h3 class="card__title">Log Minum Hari Ini</h3>
-              <span class="text-muted small">Catatan konsumsi cairan per sesi</span>
+              <h3 class="card__title">Recent Entries</h3>
             </div>
             <span class="drink-log__count" id="drinkLogCount">0 catatan</span>
           </div>
@@ -255,6 +268,67 @@
 
     </section>
   </main>
+
+  <!-- ========== BOTTOM NAVIGATION BAR (Mobile Responsive) ========== -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="index.html" class="bottom-nav__item active">
+      <div class="bottom-nav__icon-wrapper">
+        <i class="ri-home-3-line"></i>
+      </div>
+      <span class="bottom-nav__label">Home</span>
+    </a>
+    <a href="riwayat.html" class="bottom-nav__item">
+      <div class="bottom-nav__icon-wrapper">
+        <i class="ri-history-line"></i>
+      </div>
+      <span class="bottom-nav__label">History</span>
+    </a>
+    <a href="analisis.html" class="bottom-nav__item">
+      <div class="bottom-nav__icon-wrapper">
+        <i class="ri-bar-chart-2-line"></i>
+      </div>
+      <span class="bottom-nav__label">Statistics</span>
+    </a>
+    <a href="pengaturan.html" class="bottom-nav__item">
+      <div class="bottom-nav__icon-wrapper">
+        <i class="ri-settings-4-line"></i>
+      </div>
+      <span class="bottom-nav__label">Settings</span>
+    </a>
+  </nav>
+
+  <!-- ========== FLOATING ACTION BUTTON (FAB SPEED DIAL) ========== -->
+  <div class="fab-backdrop" id="fabBackdrop"></div>
+  <div class="fab-container" id="fabContainer">
+    <!-- Speed Dial Menu (Tampil mengambang ke atas) -->
+    <div class="fab-menu" id="fabMenu">
+      <button type="button" class="fab-item" id="fabNewBeverage" title="New Beverage">
+        <span class="fab-item__label">New Beverage</span>
+        <span class="fab-item__btn">
+          <i class="ri-cup-line"></i>
+        </span>
+      </button>
+
+      <button type="button" class="fab-item" id="fabNewContainer" title="New Container">
+        <span class="fab-item__label">New Container</span>
+        <span class="fab-item__btn">
+          <i class="custom-icon icon-glass-60"></i>
+        </span>
+      </button>
+
+      <button type="button" class="fab-item" id="fabAddCustom" title="+ add Custom">
+        <span class="fab-item__label">+ add Custom</span>
+        <span class="fab-item__btn">
+          <i class="ri-add-circle-line"></i>
+        </span>
+      </button>
+    </div>
+
+    <!-- Main Floating Action Button (+) -->
+    <button type="button" class="fab-main-btn" id="fabMainBtn" aria-label="Buka Menu Tambah" aria-expanded="false">
+      <i class="ri-add-line"></i>
+    </button>
+  </div>
 
   <!-- ========== TOAST NOTIFICATION ========== -->
   <div class="toast-container" id="toastContainer"></div>
@@ -386,7 +460,8 @@
 
         <!-- Field 4: Amount (ml) -->
         <div class="container-input-group">
-          <input type="number" id="editLogAmountInput" class="container-input" placeholder=" " min="10" max="5000" required>
+          <input type="number" id="editLogAmountInput" class="container-input" placeholder=" " min="10" max="5000"
+            required>
           <label class="container-label">Amount (ml)</label>
         </div>
 
@@ -415,6 +490,122 @@
         <button type="button" class="btn-modal-cancel" id="btnCancelDeleteLog">Cancel</button>
         <button type="button" class="btn-modal-delete" id="btnConfirmDeleteLog">Delete</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL NEW BEVERAGE (FAB Item 1) ========== -->
+  <div class="modal-overlay" id="newBeverageModalOverlay">
+    <div class="container-modal-box">
+      <div class="modal-sheet__handle"></div>
+
+      <div class="container-modal__header">
+        <h3 class="container-modal__title">New Beverage</h3>
+        <div class="container-preview-badge" id="newBeveragePreviewBadge">
+          <i class="ri-cup-line" style="font-size: 24px;"></i>
+        </div>
+      </div>
+
+      <form id="formNewBeverage">
+        <!-- Input 1: Beverage Name -->
+        <div class="container-input-group">
+          <input type="text" id="newBeverageNameInput" class="container-input"
+            placeholder="e.g., Matcha Latte, Smoothie" required autocomplete="off">
+          <label for="newBeverageNameInput" class="container-label">Beverage Name</label>
+        </div>
+
+        <p class="container-override-text">Choose an icon for this beverage</p>
+
+        <!-- Icon Picker Row for Beverage -->
+        <div class="container-icon-picker" id="beverageIconPicker">
+          <button type="button" class="icon-picker-btn active" data-icon="ri-cup-line" title="Cup">
+            <i class="ri-cup-line" style="font-size: 20px;"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="ri-drop-fill" title="Drop">
+            <i class="ri-drop-fill" style="font-size: 20px;"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="ri-leaf-line" title="Leaf / Tea">
+            <i class="ri-leaf-line" style="font-size: 20px;"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="ri-goblet-fill" title="Juice">
+            <i class="ri-goblet-fill" style="font-size: 20px;"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="ri-drinks-2-line" title="Soda">
+            <i class="ri-drinks-2-line" style="font-size: 20px;"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="ri-water-flash-line" title="Energy / Sport">
+            <i class="ri-water-flash-line" style="font-size: 20px;"></i>
+          </button>
+          <button type="button" class="icon-picker-btn" data-icon="ri-heart-pulse-line" title="Healthy">
+            <i class="ri-heart-pulse-line" style="font-size: 20px;"></i>
+          </button>
+        </div>
+
+        <div class="container-modal__actions">
+          <button type="button" class="btn-modal-cancel" id="btnCancelNewBeverage">Cancel</button>
+          <button type="submit" class="btn-modal-save" id="btnSubmitNewBeverage">Add Beverage</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== MODAL ADD CUSTOM INTAKE (FAB Item 3) ========== -->
+  <div class="modal-overlay" id="customIntakeModalOverlay">
+    <div class="container-modal-box">
+      <div class="modal-sheet__handle"></div>
+
+      <div class="container-modal__header">
+        <h3 class="container-modal__title">Add Custom Intake</h3>
+        <div class="container-preview-badge" id="customIntakePreviewBadge">
+          <i class="custom-icon icon-glass-60"></i>
+        </div>
+      </div>
+
+      <form id="formCustomIntake">
+        <!-- Field 1: Amount (ml) -->
+        <div class="container-input-group">
+          <input type="number" id="customIntakeAmount" class="container-input" placeholder=" " min="10" max="5000"
+            value="250" required>
+          <label class="container-label">Amount (ml)</label>
+        </div>
+
+        <!-- Field 2: Beverage Type -->
+        <div class="container-input-group">
+          <div class="select-input-wrapper">
+            <span class="select-input-icon" id="customIntakeBeverageIcon">
+              <i class="ri-drop-fill"></i>
+            </span>
+            <select id="customIntakeBeverageSelect" class="container-input container-select">
+              <option value="water">Water</option>
+              <option value="coffee">Coffee</option>
+              <option value="energy">Energy Drink</option>
+              <option value="juice">Fruit Juice</option>
+              <option value="milk">Milk</option>
+              <option value="qrs">QRS</option>
+              <option value="soda">Soft drink</option>
+              <option value="sports">Sports Drink</option>
+              <option value="tea">Tea</option>
+            </select>
+            <i class="ri-arrow-down-s-line select-chevron"></i>
+          </div>
+          <label class="container-label">Beverage Type</label>
+        </div>
+
+        <!-- Field 3: Time -->
+        <div class="container-input-group">
+          <div class="select-input-wrapper">
+            <span class="select-input-icon">
+              <i class="ri-time-line"></i>
+            </span>
+            <input type="time" id="customIntakeTime" class="container-input container-input--with-icon" required>
+          </div>
+          <label class="container-label">Time</label>
+        </div>
+
+        <div class="container-modal__actions">
+          <button type="button" class="btn-modal-cancel" id="btnCancelCustomIntake">Cancel</button>
+          <button type="submit" class="btn-modal-save" id="btnSubmitCustomIntake">Add Intake</button>
+        </div>
+      </form>
     </div>
   </div>
 

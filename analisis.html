@@ -12,10 +12,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Remix Icon CDN -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <!-- Chart.js CDN (Deferred for faster, flicker-free rendering) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- Native View Transition & Instant Page Speculation (Eliminates mobile page switch blink) -->
+    <meta name="view-transition" content="same-origin">
+    <script type="speculationrules">
+    {
+      "prerender": [
+        {
+          "source": "list",
+          "urls": ["index.html", "riwayat.html", "analisis.html", "pengaturan.html"]
+        }
+      ]
+    }
+    </script>
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/style.css">
@@ -216,6 +230,34 @@
 
         </section>
     </main>
+
+    <!-- ========== BOTTOM NAVIGATION BAR (Mobile Responsive) ========== -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="index.html" class="bottom-nav__item">
+            <div class="bottom-nav__icon-wrapper">
+                <i class="ri-home-3-line"></i>
+            </div>
+            <span class="bottom-nav__label">Home</span>
+        </a>
+        <a href="riwayat.html" class="bottom-nav__item">
+            <div class="bottom-nav__icon-wrapper">
+                <i class="ri-history-line"></i>
+            </div>
+            <span class="bottom-nav__label">History</span>
+        </a>
+        <a href="analisis.html" class="bottom-nav__item active">
+            <div class="bottom-nav__icon-wrapper">
+                <i class="ri-bar-chart-2-line"></i>
+            </div>
+            <span class="bottom-nav__label">Statistics</span>
+        </a>
+        <a href="pengaturan.html" class="bottom-nav__item">
+            <div class="bottom-nav__icon-wrapper">
+                <i class="ri-settings-4-line"></i>
+            </div>
+            <span class="bottom-nav__label">Settings</span>
+        </a>
+    </nav>
 
     <!-- ========== TOAST NOTIFICATION ========== -->
     <div class="toast-container" id="toastContainer"></div>

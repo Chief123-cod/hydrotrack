@@ -33,17 +33,18 @@
 /* ---------- Tablet (max-width: 768px) ---------- */
 @media (max-width: 768px) {
 
-  /* Show mobile header, hide desktop sidebar */
+  /* Sembunyikan sidebar kiri dan tombol hamburger pada mobile (Gantikan dengan Bottom Nav) */
   .mobile-header {
     display: flex;
   }
 
-  .sidebar {
-    transform: translateX(-100%);
+  .mobile-header__toggle {
+    display: none !important;
   }
 
-  .sidebar.open {
-    transform: translateX(0);
+  .sidebar,
+  .sidebar-overlay {
+    display: none !important;
   }
 
   .main-content {
@@ -54,6 +55,7 @@
     box-sizing: border-box;
     padding: var(--spacing-md);
     padding-top: calc(60px + var(--spacing-md));
+    padding-bottom: 96px;
   }
 
   .top-header {
@@ -159,6 +161,7 @@
   .main-content {
     padding: var(--spacing-sm);
     padding-top: calc(60px + var(--spacing-sm));
+    padding-bottom: 96px;
   }
 
   .metrics-row {

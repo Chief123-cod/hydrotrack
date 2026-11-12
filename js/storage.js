@@ -32,6 +32,8 @@ const Storage = (() => {
     coconut: { label: 'Air Kelapa', icon: 'ri-plant-line' }
   };
 
+  const CUSTOM_BEVERAGES_KEY = 'hydrotrack_custom_beverages';
+
   /* --- Helper: Safe JSON Parse --- */
   function _parse(key, fallback) {
     try {
@@ -41,6 +43,25 @@ const Storage = (() => {
       console.error(`Error parsing localStorage key "${key}":`, e);
       return fallback;
     }
+  }
+
+  // Merge stored custom beverages into DRINK_TYPES on load
+  try {
+    const storedCustom = _parse(CUSTOM_BEVERAGES_KEY, {});
+    Object.assign(DRINK_TYPES, storedCustom);
+  } catch (e) {}
+
+  function getCustomBeverages() {
+    return _parse(CUSTOM_BEVERAGES_KEY, {});
+  }
+
+  function addCustomBeverage(name, icon = 'ri-cup-line') {
+    const custom = getCustomBeverages();
+    const id = 'bev-' + Date.now();
+    custom[id] = { label: name.trim(), icon: icon };
+    DRINK_TYPES[id] = custom[id];
+    _save(CUSTOM_BEVERAGES_KEY, custom);
+    return { id, ...custom[id] };
   }
 
   /* --- Helper: Save to LocalStorage --- */
@@ -63,10 +84,27 @@ const Storage = (() => {
 
   /* ==================== LOGS CRUD ==================== */
 
+  // Helper to get container icon based on amount or matching container
+  function getContainerIconByAmount(amount) {
+    const amt = parseInt(amount) || 0;
+    const containers = getAllContainers ? getAllContainers() : DEFAULT_CONTAINERS;
+    const matched = containers.find(c => c.amount === amt);
+    if (matched && matched.icon) return matched.icon;
+
+    if (amt <= 120) return 'icon-coffee';
+    if (amt <= 160) return 'icon-cup-40';
+    if (amt <= 180) return 'icon-cup-50';
+    if (amt <= 250) return 'icon-glass-60';
+    if (amt <= 350) return 'icon-glass-75';
+    if (amt <= 750) return 'icon-bottle';
+    return 'icon-bottle-lg';
+  }
+
   // CREATE — Add a new drink log
-  function addLog(amount, type = 'water', note = '', timestamp = null) {
+  function addLog(amount, type = 'water', note = '', timestamp = null, containerIcon = null) {
     const logs = getAllLogs();
     const now = timestamp ? new Date(timestamp) : new Date();
+    const resolvedIcon = containerIcon || getContainerIconByAmount(amount);
 
     const newLog = {
       id: 'log-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
@@ -74,7 +112,8 @@ const Storage = (() => {
       type: type,
       timestamp: now.toISOString(),
       date: now.toISOString().split('T')[0],
-      note: note.trim()
+      note: note.trim(),
+      containerIcon: resolvedIcon
     };
 
     logs.push(newLog);
@@ -167,6 +206,7 @@ const Storage = (() => {
     if (updates.amount !== undefined) logs[index].amount = parseInt(updates.amount);
     if (updates.type !== undefined) logs[index].type = updates.type;
     if (updates.note !== undefined) logs[index].note = updates.note.trim();
+    if (updates.containerIcon !== undefined) logs[index].containerIcon = updates.containerIcon;
     if (updates.timestamp !== undefined) {
       const newDate = new Date(updates.timestamp);
       logs[index].timestamp = newDate.toISOString();
@@ -466,6 +506,9 @@ const Storage = (() => {
     getDrinkDistribution,
     getAnalyticsStats,
     loadSampleData,
+    getContainerIconByAmount,
+    getCustomBeverages,
+    addCustomBeverage,
     getAllContainers,
     getCustomContainers,
     addCustomContainer,

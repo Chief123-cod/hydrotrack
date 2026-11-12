@@ -41,6 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ==================== NAVIGATION ==================== */
 
+  // Bottom navigation links: jika tab sudah aktif di halaman saat ini, cegah reload dan scroll halus ke atas
+  document.querySelectorAll('.bottom-nav__item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (item.classList.contains('active')) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  });
+
   // Sidebar nav links
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -283,14 +293,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activeBeverageType = 'water';
 
-  const beverageTabs = document.querySelectorAll('.beverage-tab');
-  beverageTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      beverageTabs.forEach(t => t.classList.remove('active'));
+  const beverageTabsContainer = document.getElementById('beverageTabs');
+  if (beverageTabsContainer) {
+    // Render existing custom beverages from Storage if any
+    if (typeof Storage !== 'undefined' && Storage.getCustomBeverages) {
+      const customBevs = Storage.getCustomBeverages();
+      Object.keys(customBevs).forEach(key => {
+        const bev = customBevs[key];
+        if (!beverageTabsContainer.querySelector(`[data-type="${key}"]`)) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'beverage-tab';
+          btn.dataset.type = key;
+          btn.innerHTML = `<i class="${bev.icon}"></i><span>${bev.label}</span>`;
+          beverageTabsContainer.appendChild(btn);
+        }
+      });
+    }
+
+    beverageTabsContainer.addEventListener('click', (e) => {
+      const tab = e.target.closest('.beverage-tab');
+      if (!tab) return;
+      beverageTabsContainer.querySelectorAll('.beverage-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       activeBeverageType = tab.dataset.type || 'water';
     });
-  });
+  }
 
   // Enable horizontal mouse wheel scroll on container rows & tabs
   const scrollableHorizontalRows = document.querySelectorAll('.quick-log__buttons, .beverage-tabs-wrapper');
@@ -380,7 +408,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const typeInfo = Storage.DRINK_TYPES[drinkType] || Storage.DRINK_TYPES.water;
       const cupName = btn.querySelector('span')?.textContent || 'Gelas';
 
-      Storage.addLog(amount, drinkType);
+      let containerIcon = btn.dataset.icon;
+      if (!containerIcon) {
+        const iconEl = btn.querySelector('.custom-icon');
+        if (iconEl) {
+          containerIcon = Array.from(iconEl.classList).find(c => c.startsWith('icon-'));
+        }
+      }
+
+      Storage.addLog(amount, drinkType, '', null, containerIcon);
       UI.refreshDashboard();
       UI.showToast(`${amount} ml ${typeInfo.label} (${cupName}) berhasil dicatat! 💧`, 'success');
 
@@ -551,6 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.className = 'quick-btn';
       btn.dataset.id = item.id;
       btn.dataset.amount = item.amount;
+      btn.dataset.icon = item.icon;
       btn.dataset.type = 'water';
 
       // Edit trigger badge (top right)
@@ -783,10 +820,14 @@ document.addEventListener('DOMContentLoaded', () => {
         dateObj.setHours(parseInt(hh), parseInt(mm), 0, 0);
       }
 
+      const selectedOpt = editLogContainerSelect ? editLogContainerSelect.selectedOptions[0] : null;
+      const selectedIcon = selectedOpt ? selectedOpt.dataset.icon : null;
+
       Storage.updateLog(logId, {
         amount: amount,
         type: type,
-        timestamp: dateObj.toISOString()
+        timestamp: dateObj.toISOString(),
+        containerIcon: selectedIcon
       });
 
       UI.refreshDashboard();
@@ -931,6 +972,210 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modalOverlay) UI.hideModal();
     });
   }
+
+  /* ==================== FLOATING ACTION BUTTON (FAB SPEED DIAL) ==================== */
+  const fabContainer = document.getElementById('fabContainer');
+  const fabMainBtn = document.getElementById('fabMainBtn');
+  const fabBackdrop = document.getElementById('fabBackdrop');
+  const fabNewBeverage = document.getElementById('fabNewBeverage');
+  const fabNewContainer = document.getElementById('fabNewContainer');
+  const fabAddCustom = document.getElementById('fabAddCustom');
+
+  function toggleFab(forceState) {
+    if (!fabContainer) return;
+    const shouldOpen = forceState !== undefined ? forceState : !fabContainer.classList.contains('active');
+    fabContainer.classList.toggle('active', shouldOpen);
+    if (fabBackdrop) fabBackdrop.classList.toggle('active', shouldOpen);
+    if (fabMainBtn) fabMainBtn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+  }
+
+  function closeFab() {
+    toggleFab(false);
+  }
+
+  if (fabMainBtn) {
+    fabMainBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFab();
+    });
+  }
+
+  if (fabBackdrop) {
+    fabBackdrop.addEventListener('click', closeFab);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && fabContainer && fabContainer.classList.contains('active')) {
+      closeFab();
+    }
+  });
+
+  // FAB Item 1: New Beverage
+  const newBeverageModalOverlay = document.getElementById('newBeverageModalOverlay');
+  const formNewBeverage = document.getElementById('formNewBeverage');
+  const newBeverageNameInput = document.getElementById('newBeverageNameInput');
+  const newBeveragePreviewBadge = document.getElementById('newBeveragePreviewBadge');
+  const btnCancelNewBeverage = document.getElementById('btnCancelNewBeverage');
+  const beverageIconPicker = document.getElementById('beverageIconPicker');
+  let selectedBeverageIcon = 'ri-cup-line';
+
+  if (fabNewBeverage) {
+    fabNewBeverage.addEventListener('click', () => {
+      closeFab();
+      if (formNewBeverage) formNewBeverage.reset();
+      selectedBeverageIcon = 'ri-cup-line';
+      if (newBeveragePreviewBadge) {
+        newBeveragePreviewBadge.innerHTML = `<i class="${selectedBeverageIcon}" style="font-size:24px;"></i>`;
+      }
+      if (beverageIconPicker) {
+        beverageIconPicker.querySelectorAll('.icon-picker-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.icon === selectedBeverageIcon);
+        });
+      }
+      if (newBeverageModalOverlay) newBeverageModalOverlay.classList.add('active');
+      setTimeout(() => { if (newBeverageNameInput) newBeverageNameInput.focus(); }, 100);
+    });
+  }
+
+  if (beverageIconPicker) {
+    beverageIconPicker.querySelectorAll('.icon-picker-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedBeverageIcon = btn.dataset.icon || 'ri-cup-line';
+        beverageIconPicker.querySelectorAll('.icon-picker-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (newBeveragePreviewBadge) {
+          newBeveragePreviewBadge.innerHTML = `<i class="${selectedBeverageIcon}" style="font-size:24px;"></i>`;
+        }
+      });
+    });
+  }
+
+  if (btnCancelNewBeverage && newBeverageModalOverlay) {
+    btnCancelNewBeverage.addEventListener('click', () => {
+      newBeverageModalOverlay.classList.remove('active');
+    });
+  }
+
+  if (formNewBeverage) {
+    formNewBeverage.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = newBeverageNameInput ? newBeverageNameInput.value.trim() : '';
+      if (!name) return;
+
+      if (Storage.addCustomBeverage) {
+        const newBev = Storage.addCustomBeverage(name, selectedBeverageIcon);
+        if (beverageTabsContainer) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'beverage-tab active';
+          btn.dataset.type = newBev.id;
+          btn.innerHTML = `<i class="${newBev.icon}"></i><span>${newBev.label}</span>`;
+          beverageTabsContainer.querySelectorAll('.beverage-tab').forEach(t => t.classList.remove('active'));
+          beverageTabsContainer.appendChild(btn);
+          activeBeverageType = newBev.id;
+        }
+
+        // Add to beverage dropdowns if available
+        const bevSelects = document.querySelectorAll('#editLogBeverageSelect, #customIntakeBeverageSelect');
+        bevSelects.forEach(sel => {
+          const opt = document.createElement('option');
+          opt.value = newBev.id;
+          opt.textContent = newBev.label;
+          sel.appendChild(opt);
+        });
+      }
+
+      if (newBeverageModalOverlay) newBeverageModalOverlay.classList.remove('active');
+      UI.showToast(`Kategori minuman "${name}" berhasil ditambahkan! 🍹`, 'success');
+    });
+  }
+
+  // FAB Item 2: New Container
+  if (fabNewContainer) {
+    fabNewContainer.addEventListener('click', () => {
+      closeFab();
+      openAddContainerModal();
+    });
+  }
+
+  // FAB Item 3: + add Custom (Custom Intake Log)
+  const customIntakeModalOverlay = document.getElementById('customIntakeModalOverlay');
+  const formCustomIntake = document.getElementById('formCustomIntake');
+  const customIntakeAmount = document.getElementById('customIntakeAmount');
+  const customIntakeBeverageSelect = document.getElementById('customIntakeBeverageSelect');
+  const customIntakeBeverageIcon = document.getElementById('customIntakeBeverageIcon');
+  const customIntakeTime = document.getElementById('customIntakeTime');
+  const btnCancelCustomIntake = document.getElementById('btnCancelCustomIntake');
+
+  if (fabAddCustom) {
+    fabAddCustom.addEventListener('click', () => {
+      closeFab();
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      if (customIntakeTime) customIntakeTime.value = `${hh}:${mm}`;
+      if (customIntakeBeverageSelect) {
+        customIntakeBeverageSelect.value = activeBeverageType || 'water';
+        const bev = Storage.DRINK_TYPES[customIntakeBeverageSelect.value];
+        if (customIntakeBeverageIcon && bev) {
+          customIntakeBeverageIcon.innerHTML = `<i class="${bev.icon}"></i>`;
+        }
+      }
+      if (customIntakeModalOverlay) customIntakeModalOverlay.classList.add('active');
+      setTimeout(() => { if (customIntakeAmount) customIntakeAmount.focus(); }, 100);
+    });
+  }
+
+  if (customIntakeBeverageSelect) {
+    customIntakeBeverageSelect.addEventListener('change', () => {
+      const val = customIntakeBeverageSelect.value;
+      const bev = Storage.DRINK_TYPES[val] || Storage.DRINK_TYPES.water;
+      if (customIntakeBeverageIcon && bev) {
+        customIntakeBeverageIcon.innerHTML = `<i class="${bev.icon}"></i>`;
+      }
+    });
+  }
+
+  if (btnCancelCustomIntake && customIntakeModalOverlay) {
+    btnCancelCustomIntake.addEventListener('click', () => {
+      customIntakeModalOverlay.classList.remove('active');
+    });
+  }
+
+  if (formCustomIntake) {
+    formCustomIntake.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const amount = parseInt(customIntakeAmount?.value) || 0;
+      const type = customIntakeBeverageSelect?.value || 'water';
+      const timeVal = customIntakeTime?.value;
+
+      if (!amount || amount <= 0) {
+        UI.showToast('Masukkan jumlah volume yang valid (ml)!', 'warning');
+        return;
+      }
+
+      const dateObj = new Date();
+      if (timeVal) {
+        const [hh, mm] = timeVal.split(':');
+        dateObj.setHours(parseInt(hh), parseInt(mm), 0, 0);
+      }
+
+      const typeInfo = Storage.DRINK_TYPES[type] || Storage.DRINK_TYPES.water;
+      Storage.addLog(amount, type, '', dateObj.toISOString());
+      UI.refreshDashboard();
+      if (customIntakeModalOverlay) customIntakeModalOverlay.classList.remove('active');
+      UI.showToast(`${amount} ml ${typeInfo.label} berhasil dicatat! ✨`, 'success');
+    });
+  }
+
+  // Close new modals on backdrop click
+  [newBeverageModalOverlay, customIntakeModalOverlay].forEach(modal => {
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    }
+  });
 
   /* ==================== PREVENT PAGE HORIZONTAL SHIFT ==================== */
 

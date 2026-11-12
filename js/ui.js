@@ -164,6 +164,22 @@ const UI = (() => {
     return div;
   }
 
+  // Helper to determine container glass/cup icon for a log entry
+  function getLogContainerIcon(log) {
+    if (log && log.containerIcon) return log.containerIcon;
+    if (Storage.getContainerIconByAmount && log) {
+      return Storage.getContainerIconByAmount(log.amount);
+    }
+    const amt = log ? log.amount : 0;
+    if (amt <= 120) return 'icon-coffee';
+    if (amt <= 160) return 'icon-cup-40';
+    if (amt <= 180) return 'icon-cup-50';
+    if (amt <= 250) return 'icon-glass-60';
+    if (amt <= 350) return 'icon-glass-75';
+    if (amt <= 750) return 'icon-bottle';
+    return 'icon-bottle-lg';
+  }
+
   // Create a single drink log list item
   function createLogItem(log) {
     const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
@@ -172,13 +188,19 @@ const UI = (() => {
       minute: '2-digit'
     });
 
+    const containerIcon = getLogContainerIcon(log);
+    const isCustom = containerIcon.startsWith('icon-');
+    const iconHtml = isCustom
+      ? `<i class="custom-icon ${containerIcon}"></i>`
+      : `<i class="${containerIcon}"></i>`;
+
     const item = document.createElement('div');
     item.className = 'drink-log__item';
     item.dataset.id = log.id;
 
     item.innerHTML = `
       <div class="drink-log__item-icon">
-        <i class="${drinkType.icon}"></i>
+        ${iconHtml}
       </div>
       <div class="drink-log__item-info">
         <span class="drink-log__item-type">${drinkType.label}</span>
