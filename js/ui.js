@@ -401,7 +401,7 @@ const UI = (() => {
       barsContainer.innerHTML = '';
       if (emptyView) {
         emptyView.classList.remove('hidden');
-        if (emptyText) emptyText.textContent = `Belum ada data untuk periode ${weekData.periodLabel}`;
+        if (emptyText) emptyText.textContent = 'Belum ada catatan air minum pada periode ini';
       }
       return;
     }
@@ -409,7 +409,7 @@ const UI = (() => {
     if (emptyView) emptyView.classList.add('hidden');
     barsContainer.innerHTML = '';
 
-    const maxVal = Math.max(...weekData.days.map(d => d.total), weekData.dailyGoal, 2000);
+    const dailyGoal = weekData.dailyGoal || 2000;
 
     weekData.days.forEach(day => {
       const col = document.createElement('div');
@@ -417,7 +417,7 @@ const UI = (() => {
       if (day.date === selectedDate) col.classList.add('is-selected');
       if (day.isToday) col.classList.add('is-today');
 
-      const pct = maxVal > 0 ? Math.min(Math.round((day.total / maxVal) * 100), 100) : 0;
+      const pct = dailyGoal > 0 ? Math.min(Math.round((day.total / dailyGoal) * 100), 100) : 0;
       const heightStyle = day.goalMet ? '100%' : (day.total > 0 ? `${Math.max(pct, 14)}%` : '6px');
 
       let fillHtml = '';
@@ -467,7 +467,7 @@ const UI = (() => {
       gridEl.innerHTML = '';
       if (emptyView) {
         emptyView.classList.remove('hidden');
-        if (emptyText) emptyText.textContent = `Belum ada data untuk bulan ${monthData.periodLabel}`;
+        if (emptyText) emptyText.textContent = 'Belum ada catatan air minum untuk 30 hari terakhir';
       }
       return;
     }
@@ -535,7 +535,7 @@ const UI = (() => {
       gridEl.innerHTML = '';
       if (emptyView) {
         emptyView.classList.remove('hidden');
-        if (emptyText) emptyText.textContent = `Belum ada data untuk tahun ${yearData.periodLabel}`;
+        if (emptyText) emptyText.textContent = 'Belum ada catatan air minum untuk tahun ini';
       }
       return;
     }
@@ -600,9 +600,9 @@ const UI = (() => {
 
   // 5. Render Selected Day Entries List
   function renderHistoryEntriesList(dateStr, search = '', filterDrink = 'all') {
-    const listEl = document.getElementById('historyEntriesList');
-    const emptyEl = document.getElementById('historyEmpty');
-    const emptyMsgEl = document.getElementById('historyEmptyMsg');
+    const listEl = document.getElementById('historyDrinkLogList') || document.getElementById('historyEntriesList');
+    const dateDisplayEl = document.getElementById('historyEntriesDate');
+    const countEl = document.getElementById('historyEntriesCount');
     const totalEl = document.getElementById('selectedDateTotal');
     const displayEl = document.getElementById('selectedDateDisplay');
 
@@ -625,6 +625,17 @@ const UI = (() => {
       });
     }
 
+    if (dateDisplayEl) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const isToday = dateStr === Storage.formatDateKey(new Date());
+      const prefix = isToday ? 'Hari Ini, ' : '';
+      dateDisplayEl.textContent = prefix + d.toLocaleDateString('id-ID', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      });
+    }
+
     // Apply drink type filter
     if (filterDrink && filterDrink !== 'all') {
       logs = logs.filter(l => l.type === filterDrink);
@@ -644,53 +655,25 @@ const UI = (() => {
     // Sort descending by timestamp
     logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
+    if (countEl) {
+      countEl.textContent = `${logs.length} catatan`;
+    }
+
+    listEl.innerHTML = '';
+
     if (logs.length === 0) {
-      listEl.innerHTML = '';
-      if (emptyEl) {
-        emptyEl.classList.remove('hidden');
-        if (emptyMsgEl) {
-          emptyMsgEl.textContent = (search || filterDrink !== 'all')
-            ? 'Tidak ada catatan yang cocok dengan filter pencarian.'
-            : 'Belum ada catatan air minum untuk tanggal ini. Ketuk Catat Minum untuk menambah entri!';
-        }
-      }
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'history-drink-log__empty';
+      emptyDiv.innerHTML = `
+        <i class="ri-drop-line"></i>
+        <p>Belum ada catatan air minum untuk tanggal ini.</p>
+      `;
+      listEl.appendChild(emptyDiv);
       return;
     }
 
-    if (emptyEl) emptyEl.classList.add('hidden');
-    listEl.innerHTML = '';
-
     logs.forEach(log => {
-      const card = document.createElement('div');
-      card.className = 'entry-item-card';
-
-      const typeInfo = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
-      const logDate = new Date(log.timestamp);
-      const timeStr = logDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      const iconClass = log.containerIcon || Storage.getContainerIconByAmount(log.amount);
-
-      card.innerHTML = `
-        <div class="entry-item__icon">
-          <i class="custom-icon ${iconClass}"></i>
-        </div>
-        <div class="entry-item__info">
-          <div class="entry-item__title">
-            <span>${escapeHtml(typeInfo.label)}</span>
-            <span class="entry-item__time"><i class="ri-time-line"></i> ${timeStr}</span>
-          </div>
-          ${log.note ? `<div class="entry-item__note">${escapeHtml(log.note)}</div>` : ''}
-        </div>
-        <div class="entry-item__amount">${log.amount.toLocaleString('id-ID')} ml</div>
-        <div class="entry-item__actions">
-          <button type="button" class="btn-edit" data-id="${log.id}" title="Edit Catatan">
-            <i class="ri-pencil-line"></i>
-          </button>
-          <button type="button" class="btn-delete" data-id="${log.id}" title="Hapus Catatan">
-            <i class="ri-delete-bin-line"></i>
-          </button>
-        </div>
-      `;
-      listEl.appendChild(card);
+      listEl.appendChild(createLogItem(log));
     });
   }
 
@@ -845,63 +828,166 @@ const UI = (() => {
     });
   }
 
-  /* ==================== ANALYTICS RENDERING ==================== */
+  /* ==================== STATISTICS / ANALYTICS RENDERING ==================== */
 
-  function renderAnalytics(days = 7) {
-    const avgEl = document.getElementById('analyticsAvgDaily');
-    if (!avgEl) return;
+  function renderStatisticsPage(period = 'all') {
+    const totalIntakeEl = document.getElementById('statsTotalIntake');
+    // If not on statistics page, exit gracefully
+    if (!totalIntakeEl && !document.getElementById('view-analytics')) return;
 
-    const stats = Storage.getAnalyticsStats(days);
+    const data = Storage.getStatisticsData(period);
 
-    // Update stat cards
-    avgEl.textContent = formatMl(stats.avgDaily);
-
-    const bestDayEl = document.getElementById('analyticsBestDay');
-    if (bestDayEl) {
-      bestDayEl.textContent = stats.bestDay.total > 0
-        ? `${formatMl(stats.bestDay.total)} (${stats.bestDay.dayName})`
-        : '-';
-    }
-
-    const goalsMetEl = document.getElementById('analyticsGoalsMet');
-    if (goalsMetEl) {
-      goalsMetEl.textContent = `${stats.goalsMet} / ${days} Hari (${stats.completionRate}%)`;
-    }
-
-    const totalIntakeEl = document.getElementById('analyticsTotalIntake');
+    // 1. Medium Cards (4 Cards)
     if (totalIntakeEl) {
-      totalIntakeEl.textContent = formatMl(stats.totalIntake);
+      totalIntakeEl.textContent = formatVolumeDisplay(data.totalIntake);
+    }
+    const totalIntakeSub = document.getElementById('statsTotalIntakeSub');
+    if (totalIntakeSub) {
+      totalIntakeSub.textContent = data.hasData ? `${data.totalIntake.toLocaleString('id-ID')} ml total` : 'Belum ada catatan';
     }
 
-    // Status evaluation message
-    const evalMessage = document.getElementById('analyticsEvalMessage');
-    const evalBadge = document.getElementById('analyticsEvalBadge');
-    if (evalMessage) {
-      if (stats.completionRate >= 80) {
-        evalMessage.textContent = 'Luar biasa! Konsistensi hidrasimu sangat baik. Pertahankan kebiasaan sehat ini! 🌟';
-        if (evalBadge) {
-          evalBadge.className = 'analytics-badge analytics-badge--success';
-          evalBadge.textContent = 'Sangat Baik';
-        }
-      } else if (stats.completionRate >= 50) {
-        evalMessage.textContent = 'Progres yang cukup baik! Coba minum air lebih rutin di pagi dan siang hari untuk mencapai target harian. 💪';
-        if (evalBadge) {
-          evalBadge.className = 'analytics-badge analytics-badge--warning';
-          evalBadge.textContent = 'Cukup Baik';
-        }
+    const dailyAvgEl = document.getElementById('statsDailyAvg');
+    if (dailyAvgEl) {
+      dailyAvgEl.textContent = formatVolumeDisplay(data.dailyAverage);
+    }
+
+    const successRateEl = document.getElementById('statsSuccessRate');
+    if (successRateEl) {
+      successRateEl.textContent = `${data.successRate}%`;
+    }
+    const goalsMetSub = document.getElementById('statsGoalsMetSub');
+    if (goalsMetSub) {
+      goalsMetSub.textContent = `${data.goalsMet} / ${data.daysTracked} hari target`;
+    }
+
+    const daysTrackedEl = document.getElementById('statsDaysTracked');
+    if (daysTrackedEl) {
+      daysTrackedEl.textContent = `${data.daysTracked} Hari`;
+    }
+
+    // 2. Overview (8 Items)
+    const streakEl = document.getElementById('overviewStreak');
+    if (streakEl) streakEl.textContent = `${data.currentStreak} Hari`;
+
+    const ovSuccessEl = document.getElementById('overviewSuccessRate');
+    if (ovSuccessEl) ovSuccessEl.textContent = `${data.successRate}%`;
+
+    const ovDaysEl = document.getElementById('overviewDaysTracked');
+    if (ovDaysEl) ovDaysEl.textContent = `${data.daysTracked} Hari`;
+
+    const intervalEl = document.getElementById('overviewAvgInterval');
+    if (intervalEl) intervalEl.textContent = data.avgIntervalStr;
+
+    const avgDrinkEl = document.getElementById('overviewAvgDrinkSize');
+    if (avgDrinkEl) avgDrinkEl.textContent = formatVolumeDisplay(data.avgDrinkSize);
+
+    const largestEl = document.getElementById('overviewLargestDrink');
+    if (largestEl) largestEl.textContent = formatVolumeDisplay(data.largestDrink);
+
+    const firstEl = document.getElementById('overviewFirstDrink');
+    if (firstEl) firstEl.textContent = data.firstDrinkStr;
+
+    const lastEl = document.getElementById('overviewLastDrink');
+    if (lastEl) lastEl.textContent = data.lastDrinkStr;
+
+    // 3. Beverage Breakdown (Grafik & Dynamic List)
+    const centerValEl = document.getElementById('beverageCenterVal');
+    if (centerValEl) {
+      centerValEl.textContent = data.totalIntake >= 1000
+        ? `${(data.totalIntake / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} L`
+        : `${data.totalIntake} ml`;
+    }
+
+    if (typeof ChartModule !== 'undefined' && ChartModule.renderBeverageBreakdown) {
+      ChartModule.renderBeverageBreakdown('beverageBreakdownChart', data.beverageBreakdown, data.totalIntake);
+    }
+
+    const bevListEl = document.getElementById('beverageBreakdownList');
+    if (bevListEl) {
+      bevListEl.innerHTML = '';
+      const activeBeverages = data.beverageBreakdown.filter(b => b.amount > 0);
+
+      if (activeBeverages.length === 0) {
+        bevListEl.innerHTML = `
+          <div class="beverage-empty-hint">
+            <i class="ri-drop-line"></i>
+            <p>Belum ada catatan minuman pada periode ini. Catat minuman di Home untuk melihat distribusinya!</p>
+          </div>
+        `;
       } else {
-        evalMessage.textContent = 'Tingkat hidrasimu masih di bawah target. Pasang alarm atau bawa tumbler minum ke mana pun kamu beraktivitas! 💧';
-        if (evalBadge) {
-          evalBadge.className = 'analytics-badge analytics-badge--danger';
-          evalBadge.textContent = 'Perlu Ditingkatkan';
-        }
+        activeBeverages.forEach(b => {
+          const row = document.createElement('div');
+          row.className = 'beverage-item-row';
+          row.innerHTML = `
+            <div class="beverage-item-main">
+              <span class="beverage-dot" style="background-color: ${b.color};"></span>
+              <span class="beverage-name">${escapeHtml(b.label)}</span>
+            </div>
+            <div class="beverage-bar-wrap">
+              <div class="beverage-bar-fill" style="width: ${b.percentage}%; background-color: ${b.color};"></div>
+            </div>
+            <div class="beverage-item-meta">
+              <span class="beverage-amount">${b.amount.toLocaleString('id-ID')} ml</span>
+              <span class="beverage-pct">${b.percentage}%</span>
+            </div>
+          `;
+          bevListEl.appendChild(row);
+        });
       }
     }
 
-    // Render charts
-    if (typeof ChartModule !== 'undefined' && ChartModule.initAnalyticsCharts) {
-      ChartModule.initAnalyticsCharts(days);
+    // 4. Container Usage (Table: container, volume dan uses)
+    const containerTbody = document.getElementById('containerUsageTableBody');
+    if (containerTbody) {
+      containerTbody.innerHTML = '';
+      if (!data.containerUsage || data.containerUsage.length === 0) {
+        containerTbody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center text-muted" style="padding: 20px;">
+              Belum ada data wadah minuman.
+            </td>
+          </tr>
+        `;
+      } else {
+        data.containerUsage.forEach(c => {
+          const isSvg = c.icon && c.icon.startsWith('icon-');
+          const iconHtml = isSvg
+            ? `<i class="custom-icon ${c.icon}"></i>`
+            : `<i class="${c.icon || 'ri-cup-line'}"></i>`;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <div class="container-cell">
+                <div class="container-cell__icon">
+                  ${iconHtml}
+                </div>
+                <div class="container-cell__info">
+                  <span class="container-cell__name">${escapeHtml(c.name)}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="volume-badge">${c.amount.toLocaleString('id-ID')} ml</span>
+            </td>
+            <td>
+              <div class="uses-cell">
+                <span class="uses-badge">${c.uses}x</span>
+                <div class="uses-bar-track">
+                  <div class="uses-bar-fill" style="width: ${c.percentage}%;"></div>
+                </div>
+                <span class="uses-pct">${c.percentage}%</span>
+              </div>
+            </td>
+          `;
+          containerTbody.appendChild(tr);
+        });
+      }
     }
+  }
+
+  function renderAnalytics(days = 7) {
+    renderStatisticsPage(days);
   }
 
   /* ==================== SETTINGS RENDERING ==================== */
@@ -968,6 +1054,7 @@ const UI = (() => {
     renderHistoryTable,
     openHistoryForm,
     closeHistoryForm,
+    renderStatisticsPage,
     renderAnalytics,
     renderSettings,
     updateWaterCalculator,

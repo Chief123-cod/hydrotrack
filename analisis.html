@@ -102,129 +102,226 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ========== MAIN CONTENT ========== -->
-    <main class="main-content">
+    <main class="main-content main-content--stats">
 
         <!-- Top Header Bar -->
-        <header class="top-header">
+        <header class="top-header stats-top-header">
             <div class="top-header__left">
-                <h1 class="top-header__greeting">Analisis & Tren Hidrasi</h1>
-                <p class="top-header__subtitle">Visualisasi performa, grafik tren, dan komposisi konsumsi cairanmu.</p>
+                <h1 class="top-header__greeting">Statistics</h1>
+                <p class="top-header__subtitle">Analisis kebiasaan hidrasi, distribusi minuman, dan statistik penggunaan wadah.</p>
             </div>
             <div class="top-header__right">
                 <div class="filter-group">
                     <label class="filter-label" for="analyticsPeriod">Periode:</label>
                     <select id="analyticsPeriod" class="form-input form-select form-select--sm">
-                        <option value="7" selected>7 Hari Terakhir</option>
-                        <option value="14">14 Hari Terakhir</option>
+                        <option value="all" selected>Semua Waktu</option>
                         <option value="30">30 Hari Terakhir</option>
+                        <option value="7">7 Hari Terakhir</option>
                     </select>
                 </div>
                 <div class="top-header__date" id="headerDate"></div>
             </div>
         </header>
 
-        <!-- ===== VIEW: ANALYTICS ===== -->
+        <!-- ===== VIEW: STATISTICS ===== -->
         <section class="view view--active" id="view-analytics">
 
-            <!-- Metric Cards Row -->
-            <div class="metrics-row">
-                <div class="metric-card metric-card--primary">
-                    <div class="metric-card__icon"><i class="ri-pulse-line"></i></div>
-                    <div class="metric-card__info">
-                        <span class="metric-card__label">Rata-rata Harian</span>
-                        <span class="metric-card__value" id="analyticsAvgDaily">0 ml</span>
+            <!-- 1. Card Bentuk Sedang: Total Intake, Daily Average, Success Rate, Days Tracked -->
+            <div class="stats-cards-row">
+                <div class="stats-card stats-card--primary">
+                    <div class="stats-card__icon">
+                        <i class="ri-water-flash-fill"></i>
+                    </div>
+                    <div class="stats-card__content">
+                        <span class="stats-card__label">Total Intake</span>
+                        <span class="stats-card__value" id="statsTotalIntake">0 ml</span>
+                        <span class="stats-card__sub" id="statsTotalIntakeSub">Total asupan tercatat</span>
                     </div>
                 </div>
-                <div class="metric-card metric-card--success">
-                    <div class="metric-card__icon"><i class="ri-trophy-line"></i></div>
-                    <div class="metric-card__info">
-                        <span class="metric-card__label">Rekor Tertinggi</span>
-                        <span class="metric-card__value" id="analyticsBestDay">-</span>
+
+                <div class="stats-card stats-card--info">
+                    <div class="stats-card__icon">
+                        <i class="ri-pulse-line"></i>
+                    </div>
+                    <div class="stats-card__content">
+                        <span class="stats-card__label">Daily Average</span>
+                        <span class="stats-card__value" id="statsDailyAvg">0 ml</span>
+                        <span class="stats-card__sub">Rata-rata per hari</span>
                     </div>
                 </div>
-                <div class="metric-card metric-card--info">
-                    <div class="metric-card__icon"><i class="ri-checkbox-circle-line"></i></div>
-                    <div class="metric-card__info">
-                        <span class="metric-card__label">Target Terpenuhi</span>
-                        <span class="metric-card__value" id="analyticsGoalsMet">0 / 0 Hari</span>
+
+                <div class="stats-card stats-card--success">
+                    <div class="stats-card__icon">
+                        <i class="ri-checkbox-circle-fill"></i>
+                    </div>
+                    <div class="stats-card__content">
+                        <span class="stats-card__label">Success Rate</span>
+                        <span class="stats-card__value" id="statsSuccessRate">0%</span>
+                        <span class="stats-card__sub" id="statsGoalsMetSub">0 / 0 Hari target</span>
                     </div>
                 </div>
-                <div class="metric-card metric-card--warning">
-                    <div class="metric-card__icon"><i class="ri-water-flash-line"></i></div>
-                    <div class="metric-card__info">
-                        <span class="metric-card__label">Total Asupan Periode</span>
-                        <span class="metric-card__value" id="analyticsTotalIntake">0 ml</span>
+
+                <div class="stats-card stats-card--warning">
+                    <div class="stats-card__icon">
+                        <i class="ri-calendar-check-fill"></i>
+                    </div>
+                    <div class="stats-card__content">
+                        <span class="stats-card__label">Days Tracked</span>
+                        <span class="stats-card__value" id="statsDaysTracked">0 Hari</span>
+                        <span class="stats-card__sub">Hari aktif mencatat</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Evaluation Insight Banner -->
-            <div class="analytics-eval-card">
-                <div class="analytics-eval__content">
-                    <div class="analytics-eval__icon">
-                        <i class="ri-sparkling-fill"></i>
-                    </div>
-                    <div class="analytics-eval__text">
-                        <h4>Evaluasi Status Hidrasi</h4>
-                        <p id="analyticsEvalMessage">Memuat evaluasi kebiasaan minum airmu...</p>
-                    </div>
-                </div>
-                <span id="analyticsEvalBadge" class="analytics-badge analytics-badge--success">Sangat Baik</span>
-            </div>
+            <!-- Two-Column Grid: 2. Overview & 3. Beverage Breakdown -->
+            <div class="stats-main-grid">
 
-            <!-- Charts Grid -->
-            <div class="analytics-grid">
-                <!-- Bar Chart: Daily Trend -->
-                <div class="card chart-card">
-                    <div class="chart-card__header">
-                        <div>
-                            <h3 class="card__title">Tren Konsumsi Harian</h3>
-                            <p class="chart-card__subtitle">Konsumsi air harian (hijau = target tercapai)</p>
+                <!-- 2. Overview Card (8 Items) -->
+                <div class="card stats-overview-card">
+                    <div class="card__header">
+                        <div class="card__header-info">
+                            <h3 class="card__title">
+                                <i class="ri-dashboard-line"></i> Overview
+                            </h3>
+                            <p class="card__subtitle">Metrik dan pola kebiasaan hidrasimu</p>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="dailyTrendChart"></canvas>
-                    </div>
-                </div>
 
-                <!-- Doughnut Chart: Drink Distribution -->
-                <div class="card chart-card">
-                    <div class="chart-card__header">
-                        <div>
-                            <h3 class="card__title">Distribusi Jenis Minuman</h3>
-                            <p class="chart-card__subtitle">Proporsi asupan berdasarkan kategori minuman</p>
+                    <div class="stats-overview-grid">
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--streak">
+                                <i class="ri-fire-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Current Streak</span>
+                                <span class="overview-item__value" id="overviewStreak">0 Hari</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--success">
+                                <i class="ri-trophy-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Success Rate</span>
+                                <span class="overview-item__value" id="overviewSuccessRate">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--tracked">
+                                <i class="ri-calendar-check-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Days Tracked</span>
+                                <span class="overview-item__value" id="overviewDaysTracked">0 Hari</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--interval">
+                                <i class="ri-timer-2-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Average Interval</span>
+                                <span class="overview-item__value" id="overviewAvgInterval">-</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--size">
+                                <i class="ri-cup-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Average Drink Size</span>
+                                <span class="overview-item__value" id="overviewAvgDrinkSize">0 ml</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--largest">
+                                <i class="ri-goblet-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Largest Drink</span>
+                                <span class="overview-item__value" id="overviewLargestDrink">0 ml</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--first">
+                                <i class="ri-sun-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">First Drink</span>
+                                <span class="overview-item__value" id="overviewFirstDrink">-</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-overview-item">
+                            <div class="overview-item__icon icon--last">
+                                <i class="ri-moon-fill"></i>
+                            </div>
+                            <div class="overview-item__body">
+                                <span class="overview-item__label">Last Drink</span>
+                                <span class="overview-item__value" id="overviewLastDrink">-</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="drinkDistributionChart"></canvas>
+                </div>
+
+                <!-- 3. Beverage Breakdown Card (Grafik & Breakdown List) -->
+                <div class="card stats-beverage-card">
+                    <div class="card__header">
+                        <div class="card__header-info">
+                            <h3 class="card__title">
+                                <i class="ri-pie-chart-2-line"></i> Beverage Breakdown
+                            </h3>
+                            <p class="card__subtitle">Komposisi asupan berdasarkan jenis minuman</p>
+                        </div>
+                    </div>
+
+                    <div class="beverage-breakdown-body">
+                        <div class="beverage-chart-wrapper">
+                            <canvas id="beverageBreakdownChart"></canvas>
+                            <div class="beverage-chart-center" id="beverageChartCenter">
+                                <span class="beverage-chart-center__val" id="beverageCenterVal">0 L</span>
+                                <span class="beverage-chart-center__lbl">Total Minum</span>
+                            </div>
+                        </div>
+
+                        <div class="beverage-breakdown-list" id="beverageBreakdownList">
+                            <!-- Populated dynamically via JS -->
+                        </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Hydration Tips / Insights Footer -->
-            <div class="tips-section">
-                <h3 class="card__title tips-section__title">Insight & Rekomendasi 💡</h3>
-                <div class="tips-grid">
-                    <div class="tip-card">
-                        <div class="tip-card__icon"><i class="ri-time-line"></i></div>
-                        <h4>Waktu Terbaik</h4>
-                        <p>Usahakan memenuhi 50% target cairanmu sebelum jam 13.00 siang.</p>
+            <!-- 4. Container Usage Card (Table: Container, Volume, Uses) -->
+            <div class="card stats-container-card">
+                <div class="card__header">
+                    <div class="card__header-info">
+                        <h3 class="card__title">
+                            <i class="ri-flask-line"></i> Container Usage
+                        </h3>
+                        <p class="card__subtitle">Frekuensi dan volume penggunaan takaran minum</p>
                     </div>
-                    <div class="tip-card">
-                        <div class="tip-card__icon"><i class="ri-cup-line"></i></div>
-                        <h4>Batasi Kafein</h4>
-                        <p>Kopi dan teh bersifat diuretik ringan, selalu seimbangi dengan air putih.</p>
-                    </div>
-                    <div class="tip-card">
-                        <div class="tip-card__icon"><i class="ri-heart-pulse-line"></i></div>
-                        <h4>Fokus Konsistensi</h4>
-                        <p>Minum sedikit tapi sering jauh lebih baik dibanding minum banyak sekaligus.</p>
-                    </div>
-                    <div class="tip-card">
-                        <div class="tip-card__icon"><i class="ri-temp-cold-line"></i></div>
-                        <h4>Suhu Air Ideal</h4>
-                        <p>Air bersuhu ruang atau sejuk paling mudah diserap oleh sel tubuh.</p>
-                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table container-usage-table">
+                        <thead>
+                            <tr>
+                                <th>Container</th>
+                                <th>Volume</th>
+                                <th>Uses</th>
+                            </tr>
+                        </thead>
+                        <tbody id="containerUsageTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

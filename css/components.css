@@ -1908,110 +1908,484 @@
    ANALYTICS VIEW STYLES
    ============================================ */
 
-.analytics-grid {
+/* ============================================
+   STATISTICS / ANALYTICS VIEW STYLES
+   ============================================ */
+
+.main-content--stats {
+  max-width: 1200px;
+}
+
+.stats-top-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* 1. Medium Metric Cards Row */
+.stats-cards-row {
   display: grid;
-  grid-template-columns: 1.6fr 1.1fr;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.chart-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-md);
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-}
-
-.chart-card__header .card__title {
-  margin-bottom: 0;
-}
-
-.chart-card__subtitle {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.chart-container {
-  position: relative;
-  width: 100%;
-  height: 300px;
-}
-
-/* Evaluation Banner Card */
-.analytics-eval-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
+.stats-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg) var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
-}
-
-.analytics-eval__content {
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.analytics-eval__icon {
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.stats-card__icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-bg);
-  color: var(--color-primary);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   flex-shrink: 0;
 }
 
-.analytics-eval__text h4 {
-  font-size: 16px;
+.stats-card--primary .stats-card__icon {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.stats-card--info .stats-card__icon {
+  background: #ECFEFF;
+  color: #0891B2;
+}
+
+.stats-card--success .stats-card__icon {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.stats-card--warning .stats-card__icon {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.stats-card__content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stats-card__label {
+  font-size: 12px;
   font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: 4px;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
 }
 
-.analytics-eval__text p {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
+.stats-card__value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.analytics-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  border-radius: 99px;
-  font-size: 13px;
-  font-weight: 600;
+.stats-card__sub {
+  font-size: 11.5px;
+  color: #94A3B8;
+  margin-top: 2px;
   white-space: nowrap;
 }
 
-.analytics-badge--success {
-  background: var(--color-success-bg);
-  color: var(--color-success);
+/* Two-Column Main Grid (Overview & Beverage Breakdown) */
+.stats-main-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+  align-items: stretch;
 }
 
-.analytics-badge--warning {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
+/* 2. Overview Card */
+.stats-overview-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px;
 }
 
-.analytics-badge--danger {
-  background: var(--color-danger-bg);
-  color: var(--color-danger);
+.stats-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.stats-overview-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #F8FAFC;
+  border: 1px solid #F1F5F9;
+  border-radius: 14px;
+  transition: all 0.15s ease;
+}
+
+.stats-overview-item:hover {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+}
+
+.overview-item__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.overview-item__icon.icon--streak {
+  background: #FFF7ED;
+  color: #EA580C;
+}
+
+.overview-item__icon.icon--success {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.overview-item__icon.icon--tracked {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.overview-item__icon.icon--interval {
+  background: #F5F3FF;
+  color: #7C3AED;
+}
+
+.overview-item__icon.icon--size {
+  background: #ECFEFF;
+  color: #0891B2;
+}
+
+.overview-item__icon.icon--largest {
+  background: #EEF2FF;
+  color: #4F46E5;
+}
+
+.overview-item__icon.icon--first {
+  background: #FEF9C3;
+  color: #CA8A04;
+}
+
+.overview-item__icon.icon--last {
+  background: #F1F5F9;
+  color: #334155;
+}
+
+.overview-item__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.overview-item__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748B;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.overview-item__value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.2;
+}
+
+/* 3. Beverage Breakdown Card */
+.stats-beverage-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px;
+}
+
+.beverage-breakdown-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  margin-top: 14px;
+}
+
+.beverage-chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 175px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beverage-chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.beverage-chart-center__val {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.1;
+}
+
+.beverage-chart-center__lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 1px;
+}
+
+.beverage-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.beverage-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.beverage-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 110px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #1E293B;
+  font-size: 12.5px;
+}
+
+.beverage-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.beverage-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.beverage-bar-wrap {
+  flex: 1;
+  height: 7px;
+  background: #E2E8F0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.beverage-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.beverage-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 95px;
+  justify-content: flex-end;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.beverage-amount {
+  font-weight: 600;
+  color: #475569;
+}
+
+.beverage-pct {
+  font-weight: 700;
+  color: #0F172A;
+  min-width: 30px;
+  text-align: right;
+}
+
+.beverage-empty-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 12px;
+  text-align: center;
+  color: #94A3B8;
+  font-size: 12.5px;
+}
+
+.beverage-empty-hint i {
+  font-size: 28px;
+  color: #CBD5E1;
+}
+
+/* 4. Container Usage Card */
+.stats-container-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px;
+}
+
+.container-usage-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+}
+
+.container-usage-table th {
+  background: #F8FAFC;
+  color: #64748B;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.container-usage-table th:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.container-usage-table th:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.container-usage-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+.container-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.container-cell__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.container-cell__icon .custom-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.container-cell__name {
+  font-weight: 600;
+  color: #1E293B;
+  font-size: 13.5px;
+}
+
+.volume-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #DBEAFE;
+}
+
+.uses-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 260px;
+}
+
+.uses-badge {
+  font-weight: 700;
+  color: #0F172A;
+  font-size: 13px;
+  min-width: 30px;
+}
+
+.uses-bar-track {
+  flex: 1;
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 99px;
+  overflow: hidden;
+  min-width: 70px;
+}
+
+.uses-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.uses-pct {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748B;
+  min-width: 32px;
+  text-align: right;
 }
 
 /* ============================================
@@ -2313,54 +2687,85 @@
    ============================================================ */
 
 /* ==================== MODERN HISTORY DASHBOARD (Weekly / Monthly / Yearly) ==================== */
+body.page-history,
+body:has(.main-content--history) {
+  overflow: hidden !important;
+  height: 100vh;
+  max-height: 100vh;
+}
+
 .main-content--history {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  overflow-y: hidden;
+  align-items: center;
+  padding: 0 24px !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
 }
 
 .history-top-header {
-  max-width: 600px;
+  max-width: 920px;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .history-top-header .top-header__greeting {
-  font-size: 19px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.3px;
 }
 
 .history-top-header .top-header__subtitle {
-  font-size: 12.5px;
-  margin-top: 1px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.main-content--history #view-history {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .history-dashboard-grid {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
-  margin-bottom: 0;
+  max-width: 920px;
+  margin: 0 auto;
+  flex-shrink: 0;
 }
 
-/* ---------- Visual Card (Centered Single Card) ---------- */
+/* ---------- Visual Card (Permanently Static & Structured) ---------- */
 .history-visual-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 18px;
+  justify-content: space-between;
   width: 100%;
-  max-width: 600px;
+  max-width: 920px;
   margin: 0 auto;
+  padding: 20px 28px;
+  gap: 12px;
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
   border: 1px solid var(--color-border);
+  box-sizing: border-box;
+  overflow: hidden;
+  /* Ketinggian dikunci permanen agar card tetap diam dan tidak melompat */
+  height: 590px;
+  min-height: 590px;
+  max-height: 590px;
 }
 
 /* Segmented Control Tabs */
@@ -2368,32 +2773,41 @@
   display: flex;
   justify-content: center;
   width: 100%;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  flex-shrink: 0;
 }
 
 .history-tabs {
   display: inline-flex;
   background: #F1F5F9;
-  padding: 3px;
+  padding: 4px;
   border-radius: 999px;
-  gap: 3px;
+  gap: 4px;
   border: 1px solid #E2E8F0;
   width: 100%;
-  max-width: 340px;
+  max-width: 440px;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .history-tab {
   flex: 1;
-  padding: 6px 12px;
+  padding: 6px 16px;
   border-radius: 999px;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #64748B;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .history-tab:hover:not(.active) {
@@ -2403,7 +2817,7 @@
 .history-tab.active {
   background: #FFFFFF;
   color: var(--color-primary);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
   font-weight: 700;
 }
 
@@ -2412,12 +2826,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2px;
+  padding: 0 4px;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  flex-shrink: 0;
 }
 
 .history-nav-btn {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--color-primary-bg);
   color: var(--color-primary);
@@ -2427,14 +2845,14 @@
   font-size: 20px;
   border: 1px solid #BFDBFE;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
   user-select: none;
 }
 
 .history-nav-btn:hover {
   background: #DBEAFE;
   color: var(--color-primary-dark);
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .history-nav-btn:active {
@@ -2442,43 +2860,53 @@
 }
 
 .history-period-title {
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--color-text-primary);
   letter-spacing: -0.2px;
   text-align: center;
   flex: 1;
-  padding: 0 var(--spacing-xs);
+  padding: 0 var(--spacing-sm);
 }
 
-/* Visual Container */
+/* Visual Container (Ketinggian tetap 215px agar tidak ada layout shift saat switch tab) */
 .history-visual-container {
-  min-height: auto;
+  height: 215px;
+  min-height: 215px;
+  max-height: 215px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2px 0;
+  align-items: center;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* ----- 1. Weekly Chart View ----- */
 .weekly-chart-view {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .weekly-chart-bars {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  height: 155px;
-  padding: 8px 4px 4px;
-  gap: 6px;
+  height: 100%;
+  padding: 8px 6px 4px;
+  gap: 10px;
   position: relative;
+  box-sizing: border-box;
 }
 
 .weekly-chart-bars::before {
   content: '';
   position: absolute;
-  top: 48%;
+  top: 14px;
   left: 6px;
   right: 6px;
   border-top: 1.5px dashed #CBD5E1;
@@ -2499,20 +2927,38 @@
   user-select: none;
   position: relative;
   z-index: 2;
+  background: transparent;
 }
 
 .weekly-bar-col:hover {
-  background: rgba(46, 134, 222, 0.05);
+  background: transparent;
 }
 
+/* Tanpa border kotak besar pada kolom */
 .weekly-bar-col.is-selected {
-  background: var(--color-primary-bg);
-  box-shadow: 0 0 0 1.5px var(--color-primary);
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Kotak kecil (pill) di bawah berubah warna biru saat dipilih */
+.weekly-bar-col.is-selected .weekly-bar-fill.is-empty {
+  background: var(--color-primary) !important;
+  box-shadow: 0 2px 8px rgba(46, 134, 222, 0.45);
+}
+
+/* Indikator bar aktif saat dipilih */
+.weekly-bar-col.is-selected .weekly-bar-fill:not(.is-empty):not(.is-goal-met) {
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--color-primary);
+}
+
+.weekly-bar-col.is-selected .weekly-day-num {
+  color: var(--color-primary) !important;
+  font-weight: 800;
 }
 
 .weekly-bar-track {
-  height: 105px;
-  width: 32px;
+  height: 135px;
+  width: 42px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -2522,51 +2968,51 @@
 
 /* Pill Bar Shape */
 .weekly-bar-fill {
-  width: 22px;
+  width: 28px;
   border-radius: 999px;
   background: linear-gradient(180deg, #93C5FD 0%, #2E86DE 100%);
   transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 6px;
+  min-height: 8px;
   position: relative;
 }
 
 /* Empty day pill */
 .weekly-bar-fill.is-empty {
-  height: 6px !important;
-  width: 20px;
+  height: 8px !important;
+  width: 28px;
   background: #E2E8F0;
   border-radius: 999px;
 }
 
 /* Goal Met (Green with Trophy 🏆) */
 .weekly-bar-fill.is-goal-met {
-  width: 28px;
+  width: 36px;
   height: 100% !important;
   background: linear-gradient(180deg, #34D399 0%, #10B981 100%);
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.28);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 1px 6px;
+  padding: 6px 2px 8px;
   color: #FFFFFF;
 }
 
 .trophy-badge {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #FFFFFF;
   color: #10B981;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .bar-amount-lbl {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   color: #FFFFFF;
   line-height: 1;
@@ -2577,18 +3023,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1.1;
-  gap: 1px;
+  line-height: 1.15;
+  gap: 2px;
 }
 
 .weekly-day-num {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .weekly-day-name {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -2602,35 +3048,64 @@
 /* ----- 2. Monthly Calendar View ----- */
 .monthly-calendar-view {
   width: 100%;
+  max-width: 440px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 }
 
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 6px auto;
+  box-sizing: border-box;
+  justify-items: center;
+  align-items: center;
+}
+
+.calendar-weekdays span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #64748B;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  width: 100%;
+  height: 20px;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
+  gap: 4px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  justify-items: center;
+  align-items: center;
 }
 
 .calendar-cell {
-  aspect-ratio: 1;
-  max-height: 36px;
+  width: 28px;
+  height: 28px;
+  max-width: 28px;
+  max-height: 28px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
   position: relative;
@@ -2639,6 +3114,9 @@
   background: #F8FAFC;
   color: #334155;
   border: 1px solid #E2E8F0;
+  box-sizing: border-box;
+  justify-self: center;
+  margin: 0 auto;
 }
 
 .calendar-cell:hover:not(.out-month) {
@@ -2672,7 +3150,7 @@
 }
 
 .calendar-cell.is-selected {
-  box-shadow: 0 0 0 2px var(--color-primary), 0 2px 8px rgba(46, 134, 222, 0.2);
+  box-shadow: 0 0 0 2.5px var(--color-primary), 0 3px 10px rgba(46, 134, 222, 0.25);
 }
 
 .calendar-cell.is-today::after {
@@ -2688,6 +3166,11 @@
 /* ----- 3. Yearly Heatmap View ----- */
 .yearly-heatmap-view {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   overflow-x: auto;
   padding: 4px 0;
 }
@@ -2696,15 +3179,15 @@
   display: grid;
   grid-template-rows: repeat(7, 1fr);
   grid-auto-flow: column;
-  gap: 2.5px;
+  gap: 3.5px;
   width: max-content;
   margin: 0 auto;
 }
 
 .heatmap-dot {
-  width: 9.5px;
-  height: 9.5px;
-  border-radius: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
   background: #E2E8F0;
   cursor: pointer;
   transition: all 0.12s ease;
@@ -2721,34 +3204,40 @@
 .heatmap-dot.lvl-3 { background: #10B981; }
 
 .heatmap-dot.is-selected {
-  box-shadow: 0 0 0 1.5px #1E293B;
+  box-shadow: 0 0 0 2px #1E293B;
 }
 
 .heatmap-legend {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 3px;
-  font-size: 10px;
+  gap: 4px;
+  font-size: 11px;
   color: #64748B;
   margin-top: 8px;
 }
 
 .legend-cell {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 2px;
 }
 
 /* Empty state in visual container */
 .history-visual-empty {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  padding: 24px 16px;
+  padding: 0;
   color: #64748B;
 }
 
 .history-visual-empty i {
-  font-size: 32px;
+  font-size: 34px;
   color: #94A3B8;
   margin-bottom: 6px;
 }
@@ -2758,10 +3247,15 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 8px 10px;
+  padding: 10px 18px;
   background: #F8FAFC;
   border-radius: var(--radius-md);
   border: 1px solid #E2E8F0;
+  height: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .history-metric-col {
@@ -2774,7 +3268,7 @@
 }
 
 .history-metric-col .metric-val {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--color-primary);
   letter-spacing: -0.2px;
@@ -2782,7 +3276,7 @@
 }
 
 .history-metric-col .metric-lbl {
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #64748B;
   text-transform: capitalize;
@@ -2790,25 +3284,134 @@
 
 .history-metric-divider {
   width: 1px;
-  height: 24px;
+  height: 28px;
   background: #E2E8F0;
 }
 
-.history-visual-hint {
+/* Recent Entries on History (Ketinggian tetap 140px agar card tidak pernah melompat/bergeser) */
+.history-recent-entries {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  font-size: 11.5px;
-  color: var(--color-text-secondary);
-  padding: 4px 0 0;
-  text-align: center;
+  background: #F8FAFC;
+  border-radius: var(--radius-md);
+  border: 1px solid #E2E8F0;
+  padding: 10px 16px;
+  height: 140px;
+  min-height: 140px;
+  max-height: 140px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
-.history-visual-hint i {
-  font-size: 17px;
+.history-recent-header {
+  height: 26px;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #E2E8F0;
+  flex-shrink: 0;
+}
+
+.history-recent-header__info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.history-recent-header__info i {
+  color: var(--color-primary);
+  font-size: 15px;
+}
+
+.history-recent__divider {
   color: #94A3B8;
+  font-weight: 400;
+}
+
+.history-recent__date {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.history-drink-log__list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 6px;
+}
+
+.history-drink-log__list .drink-log__item {
+  padding: 8px 12px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.history-drink-log__list .drink-log__item:hover {
+  border-color: #BFDBFE;
+  background: var(--color-primary-bg);
+}
+
+.history-drink-log__empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+}
+
+.history-drink-log__empty i {
+  font-size: 16px;
+  color: var(--color-primary-light);
+}
+
+.history-drink-log__empty p {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+/* Responsif Laptop dengan Layar Lebih Pendek (<= 760px Height) */
+@media (max-height: 760px) and (min-width: 769px) {
+  .main-content--history {
+    padding: 10px 24px;
+  }
+  .history-top-header {
+    margin-bottom: 8px;
+  }
+  .history-visual-card {
+    height: 520px;
+    min-height: 520px;
+    max-height: 520px;
+    padding: 16px 24px;
+    gap: 10px;
+  }
+  .history-visual-container {
+    height: 185px;
+    min-height: 185px;
+    max-height: 185px;
+  }
+  .weekly-bar-track {
+    height: 110px;
+  }
+  .history-recent-entries {
+    height: 125px;
+    min-height: 125px;
+    max-height: 125px;
+  }
 }
 
 /* ---------- Entries Card (Right Column) ---------- */

@@ -351,7 +351,7 @@ const Storage = (() => {
     return distribution;
   }
 
-  // Get comprehensive analytics statistics
+  // Get comprehensive analytics statistics (Legacy)
   function getAnalyticsStats(days) {
     const daily = getDailyTotals(days);
     const settings = getSettings();
@@ -380,6 +380,213 @@ const Storage = (() => {
       completionRate,
       totalIntake,
       dailyGoal: settings.dailyGoal
+    };
+  }
+
+  // Get comprehensive Statistics Data (Medium Cards, Overview, Beverage Breakdown, Container Usage)
+  function getStatisticsData(period = 'all') {
+    let logs = getAllLogs();
+    const settings = getSettings();
+    const dailyGoal = settings.dailyGoal || 2000;
+
+    // Filter logs if period is specified
+    if (period && period !== 'all') {
+      const numDays = parseInt(period);
+      if (!isNaN(numDays) && numDays > 0) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - numDays + 1);
+        cutoff.setHours(0, 0, 0, 0);
+        logs = logs.filter(l => new Date(l.timestamp) >= cutoff);
+      }
+    }
+
+    // 1. Group logs by date
+    const dayMap = {};
+    logs.forEach(l => {
+      const d = l.date || (l.timestamp ? l.timestamp.split('T')[0] : '');
+      if (!d) return;
+      if (!dayMap[d]) dayMap[d] = [];
+      dayMap[d].push(l);
+    });
+
+    const uniqueDates = Object.keys(dayMap);
+    const daysTracked = uniqueDates.length;
+    const totalIntake = logs.reduce((sum, l) => sum + (parseInt(l.amount) || 0), 0);
+    const dailyAverage = daysTracked > 0 ? Math.round(totalIntake / daysTracked) : 0;
+
+    let goalsMet = 0;
+    uniqueDates.forEach(d => {
+      const daySum = dayMap[d].reduce((s, l) => s + (parseInt(l.amount) || 0), 0);
+      if (daySum >= dailyGoal) goalsMet++;
+    });
+
+    const successRate = daysTracked > 0 ? Math.round((goalsMet / daysTracked) * 100) : 0;
+
+    // 2. Current Streak calculation (across all recorded logs)
+    const allLogs = getAllLogs();
+    const allDayMap = {};
+    allLogs.forEach(l => {
+      const d = l.date || (l.timestamp ? l.timestamp.split('T')[0] : '');
+      if (d) allDayMap[d] = (allDayMap[d] || 0) + (parseInt(l.amount) || 0);
+    });
+
+    let currentStreak = 0;
+    const streakCursor = new Date();
+    streakCursor.setHours(0, 0, 0, 0);
+    const todayKey = formatDateKey(streakCursor);
+
+    if ((allDayMap[todayKey] || 0) >= dailyGoal) {
+      currentStreak++;
+      streakCursor.setDate(streakCursor.getDate() - 1);
+    } else {
+      streakCursor.setDate(streakCursor.getDate() - 1);
+    }
+
+    while (true) {
+      const k = formatDateKey(streakCursor);
+      if ((allDayMap[k] || 0) >= dailyGoal) {
+        currentStreak++;
+        streakCursor.setDate(streakCursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    // 3. Average Interval between drinks (in days with >= 2 logs)
+    let totalIntervalMin = 0;
+    let intervalCount = 0;
+    uniqueDates.forEach(d => {
+      const dayLogs = dayMap[d].slice().sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      for (let i = 1; i < dayLogs.length; i++) {
+        const diffMs = new Date(dayLogs[i].timestamp) - new Date(dayLogs[i - 1].timestamp);
+        const diffMin = Math.round(diffMs / 60000);
+        if (diffMin > 0 && diffMin <= 960) {
+          totalIntervalMin += diffMin;
+          intervalCount++;
+        }
+      }
+    });
+
+    let avgIntervalStr = '-';
+    if (intervalCount > 0) {
+      const avgMin = Math.round(totalIntervalMin / intervalCount);
+      const hours = Math.floor(avgMin / 60);
+      const mins = avgMin % 60;
+      if (hours > 0 && mins > 0) {
+        avgIntervalStr = `${hours}j ${mins}m`;
+      } else if (hours > 0) {
+        avgIntervalStr = `${hours} jam`;
+      } else {
+        avgIntervalStr = `${mins} mnt`;
+      }
+    }
+
+    // 4. Drink sizes
+    const avgDrinkSize = logs.length > 0 ? Math.round(totalIntake / logs.length) : 0;
+    const largestDrink = logs.length > 0 ? Math.max(...logs.map(l => parseInt(l.amount) || 0)) : 0;
+
+    // 5. First Drink & Last Drink (Average time of day)
+    let sumFirstMin = 0;
+    let sumLastMin = 0;
+    let validDaysWithTime = 0;
+
+    uniqueDates.forEach(d => {
+      const dayLogs = dayMap[d].slice().sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      if (dayLogs.length > 0) {
+        const fDate = new Date(dayLogs[0].timestamp);
+        const lDate = new Date(dayLogs[dayLogs.length - 1].timestamp);
+        sumFirstMin += fDate.getHours() * 60 + fDate.getMinutes();
+        sumLastMin += lDate.getHours() * 60 + lDate.getMinutes();
+        validDaysWithTime++;
+      }
+    });
+
+    function formatTimeMinutes(minTotal) {
+      const hh = String(Math.floor(minTotal / 60)).padStart(2, '0');
+      const mm = String(minTotal % 60).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+
+    const firstDrinkStr = validDaysWithTime > 0 ? formatTimeMinutes(Math.round(sumFirstMin / validDaysWithTime)) : '-';
+    const lastDrinkStr = validDaysWithTime > 0 ? formatTimeMinutes(Math.round(sumLastMin / validDaysWithTime)) : '-';
+
+    // 6. Beverage Breakdown
+    const bevColors = {
+      water: '#2E86DE',
+      tea: '#10B981',
+      coffee: '#8B5A2B',
+      juice: '#F59E0B',
+      milk: '#06B6D4',
+      energy: '#EF4444',
+      sports: '#3B82F6',
+      soda: '#EC4899',
+      coconut: '#14B8A6',
+      qrs: '#8B5CF6'
+    };
+
+    const bevAmountMap = {};
+    Object.keys(DRINK_TYPES).forEach(k => { bevAmountMap[k] = 0; });
+    logs.forEach(l => {
+      const t = l.type || 'water';
+      bevAmountMap[t] = (bevAmountMap[t] || 0) + (parseInt(l.amount) || 0);
+    });
+
+    const beverageBreakdown = [];
+    Object.keys(DRINK_TYPES).forEach(key => {
+      const amount = bevAmountMap[key] || 0;
+      const typeInfo = DRINK_TYPES[key];
+      const pct = totalIntake > 0 ? Math.round((amount / totalIntake) * 100) : 0;
+      beverageBreakdown.push({
+        type: key,
+        label: typeInfo.label || key,
+        icon: typeInfo.icon || 'ri-drop-fill',
+        amount: amount,
+        percentage: pct,
+        color: bevColors[key] || '#6366F1'
+      });
+    });
+
+    // Urutkan: yang sudah ada asupan didahulukan
+    beverageBreakdown.sort((a, b) => b.amount - a.amount);
+
+    // 7. Container Usage
+    const allContainers = getAllContainers();
+    const containerUsage = allContainers.map(c => {
+      const uses = logs.filter(l => l.containerId === c.id || l.amount === c.amount).length;
+      return {
+        id: c.id,
+        name: c.name,
+        amount: c.amount,
+        icon: c.icon,
+        uses: uses
+      };
+    });
+
+    const totalUses = containerUsage.reduce((s, c) => s + c.uses, 0);
+    containerUsage.forEach(c => {
+      c.percentage = totalUses > 0 ? Math.round((c.uses / totalUses) * 100) : 0;
+    });
+
+    containerUsage.sort((a, b) => b.uses - a.uses);
+
+    return {
+      period,
+      totalIntake,
+      dailyAverage,
+      successRate,
+      daysTracked,
+      goalsMet,
+      dailyGoal,
+      currentStreak,
+      avgIntervalStr,
+      avgDrinkSize,
+      largestDrink,
+      firstDrinkStr,
+      lastDrinkStr,
+      beverageBreakdown,
+      containerUsage,
+      totalUses,
+      hasData: logs.length > 0
     };
   }
 
@@ -417,9 +624,15 @@ const Storage = (() => {
     saveSettings({ userName: 'Matthew', dailyGoal: 2500 });
   }
 
-  // Auto initialize sample data on first run if localStorage is empty
+  // Initialize with empty logs on first run (clean state for real user input)
   if (localStorage.getItem(KEYS.logs) === null) {
-    loadSampleData();
+    _save(KEYS.logs, []);
+  }
+
+  // Clear previous sample logs if requested so user starts completely clean with 0 ml
+  if (localStorage.getItem('hydrotrack_logs_cleared_fresh') !== 'true') {
+    _save(KEYS.logs, []);
+    localStorage.setItem('hydrotrack_logs_cleared_fresh', 'true');
   }
 
   /* ==================== CONTAINERS (DEFAULT & CUSTOM) ==================== */
@@ -523,7 +736,7 @@ const Storage = (() => {
       totalIntake += dayTotal;
 
       const dayName = d.toLocaleDateString('id-ID', { weekday: 'short' });
-      const dayNum = String(d.getDate());
+      const dayNum = String(d.getDate()).padStart(2, '0');
 
       if (dayTotal > bestDay.total) {
         bestDay = { date: dateKey, dayName, dayNum, total: dayTotal };
@@ -746,6 +959,7 @@ const Storage = (() => {
     getDailyTotals,
     getDrinkDistribution,
     getAnalyticsStats,
+    getStatisticsData,
     loadSampleData,
     getContainerIconByAmount,
     getCustomBeverages,

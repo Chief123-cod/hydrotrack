@@ -193,6 +193,67 @@ const ChartModule = (() => {
     });
   }
 
+  /* --- Render Modern Beverage Breakdown Donut Chart --- */
+  function renderBeverageBreakdown(canvasId, breakdownList, totalIntake) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    if (doughnutChartInstance) {
+      doughnutChartInstance.destroy();
+      doughnutChartInstance = null;
+    }
+
+    const hasData = totalIntake > 0 && Array.isArray(breakdownList);
+    const activeItems = hasData ? breakdownList.filter(b => b.amount > 0) : [];
+    const isReallyActive = activeItems.length > 0;
+
+    const finalLabels = isReallyActive ? activeItems.map(b => b.label) : ['Belum Ada Data'];
+    const finalValues = isReallyActive ? activeItems.map(b => b.amount) : [1];
+    const finalColors = isReallyActive ? activeItems.map(b => b.color) : ['#E2E8F0'];
+
+    const ctx = canvas.getContext('2d');
+    doughnutChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: finalLabels,
+        datasets: [
+          {
+            data: finalValues,
+            backgroundColor: finalColors,
+            borderWidth: 2,
+            borderColor: '#FFFFFF',
+            hoverOffset: isReallyActive ? 5 : 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: isReallyActive,
+            backgroundColor: '#1E293B',
+            padding: 10,
+            titleFont: { size: 12.5, family: 'Inter', weight: '600' },
+            bodyFont: { size: 12.5, family: 'Inter' },
+            cornerRadius: 8,
+            callbacks: {
+              label: function (context) {
+                const val = context.raw || 0;
+                const pct = totalIntake > 0 ? Math.round((val / totalIntake) * 100) : 0;
+                return ` ${context.label}: ${val.toLocaleString('id-ID')} ml (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
   /* --- Initialize all charts on the page --- */
   function initAnalyticsCharts(days = 7) {
     renderBarChart('dailyTrendChart', days);
@@ -216,6 +277,7 @@ const ChartModule = (() => {
     initAnalyticsCharts,
     renderBarChart,
     renderDoughnutChart,
+    renderBeverageBreakdown,
     destroyCharts
   };
 })();

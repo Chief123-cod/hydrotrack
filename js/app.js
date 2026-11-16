@@ -4,6 +4,15 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* ==================== HISTORY STATE ==================== */
+  const historyState = {
+    period: 'weekly',
+    weekOffset: 0,
+    monthOffset: 0,
+    yearOffset: 0,
+    selectedDate: Storage.formatDateKey(new Date())
+  };
+
   /* ==================== INITIALIZATION ==================== */
 
   // Display date & user info
@@ -23,9 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
     const searchParam = urlParams.get('search');
+    const searchInput = document.getElementById('historySearch');
 
-    if (searchParam && historySearch) {
-      historySearch.value = searchParam;
+    if (searchParam && searchInput) {
+      searchInput.value = searchParam;
       refreshHistory();
     }
 
@@ -36,6 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
           UI.openHistoryForm(logToEdit);
         }, 150);
       }
+    }
+  }
+
+  // Render statistics if on statistics page (analisis.html)
+  if (document.getElementById('statsTotalIntake') || document.getElementById('view-analytics')) {
+    const periodSelect = document.getElementById('analyticsPeriod');
+    const initialPeriod = periodSelect ? periodSelect.value : 'all';
+    UI.renderStatisticsPage(initialPeriod);
+
+    if (periodSelect) {
+      periodSelect.addEventListener('change', (e) => {
+        UI.renderStatisticsPage(e.target.value);
+      });
     }
   }
 
@@ -75,15 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ==================== HISTORY LOGIC & FILTERS ==================== */
-
-  // State navigasi riwayat
-  const historyState = {
-    period: 'weekly',
-    weekOffset: 0,
-    monthOffset: 0,
-    yearOffset: 0,
-    selectedDate: Storage.formatDateKey(new Date())
-  };
 
   function refreshHistory() {
     // 1. Jika berada pada dashboard visual modern di riwayat.html
@@ -993,10 +1007,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Event delegation on drinkLogList
-  const drinkLogList = document.getElementById('drinkLogList');
-  if (drinkLogList) {
-    drinkLogList.addEventListener('click', (e) => {
+  // Event delegation on drinkLogList & historyDrinkLogList
+  const drinkLogContainers = [
+    document.getElementById('drinkLogList'),
+    document.getElementById('historyDrinkLogList')
+  ].filter(Boolean);
+
+  drinkLogContainers.forEach(container => {
+    container.addEventListener('click', (e) => {
       const deleteBtn = e.target.closest('.btn-delete');
       const editBtn = e.target.closest('.btn-edit');
 
@@ -1029,7 +1047,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!log) return;
 
         if (editLogModalOverlay) {
-          // Open popup directly on Home without navigating away!
           openEditLogModal(log);
         } else if (document.getElementById('historyFormCard')) {
           UI.switchView('history');
@@ -1040,7 +1057,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
-  }
+  });
 
   /* ==================== MODAL EVENTS ==================== */
 

@@ -21,8 +21,13 @@
     width: 180px;
   }
 
-  .analytics-grid {
+  .analytics-grid,
+  .stats-main-grid {
     grid-template-columns: 1fr;
+  }
+
+  .stats-cards-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .quick-goal-row {
@@ -223,23 +228,30 @@
 
   /* History modern dashboard mobile */
   .main-content--history {
+    height: 100dvh;
+    max-height: 100dvh;
     padding-top: calc(56px + 4px);
-    padding-bottom: 68px;
-    padding-left: 8px;
-    padding-right: 8px;
-    min-height: 100vh;
+    padding-bottom: calc(60px + 6px);
+    padding-left: 10px;
+    padding-right: 10px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    overflow-y: hidden;
+    align-items: center;
+    overflow: hidden !important;
+    box-sizing: border-box;
   }
 
   .history-top-header {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    width: 100%;
+    max-width: 100%;
+    flex-shrink: 0;
   }
 
   .history-top-header .top-header__greeting {
-    font-size: 17px;
+    font-size: 18px;
+    font-weight: 800;
   }
 
   .history-top-header .top-header__subtitle {
@@ -247,129 +259,226 @@
   }
 
   .history-dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 0;
+    width: 100%;
+    max-width: 100%;
     margin-bottom: 0;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
   }
 
   .history-visual-card {
-    padding: 8px 10px;
-    gap: 6px;
+    padding: 12px 14px;
+    gap: 8px;
+    width: 100%;
     max-width: 100%;
-    border-radius: var(--radius-md);
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    border-radius: var(--radius-lg);
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .history-tabs-nav {
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    flex-shrink: 0;
   }
 
   .history-tabs {
     max-width: 100%;
     padding: 2px;
     gap: 2px;
+    height: 100%;
   }
 
   .history-tab {
     padding: 5px 8px;
-    font-size: 11.5px;
+    font-size: 12px;
   }
 
   .history-navigator {
     padding: 0 2px;
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    flex-shrink: 0;
   }
 
   .history-nav-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    font-size: 17px;
   }
 
   .history-period-title {
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .history-visual-container {
+    height: 155px;
+    min-height: 155px;
+    max-height: 155px;
+    flex-shrink: 0;
   }
 
   .weekly-chart-bars {
-    height: 125px;
-    gap: 3px;
-    padding: 4px 2px 2px;
+    height: 100%;
+    gap: 4px;
+    padding: 4px 3px 2px;
+  }
+
+  .weekly-chart-bars::before {
+    top: 10px;
   }
 
   .weekly-bar-track {
-    height: 80px;
-    width: 26px;
+    height: 100px;
+    width: 32px;
   }
 
   .weekly-bar-fill {
-    width: 18px;
+    width: 22px;
   }
 
   .weekly-bar-fill.is-empty {
-    height: 5px !important;
-    width: 16px;
+    height: 6px !important;
+    width: 22px;
   }
 
   .weekly-bar-fill.is-goal-met {
-    width: 22px;
-    padding: 3px 1px 4px;
+    width: 28px;
+    padding: 4px 1px 6px;
   }
 
   .trophy-badge {
-    width: 16px;
-    height: 16px;
-    font-size: 9px;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
   }
 
   .bar-amount-lbl {
-    font-size: 8px;
+    font-size: 9.5px;
   }
 
   .weekly-day-meta {
-    gap: 0px;
+    gap: 1px;
   }
 
   .weekly-day-num {
-    font-size: 11.5px;
+    font-size: 13px;
+    font-weight: 700;
   }
 
   .weekly-day-name {
-    font-size: 9px;
+    font-size: 10.5px;
   }
 
   .calendar-cell {
-    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    max-width: 26px;
+    max-height: 26px;
+    border-radius: 7px;
     font-size: 11px;
-    max-height: 28px;
+    justify-self: center;
+    margin: 0 auto;
   }
 
   .calendar-grid {
     gap: 3px;
+    justify-items: center;
+    align-items: center;
   }
 
   .calendar-weekdays {
-    font-size: 9px;
+    gap: 3px;
+    font-size: 10.5px;
     margin-bottom: 2px;
+    justify-items: center;
+    align-items: center;
   }
 
   .history-metrics-row {
-    padding: 5px 4px;
+    height: 52px;
+    min-height: 52px;
+    max-height: 52px;
+    padding: 6px 8px;
+    flex-shrink: 0;
   }
 
   .history-metric-col .metric-val {
-    font-size: 14.5px;
+    font-size: 17px;
   }
 
   .history-metric-col .metric-lbl {
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .history-metric-divider {
+    height: 22px;
+  }
+
+  .history-recent-entries {
+    height: 120px;
+    min-height: 120px;
+    max-height: 120px;
+    padding: 8px 10px;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .history-recent-header {
+    height: 22px;
+    min-height: 22px;
+  }
+
+  .history-recent-header__info {
+    font-size: 11.5px;
+  }
+
+  .history-recent__date {
+    font-size: 11px;
+  }
+
+  .history-drink-log__list {
+    max-height: 80px;
+    gap: 4px;
+  }
+
+  .history-drink-log__list .drink-log__item {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .history-drink-log__list .drink-log__item-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .history-drink-log__list .drink-log__item-icon .custom-icon {
+    width: 18px;
     height: 18px;
   }
 
-  .history-visual-hint {
-    gap: 2px;
-    font-size: 10.5px;
-    padding: 2px 0 0;
+  .history-drink-log__list .drink-log__item-type {
+    font-size: 12.5px;
   }
 
-  .history-visual-hint i {
-    font-size: 15px;
+  .history-drink-log__list .drink-log__item-time {
+    font-size: 10.5px;
+  }
+
+  .history-drink-log__list .drink-log__item-amount {
+    font-size: 13px;
   }
 
   .entries-filter-row {

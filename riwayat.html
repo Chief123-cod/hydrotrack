@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 
-<body>
+<body class="page-history">
 
     <!-- ========== SIDEBAR NAVIGATION ========== -->
     <aside class="sidebar" id="sidebar">
@@ -195,10 +195,23 @@
                         </div>
                     </div>
 
-                    <!-- Interactive Hint -->
-                    <div class="history-visual-hint">
-                        <i class="ri-list-check"></i>
-                        <span>Pilih hari pada grafik di atas untuk melihat rincian minumnya</span>
+                    <!-- Recent Entries on History (Muncul rincian minum saat hari dipilih) -->
+                    <div class="history-recent-entries" id="historyRecentEntries">
+                        <div class="history-recent-header">
+                            <div class="history-recent-header__info">
+                                <i class="ri-list-check"></i>
+                                <span class="history-recent__title">Recent Entries</span>
+                                <span class="history-recent__divider">•</span>
+                                <span class="history-recent__date" id="historyEntriesDate">Hari Ini</span>
+                            </div>
+                            <span class="drink-log__count" id="historyEntriesCount">0 catatan</span>
+                        </div>
+                        <div class="drink-log__list history-drink-log__list" id="historyDrinkLogList">
+                            <div class="history-drink-log__empty" id="historyDrinkLogEmpty">
+                                <i class="ri-drop-line"></i>
+                                <p id="historyDrinkLogEmptyText">Belum ada catatan air minum untuk tanggal ini.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
