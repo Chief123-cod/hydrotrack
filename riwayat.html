@@ -99,179 +99,109 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ========== MAIN CONTENT ========== -->
-    <main class="main-content">
+    <main class="main-content main-content--history">
 
         <!-- Top Header Bar -->
-        <header class="top-header">
+        <header class="top-header history-top-header">
             <div class="top-header__left">
                 <h1 class="top-header__greeting">Riwayat Konsumsi</h1>
-                <p class="top-header__subtitle">Kelola dan pantau seluruh catatan air minum harianmu.</p>
-            </div>
-            <div class="top-header__right">
-                <button class="btn btn--primary" id="btnOpenAddForm">
-                    <i class="ri-add-line"></i>
-                    <span>Tambah Log</span>
-                </button>
-                <div class="top-header__date" id="headerDate"></div>
+                <p class="top-header__subtitle">Pantau konsumsi cairanmu dalam rentang mingguan, bulanan, dan tahunan.</p>
             </div>
         </header>
 
         <!-- ===== VIEW: HISTORY ===== -->
         <section class="view view--active" id="view-history">
 
-            <!-- Add / Edit Log Form -->
-            <div class="card history-form-card hidden" id="historyFormCard">
-                <div class="history-form__header">
-                    <h3 class="card__title" id="historyFormTitle">Tambah Catatan Baru</h3>
-                    <button class="history-form__close" id="btnCloseForm" aria-label="Tutup form">
-                        <i class="ri-close-line"></i>
-                    </button>
-                </div>
-                <form class="history-form" id="historyForm" novalidate>
-                    <input type="hidden" id="formLogId" value="">
+            <!-- Modern History Dashboard Card (Centered Desktop & Mobile) -->
+            <div class="history-dashboard-grid">
 
-                    <div class="history-form__grid">
-                        <!-- Amount -->
-                        <div class="form-group">
-                            <label class="form-label" for="formAmount">Jumlah (ml) <span
-                                    class="form-required">*</span></label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-drop-fill"></i>
-                                <input type="number" id="formAmount" class="form-input" placeholder="Contoh: 250"
-                                    min="50" max="3000" required>
-                            </div>
-                            <span class="form-error" id="errorAmount"></span>
-                        </div>
-
-                        <!-- Drink Type -->
-                        <div class="form-group">
-                            <label class="form-label" for="formType">Jenis Minuman <span
-                                    class="form-required">*</span></label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-goblet-fill"></i>
-                                <select id="formType" class="form-input form-select" required>
-                                    <option value="water">Air Mineral</option>
-                                    <option value="tea">Teh Hijau</option>
-                                    <option value="coffee">Kopi</option>
-                                    <option value="juice">Jus Buah</option>
-                                    <option value="milk">Susu</option>
-                                    <option value="coconut">Air Kelapa</option>
-                                </select>
-                            </div>
-                            <span class="form-error" id="errorType"></span>
-                        </div>
-
-                        <!-- Timestamp -->
-                        <div class="form-group">
-                            <label class="form-label" for="formTime">Waktu Konsumsi <span
-                                    class="form-required">*</span></label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-time-line"></i>
-                                <input type="datetime-local" id="formTime" class="form-input" required>
-                            </div>
-                            <span class="form-error" id="errorTime"></span>
-                        </div>
-
-                        <!-- Note -->
-                        <div class="form-group">
-                            <label class="form-label" for="formNote">Catatan <span
-                                    class="text-muted small">(opsional)</span></label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-sticky-note-line"></i>
-                                <input type="text" id="formNote" class="form-input"
-                                    placeholder="Contoh: Setelah olahraga" maxlength="100">
-                            </div>
+                <!-- ========== KARTU UTAMA: VISUALISASI & METRIK ========== -->
+                <div class="card history-visual-card">
+                    <!-- Segmented Tabs (Weekly, Monthly, Yearly) -->
+                    <div class="history-tabs-nav">
+                        <div class="history-tabs" id="historyTabs">
+                            <button type="button" class="history-tab active" data-period="weekly"
+                                id="tabWeekly">Weekly</button>
+                            <button type="button" class="history-tab" data-period="monthly"
+                                id="tabMonthly">Monthly</button>
+                            <button type="button" class="history-tab" data-period="yearly"
+                                id="tabYearly">Yearly</button>
                         </div>
                     </div>
 
-                    <div class="history-form__actions">
-                        <button type="button" class="btn btn--secondary" id="btnCancelForm">Batal</button>
-                        <button type="submit" class="btn btn--primary" id="btnSubmitForm">
-                            <i class="ri-save-line"></i>
-                            <span>Simpan</span>
+                    <!-- Date Navigator (< This Week >) -->
+                    <div class="history-navigator">
+                        <button type="button" class="history-nav-btn" id="historyNavPrev"
+                            aria-label="Periode sebelumnya">
+                            <i class="ri-arrow-left-s-line"></i>
+                        </button>
+                        <h3 class="history-period-title" id="historyPeriodTitle">This Week</h3>
+                        <button type="button" class="history-nav-btn" id="historyNavNext"
+                            aria-label="Periode berikutnya">
+                            <i class="ri-arrow-right-s-line"></i>
                         </button>
                     </div>
-                </form>
-            </div>
 
-            <!-- Search & Filter Bar -->
-            <div class="card history-filter-card">
-                <div class="history-filter">
-                    <!-- Search -->
-                    <div class="history-filter__search">
-                        <i class="ri-search-line"></i>
-                        <input type="text" id="historySearch" class="form-input"
-                            placeholder="Cari catatan atau jenis minuman...">
-                    </div>
-
-                    <!-- Filters -->
-                    <div class="history-filter__selects">
-                        <div class="filter-group">
-                            <label class="filter-label">Rentang Waktu</label>
-                            <select id="filterDateRange" class="form-input form-select form-select--sm">
-                                <option value="today">Hari Ini</option>
-                                <option value="7days" selected>7 Hari Terakhir</option>
-                                <option value="30days">30 Hari Terakhir</option>
-                                <option value="all">Semua</option>
-                            </select>
+                    <!-- Visual Area -->
+                    <div class="history-visual-container" id="historyVisualContainer">
+                        <!-- 1. Weekly View (Bar Diagram 7 Hari dengan Trophy) -->
+                        <div class="weekly-chart-view" id="weeklyChartView">
+                            <div class="weekly-chart-bars" id="weeklyChartBars"></div>
                         </div>
-                        <div class="filter-group">
-                            <label class="filter-label">Jenis Minuman</label>
-                            <select id="filterDrinkType" class="form-input form-select form-select--sm">
-                                <option value="all">Semua Jenis</option>
-                                <option value="water">Air Mineral</option>
-                                <option value="tea">Teh Hijau</option>
-                                <option value="coffee">Kopi</option>
-                                <option value="juice">Jus Buah</option>
-                                <option value="milk">Susu</option>
-                                <option value="coconut">Air Kelapa</option>
-                            </select>
+
+                        <!-- 2. Monthly View (Kalender Bulanan Penuh) -->
+                        <div class="monthly-calendar-view hidden" id="monthlyCalendarView">
+                            <div class="calendar-weekdays">
+                                <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
+                            </div>
+                            <div class="calendar-grid" id="monthlyCalendarGrid"></div>
+                        </div>
+
+                        <!-- 3. Yearly View (Heatmap 365 Hari) -->
+                        <div class="yearly-heatmap-view hidden" id="yearlyHeatmapView">
+                            <div class="yearly-heatmap-grid" id="yearlyHeatmapGrid"></div>
+                            <div class="heatmap-legend">
+                                <span>Kurang</span>
+                                <span class="legend-cell lvl-0"></span>
+                                <span class="legend-cell lvl-1"></span>
+                                <span class="legend-cell lvl-2"></span>
+                                <span class="legend-cell lvl-3"></span>
+                                <span>Target</span>
+                            </div>
+                        </div>
+
+                        <!-- Empty State Visual -->
+                        <div class="history-visual-empty hidden" id="historyVisualEmpty">
+                            <i class="ri-inbox-line"></i>
+                            <p id="historyVisualEmptyText">Belum ada catatan air minum pada periode ini</p>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Summary Stats -->
-            <div class="history-summary" id="historySummary">
-                <div class="history-summary__item">
-                    <span class="history-summary__label">Total Log</span>
-                    <span class="history-summary__value" id="summaryTotalLogs">0</span>
-                </div>
-                <div class="history-summary__item">
-                    <span class="history-summary__label">Total Volume</span>
-                    <span class="history-summary__value" id="summaryTotalVolume">0 ml</span>
-                </div>
-                <div class="history-summary__item">
-                    <span class="history-summary__label">Rata-rata / Hari</span>
-                    <span class="history-summary__value" id="summaryAvgDaily">0 ml</span>
-                </div>
-            </div>
+                    <!-- 3 Kartu Ringkasan Metrik (Total, Average, Best Day / Tracked, Goals, Rate) -->
+                    <div class="history-metrics-row" id="historyMetricsRow">
+                        <div class="history-metric-col">
+                            <span class="metric-val" id="histMetricVal1">0 ml</span>
+                            <span class="metric-lbl" id="histMetricLbl1">Total</span>
+                        </div>
+                        <div class="history-metric-divider"></div>
+                        <div class="history-metric-col">
+                            <span class="metric-val" id="histMetricVal2">0 ml</span>
+                            <span class="metric-lbl" id="histMetricLbl2">Average</span>
+                        </div>
+                        <div class="history-metric-divider"></div>
+                        <div class="history-metric-col">
+                            <span class="metric-val" id="histMetricVal3">0 ml</span>
+                            <span class="metric-lbl" id="histMetricLbl3">Best Day</span>
+                        </div>
+                    </div>
 
-            <!-- History Log Table -->
-            <div class="card history-table-card">
-                <div class="history-table-wrapper">
-                    <table class="history-table" id="historyTable">
-                        <thead>
-                            <tr>
-                                <th>Waktu</th>
-                                <th>Jenis</th>
-                                <th>Volume</th>
-                                <th>Catatan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody">
-                            <!-- Rows rendered by JS -->
-                        </tbody>
-                    </table>
+                    <!-- Interactive Hint -->
+                    <div class="history-visual-hint">
+                        <i class="ri-list-check"></i>
+                        <span>Pilih hari pada grafik di atas untuk melihat rincian minumnya</span>
+                    </div>
                 </div>
 
-                <!-- Empty State -->
-                <div class="history-empty hidden" id="historyEmpty">
-                    <i class="ri-inbox-line"></i>
-                    <h3>Tidak ada data ditemukan</h3>
-                    <p>Belum ada catatan yang sesuai dengan filter. Coba ubah filter atau tambah log baru.</p>
-                </div>
             </div>
 
         </section>

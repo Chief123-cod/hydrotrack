@@ -482,9 +482,250 @@ const Storage = (() => {
     return true;
   }
 
+  /* ==================== HISTORY ADVANCED QUERIES ==================== */
+
+  function formatDateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  // 1. Weekly History Data
+  function getWeeklyHistory(weekOffset = 0) {
+    const now = new Date();
+    const currentDayOfWeek = now.getDay(); // 0 = Sun, 1 = Mon ... 6 = Sat
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - currentDayOfWeek + (weekOffset * 7));
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const settings = getSettings();
+    const dailyGoal = settings.dailyGoal || 2000;
+    const allLogs = getAllLogs();
+
+    const days = [];
+    let totalIntake = 0;
+    let bestDay = { date: '', dayName: '', dayNum: '', total: 0 };
+    let hasData = false;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const dateKey = formatDateKey(d);
+
+      const dayLogs = allLogs.filter(log => log.date === dateKey);
+      const dayTotal = dayLogs.reduce((sum, log) => sum + (log.amount || 0), 0);
+      if (dayTotal > 0) hasData = true;
+
+      totalIntake += dayTotal;
+
+      const dayName = d.toLocaleDateString('id-ID', { weekday: 'short' });
+      const dayNum = String(d.getDate());
+
+      if (dayTotal > bestDay.total) {
+        bestDay = { date: dateKey, dayName, dayNum, total: dayTotal };
+      }
+
+      days.push({
+        date: dateKey,
+        dayNum: dayNum,
+        dayName: dayName,
+        total: dayTotal,
+        goalMet: dayTotal >= dailyGoal && dailyGoal > 0,
+        percentage: dailyGoal > 0 ? Math.round((dayTotal / dailyGoal) * 100) : 0,
+        isToday: dateKey === _todayStr()
+      });
+    }
+
+    let periodLabel = '';
+    if (weekOffset === 0) {
+      periodLabel = 'This Week';
+    } else if (weekOffset === -1) {
+      periodLabel = 'Last Week';
+    } else {
+      const startStr = startOfWeek.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      const endStr = endOfWeek.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      periodLabel = `${startStr} - ${endStr}`;
+    }
+
+    const average = Math.round(totalIntake / 7);
+
+    return {
+      periodLabel,
+      weekOffset,
+      startDate: formatDateKey(startOfWeek),
+      endDate: formatDateKey(endOfWeek),
+      days,
+      totalIntake,
+      average,
+      bestDay: bestDay.total > 0 ? bestDay : null,
+      dailyGoal,
+      hasData
+    };
+  }
+
+  // 2. Monthly History Data
+  function getMonthlyHistory(monthOffset = 0) {
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+    const year = targetDate.getFullYear();
+    const month = targetDate.getMonth(); // 0 - 11
+
+    const firstDayIndex = new Date(year, month, 1).getDay(); // 0 = Sun
+    const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+    const totalDaysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const settings = getSettings();
+    const dailyGoal = settings.dailyGoal || 2000;
+    const allLogs = getAllLogs();
+
+    let daysTracked = 0;
+    let goalsMet = 0;
+    let totalIntake = 0;
+    let hasData = false;
+
+    const days = [];
+
+    for (let dayNum = 1; dayNum <= totalDaysInMonth; dayNum++) {
+      const d = new Date(year, month, dayNum);
+      const dateKey = formatDateKey(d);
+
+      const dayLogs = allLogs.filter(log => log.date === dateKey);
+      const dayTotal = dayLogs.reduce((sum, log) => sum + (log.amount || 0), 0);
+
+      if (dayTotal > 0) {
+        daysTracked++;
+        hasData = true;
+      }
+      if (dayTotal >= dailyGoal && dailyGoal > 0) {
+        goalsMet++;
+      }
+      totalIntake += dayTotal;
+
+      days.push({
+        date: dateKey,
+        dayNum: dayNum,
+        dayOfWeek: d.getDay(),
+        total: dayTotal,
+        goalMet: dayTotal >= dailyGoal && dailyGoal > 0,
+        isToday: dateKey === _todayStr()
+      });
+    }
+
+    let periodLabel = '';
+    if (monthOffset === 0) {
+      periodLabel = 'This Month';
+    } else if (monthOffset === -1) {
+      periodLabel = 'Last Month';
+    } else {
+      periodLabel = targetDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    }
+
+    const successRate = daysTracked > 0 ? Math.round((goalsMet / daysTracked) * 100) : 0;
+
+    return {
+      periodLabel,
+      monthOffset,
+      year,
+      month,
+      firstDayIndex,
+      totalDaysInMonth,
+      totalDaysInPrevMonth,
+      days,
+      daysTracked,
+      goalsMet,
+      successRate,
+      totalIntake,
+      dailyGoal,
+      hasData
+    };
+  }
+
+  // 3. Yearly History Data
+  function getYearlyHistory(yearOffset = 0) {
+    const now = new Date();
+    const year = now.getFullYear() + yearOffset;
+
+    const settings = getSettings();
+    const dailyGoal = settings.dailyGoal || 2000;
+    const allLogs = getAllLogs();
+
+    const days = [];
+    let daysTracked = 0;
+    let goalsMet = 0;
+    let totalIntake = 0;
+    let hasData = false;
+
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    const totalDays = isLeap ? 366 : 365;
+
+    const cur = new Date(year, 0, 1);
+    for (let i = 0; i < totalDays; i++) {
+      const dateKey = formatDateKey(cur);
+      const dayLogs = allLogs.filter(log => log.date === dateKey);
+      const dayTotal = dayLogs.reduce((sum, log) => sum + (log.amount || 0), 0);
+
+      if (dayTotal > 0) {
+        daysTracked++;
+        hasData = true;
+      }
+      if (dayTotal >= dailyGoal && dailyGoal > 0) {
+        goalsMet++;
+      }
+      totalIntake += dayTotal;
+
+      let level = 0;
+      if (dayTotal > 0) {
+        if (dayTotal >= dailyGoal) level = 3;
+        else if (dayTotal >= dailyGoal / 2) level = 2;
+        else level = 1;
+      }
+
+      days.push({
+        date: dateKey,
+        month: cur.getMonth(),
+        dayNum: cur.getDate(),
+        total: dayTotal,
+        goalMet: dayTotal >= dailyGoal && dailyGoal > 0,
+        level: level,
+        isToday: dateKey === _todayStr()
+      });
+
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    let periodLabel = '';
+    if (yearOffset === 0) {
+      periodLabel = 'This Year';
+    } else if (yearOffset === -1) {
+      periodLabel = 'Last Year';
+    } else {
+      periodLabel = `${year}`;
+    }
+
+    return {
+      periodLabel,
+      yearOffset,
+      year,
+      days,
+      daysTracked,
+      goalsMet,
+      totalIntake,
+      dailyGoal,
+      hasData
+    };
+  }
+
   /* ==================== PUBLIC API ==================== */
   return {
     DRINK_TYPES,
+    formatDateKey,
+    getWeeklyHistory,
+    getMonthlyHistory,
+    getYearlyHistory,
     addLog,
     getAllLogs,
     getTodayLogs,

@@ -380,6 +380,320 @@ const UI = (() => {
 
   /* ==================== HISTORY RENDERING ==================== */
 
+  // Format volume display: e.g. 1.200 ml or 12,2 L
+  function formatVolumeDisplay(ml) {
+    const val = parseInt(ml) || 0;
+    if (val >= 1000) {
+      const liters = (val / 1000).toFixed(1).replace('.', ',');
+      return `${liters} L`;
+    }
+    return `${val.toLocaleString('id-ID')} ml`;
+  }
+
+  // 1. Render Weekly Chart View (Bar diagram 7 hari dengan Trophy piala)
+  function renderWeeklyView(weekData, selectedDate, onSelectDate) {
+    const barsContainer = document.getElementById('weeklyChartBars');
+    const emptyView = document.getElementById('historyVisualEmpty');
+    const emptyText = document.getElementById('historyVisualEmptyText');
+    if (!barsContainer) return;
+
+    if (!weekData.hasData && weekData.totalIntake === 0 && weekData.weekOffset < -4) {
+      barsContainer.innerHTML = '';
+      if (emptyView) {
+        emptyView.classList.remove('hidden');
+        if (emptyText) emptyText.textContent = `Belum ada data untuk periode ${weekData.periodLabel}`;
+      }
+      return;
+    }
+
+    if (emptyView) emptyView.classList.add('hidden');
+    barsContainer.innerHTML = '';
+
+    const maxVal = Math.max(...weekData.days.map(d => d.total), weekData.dailyGoal, 2000);
+
+    weekData.days.forEach(day => {
+      const col = document.createElement('div');
+      col.className = 'weekly-bar-col';
+      if (day.date === selectedDate) col.classList.add('is-selected');
+      if (day.isToday) col.classList.add('is-today');
+
+      const pct = maxVal > 0 ? Math.min(Math.round((day.total / maxVal) * 100), 100) : 0;
+      const heightStyle = day.goalMet ? '100%' : (day.total > 0 ? `${Math.max(pct, 14)}%` : '6px');
+
+      let fillHtml = '';
+      if (day.total === 0) {
+        fillHtml = `<div class="weekly-bar-fill is-empty" title="${day.dayName}: 0 ml"></div>`;
+      } else if (day.goalMet) {
+        fillHtml = `
+          <div class="weekly-bar-fill is-goal-met" title="${day.dayName}: ${formatVolumeDisplay(day.total)} (Target Tercapai!)">
+            <div class="trophy-badge">
+              <i class="ri-trophy-fill"></i>
+            </div>
+            <span class="bar-amount-lbl">${formatVolumeDisplay(day.total)}</span>
+          </div>
+        `;
+      } else {
+        fillHtml = `
+          <div class="weekly-bar-fill" style="height: ${heightStyle};" title="${day.dayName}: ${formatVolumeDisplay(day.total)}"></div>
+        `;
+      }
+
+      col.innerHTML = `
+        <div class="weekly-bar-track">
+          ${fillHtml}
+        </div>
+        <div class="weekly-day-meta">
+          <span class="weekly-day-num">${day.dayNum}</span>
+          <span class="weekly-day-name">${day.dayName}</span>
+        </div>
+      `;
+
+      col.addEventListener('click', () => {
+        if (typeof onSelectDate === 'function') onSelectDate(day.date);
+      });
+
+      barsContainer.appendChild(col);
+    });
+  }
+
+  // 2. Render Monthly Calendar View (Kalender Bulanan Interaktif)
+  function renderMonthlyView(monthData, selectedDate, onSelectDate) {
+    const gridEl = document.getElementById('monthlyCalendarGrid');
+    const emptyView = document.getElementById('historyVisualEmpty');
+    const emptyText = document.getElementById('historyVisualEmptyText');
+    if (!gridEl) return;
+
+    if (!monthData.hasData && monthData.monthOffset < -3) {
+      gridEl.innerHTML = '';
+      if (emptyView) {
+        emptyView.classList.remove('hidden');
+        if (emptyText) emptyText.textContent = `Belum ada data untuk bulan ${monthData.periodLabel}`;
+      }
+      return;
+    }
+
+    if (emptyView) emptyView.classList.add('hidden');
+    gridEl.innerHTML = '';
+
+    // Sel hari bulan sebelumnya
+    for (let i = 0; i < monthData.firstDayIndex; i++) {
+      const prevDayNum = monthData.totalDaysInPrevMonth - monthData.firstDayIndex + 1 + i;
+      const cell = document.createElement('div');
+      cell.className = 'calendar-cell out-month';
+      cell.textContent = prevDayNum;
+      gridEl.appendChild(cell);
+    }
+
+    // Sel hari bulan berjalan
+    monthData.days.forEach(day => {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-cell';
+      if (day.total > 0) cell.classList.add('has-data');
+      if (day.goalMet) cell.classList.add('goal-met');
+      if (day.date === selectedDate) cell.classList.add('is-selected');
+      if (day.isToday) cell.classList.add('is-today');
+
+      if (day.goalMet) {
+        cell.innerHTML = `<i class="ri-trophy-fill"></i><span>${day.dayNum}</span>`;
+        cell.title = `Tgl ${day.dayNum}: ${formatVolumeDisplay(day.total)} (Target Tercapai!)`;
+      } else {
+        cell.textContent = day.dayNum;
+        if (day.total > 0) {
+          cell.title = `Tgl ${day.dayNum}: ${formatVolumeDisplay(day.total)}`;
+        }
+      }
+
+      cell.addEventListener('click', () => {
+        if (typeof onSelectDate === 'function') onSelectDate(day.date);
+      });
+
+      gridEl.appendChild(cell);
+    });
+
+    // Sel hari bulan berikutnya agar kelipatan 7 genap
+    const totalRendered = monthData.firstDayIndex + monthData.days.length;
+    const remainder = totalRendered % 7;
+    if (remainder !== 0) {
+      const trailingCount = 7 - remainder;
+      for (let i = 1; i <= trailingCount; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell out-month';
+        cell.textContent = i;
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  // 3. Render Yearly Heatmap View (Grid Kontribusi Tahunan)
+  function renderYearlyView(yearData, selectedDate, onSelectDate) {
+    const gridEl = document.getElementById('yearlyHeatmapGrid');
+    const emptyView = document.getElementById('historyVisualEmpty');
+    const emptyText = document.getElementById('historyVisualEmptyText');
+    if (!gridEl) return;
+
+    if (!yearData.hasData && yearData.yearOffset < -2) {
+      gridEl.innerHTML = '';
+      if (emptyView) {
+        emptyView.classList.remove('hidden');
+        if (emptyText) emptyText.textContent = `Belum ada data untuk tahun ${yearData.periodLabel}`;
+      }
+      return;
+    }
+
+    if (emptyView) emptyView.classList.add('hidden');
+    gridEl.innerHTML = '';
+
+    yearData.days.forEach(day => {
+      const dot = document.createElement('div');
+      dot.className = `heatmap-dot lvl-${day.level}`;
+      if (day.date === selectedDate) dot.classList.add('is-selected');
+      dot.title = `${day.date}: ${formatVolumeDisplay(day.total)}${day.goalMet ? ' 🏆' : ''}`;
+
+      dot.addEventListener('click', () => {
+        if (typeof onSelectDate === 'function') onSelectDate(day.date);
+      });
+
+      gridEl.appendChild(dot);
+    });
+  }
+
+  // 4. Render 3 Summary Metrics
+  function renderHistoryMetrics(mode, data) {
+    const v1 = document.getElementById('histMetricVal1');
+    const l1 = document.getElementById('histMetricLbl1');
+    const v2 = document.getElementById('histMetricVal2');
+    const l2 = document.getElementById('histMetricLbl2');
+    const v3 = document.getElementById('histMetricVal3');
+    const l3 = document.getElementById('histMetricLbl3');
+
+    if (!v1 || !v2 || !v3) return;
+
+    if (mode === 'weekly') {
+      v1.textContent = formatVolumeDisplay(data.totalIntake);
+      if (l1) l1.textContent = 'Total';
+
+      v2.textContent = formatVolumeDisplay(data.average);
+      if (l2) l2.textContent = 'Average';
+
+      v3.textContent = data.bestDay ? formatVolumeDisplay(data.bestDay.total) : '0 ml';
+      if (l3) l3.textContent = 'Best Day';
+    } else if (mode === 'monthly') {
+      v1.textContent = `${data.daysTracked} Hari`;
+      if (l1) l1.textContent = 'Days Tracked';
+
+      v2.textContent = `${data.goalsMet} Kali`;
+      if (l2) l2.textContent = 'Goals Met';
+
+      v3.textContent = `${data.successRate}%`;
+      if (l3) l3.textContent = 'Success Rate';
+    } else if (mode === 'yearly') {
+      v1.textContent = `${data.daysTracked} Hari`;
+      if (l1) l1.textContent = 'Days Tracked';
+
+      v2.textContent = `${data.goalsMet} Kali`;
+      if (l2) l2.textContent = 'Goals Met';
+
+      v3.textContent = formatVolumeDisplay(data.totalIntake);
+      if (l3) l3.textContent = 'Total Intake';
+    }
+  }
+
+  // 5. Render Selected Day Entries List
+  function renderHistoryEntriesList(dateStr, search = '', filterDrink = 'all') {
+    const listEl = document.getElementById('historyEntriesList');
+    const emptyEl = document.getElementById('historyEmpty');
+    const emptyMsgEl = document.getElementById('historyEmptyMsg');
+    const totalEl = document.getElementById('selectedDateTotal');
+    const displayEl = document.getElementById('selectedDateDisplay');
+
+    if (!listEl) return;
+
+    let logs = Storage.getLogsByDate(dateStr);
+    const dayTotal = logs.reduce((sum, l) => sum + (l.amount || 0), 0);
+
+    // Update selected date header info
+    if (totalEl) totalEl.textContent = formatMl(dayTotal);
+    if (displayEl) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const isToday = dateStr === Storage.formatDateKey(new Date());
+      const prefix = isToday ? 'Hari Ini, ' : '';
+      displayEl.textContent = prefix + d.toLocaleDateString('id-ID', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    // Apply drink type filter
+    if (filterDrink && filterDrink !== 'all') {
+      logs = logs.filter(l => l.type === filterDrink);
+    }
+
+    // Apply search keyword filter
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      logs = logs.filter(l => {
+        const typeInfo = Storage.DRINK_TYPES[l.type];
+        const label = typeInfo ? typeInfo.label.toLowerCase() : '';
+        const note = (l.note || '').toLowerCase();
+        return label.includes(q) || note.includes(q) || `${l.amount}`.includes(q);
+      });
+    }
+
+    // Sort descending by timestamp
+    logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    if (logs.length === 0) {
+      listEl.innerHTML = '';
+      if (emptyEl) {
+        emptyEl.classList.remove('hidden');
+        if (emptyMsgEl) {
+          emptyMsgEl.textContent = (search || filterDrink !== 'all')
+            ? 'Tidak ada catatan yang cocok dengan filter pencarian.'
+            : 'Belum ada catatan air minum untuk tanggal ini. Ketuk Catat Minum untuk menambah entri!';
+        }
+      }
+      return;
+    }
+
+    if (emptyEl) emptyEl.classList.add('hidden');
+    listEl.innerHTML = '';
+
+    logs.forEach(log => {
+      const card = document.createElement('div');
+      card.className = 'entry-item-card';
+
+      const typeInfo = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
+      const logDate = new Date(log.timestamp);
+      const timeStr = logDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const iconClass = log.containerIcon || Storage.getContainerIconByAmount(log.amount);
+
+      card.innerHTML = `
+        <div class="entry-item__icon">
+          <i class="custom-icon ${iconClass}"></i>
+        </div>
+        <div class="entry-item__info">
+          <div class="entry-item__title">
+            <span>${escapeHtml(typeInfo.label)}</span>
+            <span class="entry-item__time"><i class="ri-time-line"></i> ${timeStr}</span>
+          </div>
+          ${log.note ? `<div class="entry-item__note">${escapeHtml(log.note)}</div>` : ''}
+        </div>
+        <div class="entry-item__amount">${log.amount.toLocaleString('id-ID')} ml</div>
+        <div class="entry-item__actions">
+          <button type="button" class="btn-edit" data-id="${log.id}" title="Edit Catatan">
+            <i class="ri-pencil-line"></i>
+          </button>
+          <button type="button" class="btn-delete" data-id="${log.id}" title="Hapus Catatan">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+  }
+
   function renderHistoryTable(logs) {
     const tbody = document.getElementById('historyTableBody');
     const emptyEl = document.getElementById('historyEmpty');
@@ -645,6 +959,12 @@ const UI = (() => {
     openMobileSidebar,
     closeMobileSidebar,
     refreshDashboard,
+    formatVolumeDisplay,
+    renderWeeklyView,
+    renderMonthlyView,
+    renderYearlyView,
+    renderHistoryMetrics,
+    renderHistoryEntriesList,
     renderHistoryTable,
     openHistoryForm,
     closeHistoryForm,

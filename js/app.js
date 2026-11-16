@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Render history if on history page
-  if (document.getElementById('historyTableBody')) {
+  if (document.getElementById('historyTableBody') || document.getElementById('historyVisualContainer')) {
     refreshHistory();
 
     // Check URL parameters for direct edit or search
@@ -76,14 +76,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ==================== HISTORY LOGIC & FILTERS ==================== */
 
-  function refreshHistory() {
-    const search = document.getElementById('historySearch')?.value || '';
-    const dateRange = document.getElementById('filterDateRange')?.value || '7days';
-    const drinkType = document.getElementById('filterDrinkType')?.value || 'all';
+  // State navigasi riwayat
+  const historyState = {
+    period: 'weekly',
+    weekOffset: 0,
+    monthOffset: 0,
+    yearOffset: 0,
+    selectedDate: Storage.formatDateKey(new Date())
+  };
 
-    const filteredLogs = Storage.getFilteredLogs({ search, dateRange, drinkType });
-    UI.renderHistoryTable(filteredLogs);
+  function refreshHistory() {
+    // 1. Jika berada pada dashboard visual modern di riwayat.html
+    if (document.getElementById('historyVisualContainer')) {
+      const titleEl = document.getElementById('historyPeriodTitle');
+
+      // Update status tab aktif
+      document.querySelectorAll('.history-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.period === historyState.period);
+      });
+
+      // Tampilkan/sembunyikan wadah tampilan sesuai tab
+      const weeklyView = document.getElementById('weeklyChartView');
+      const monthlyView = document.getElementById('monthlyCalendarView');
+      const yearlyView = document.getElementById('yearlyHeatmapView');
+
+      if (weeklyView) weeklyView.classList.toggle('hidden', historyState.period !== 'weekly');
+      if (monthlyView) monthlyView.classList.toggle('hidden', historyState.period !== 'monthly');
+      if (yearlyView) yearlyView.classList.toggle('hidden', historyState.period !== 'yearly');
+
+      if (historyState.period === 'weekly') {
+        const data = Storage.getWeeklyHistory(historyState.weekOffset);
+        if (titleEl) titleEl.textContent = data.periodLabel;
+        UI.renderWeeklyView(data, historyState.selectedDate, onSelectHistoryDate);
+        UI.renderHistoryMetrics('weekly', data);
+      } else if (historyState.period === 'monthly') {
+        const data = Storage.getMonthlyHistory(historyState.monthOffset);
+        if (titleEl) titleEl.textContent = data.periodLabel;
+        UI.renderMonthlyView(data, historyState.selectedDate, onSelectHistoryDate);
+        UI.renderHistoryMetrics('monthly', data);
+      } else if (historyState.period === 'yearly') {
+        const data = Storage.getYearlyHistory(historyState.yearOffset);
+        if (titleEl) titleEl.textContent = data.periodLabel;
+        UI.renderYearlyView(data, historyState.selectedDate, onSelectHistoryDate);
+        UI.renderHistoryMetrics('yearly', data);
+      }
+
+      // Render daftar catatan pada hari yang dipilih
+      const search = document.getElementById('historySearch')?.value || '';
+      const drinkType = document.getElementById('filterDrinkType')?.value || 'all';
+      UI.renderHistoryEntriesList(historyState.selectedDate, search, drinkType);
+    }
+
+    // 2. Fallback rendering tabel legacy jika elemennya ada
+    if (document.getElementById('historyTableBody')) {
+      const search = document.getElementById('historySearch')?.value || '';
+      const dateRange = document.getElementById('filterDateRange')?.value || '7days';
+      const drinkType = document.getElementById('filterDrinkType')?.value || 'all';
+      const filteredLogs = Storage.getFilteredLogs({ search, dateRange, drinkType });
+      UI.renderHistoryTable(filteredLogs);
+    }
   }
+
+  function onSelectHistoryDate(dateKey) {
+    historyState.selectedDate = dateKey;
+    refreshHistory();
+  }
+
+  // Event listener tab periode (Weekly / Monthly / Yearly)
+  document.querySelectorAll('.history-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      historyState.period = tab.dataset.period;
+      refreshHistory();
+    });
+  });
+
+  // Event listener tombol navigasi periode (< dan >)
+  document.getElementById('historyNavPrev')?.addEventListener('click', () => {
+    if (historyState.period === 'weekly') historyState.weekOffset--;
+    else if (historyState.period === 'monthly') historyState.monthOffset--;
+    else if (historyState.period === 'yearly') historyState.yearOffset--;
+    refreshHistory();
+  });
+
+  document.getElementById('historyNavNext')?.addEventListener('click', () => {
+    if (historyState.period === 'weekly') historyState.weekOffset++;
+    else if (historyState.period === 'monthly') historyState.monthOffset++;
+    else if (historyState.period === 'yearly') historyState.yearOffset++;
+    refreshHistory();
+  });
+
+  // Tombol quick add log di kartu detail hari
+  document.getElementById('btnQuickAddLog')?.addEventListener('click', () => {
+    UI.openHistoryForm();
+    const timeInput = document.getElementById('formTime');
+    if (timeInput && historyState.selectedDate) {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      timeInput.value = `${historyState.selectedDate}T${hh}:${mm}`;
+    }
+  });
 
   // Filter event listeners
   const historySearch = document.getElementById('historySearch');
@@ -225,41 +317,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ==================== HISTORY TABLE ACTIONS (Edit & Delete) ==================== */
+  /* ==================== HISTORY TABLE & ENTRIES ACTIONS (Edit & Delete) ==================== */
+
+  function handleHistoryEntryAction(e) {
+    const deleteBtn = e.target.closest('.btn-delete');
+    const editBtn = e.target.closest('.btn-edit');
+
+    if (deleteBtn) {
+      const logId = deleteBtn.dataset.id;
+      const log = Storage.getLogById(logId);
+      if (!log) return;
+
+      const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
+      UI.showModal(
+        'Hapus Catatan',
+        `Apakah Anda yakin ingin menghapus catatan <strong>${drinkType.label} (${log.amount} ml)</strong>?`,
+        'Hapus',
+        () => {
+          Storage.deleteLog(logId);
+          refreshHistory();
+          UI.refreshDashboard();
+          UI.showToast('Catatan berhasil dihapus.', 'warning');
+        }
+      );
+    }
+
+    if (editBtn) {
+      const logId = editBtn.dataset.id;
+      const log = Storage.getLogById(logId);
+      if (!log) return;
+
+      UI.openHistoryForm(log);
+    }
+  }
+
+  const historyEntriesList = document.getElementById('historyEntriesList');
+  if (historyEntriesList) {
+    historyEntriesList.addEventListener('click', handleHistoryEntryAction);
+  }
 
   const historyTableBody = document.getElementById('historyTableBody');
   if (historyTableBody) {
-    historyTableBody.addEventListener('click', (e) => {
-      const deleteBtn = e.target.closest('.btn-delete');
-      const editBtn = e.target.closest('.btn-edit');
-
-      if (deleteBtn) {
-        const logId = deleteBtn.dataset.id;
-        const log = Storage.getLogById(logId);
-        if (!log) return;
-
-        const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
-        UI.showModal(
-          'Hapus Catatan',
-          `Apakah Anda yakin ingin menghapus catatan <strong>${drinkType.label} (${log.amount} ml)</strong>?`,
-          'Hapus',
-          () => {
-            Storage.deleteLog(logId);
-            refreshHistory();
-            UI.refreshDashboard();
-            UI.showToast('Catatan berhasil dihapus.', 'warning');
-          }
-        );
-      }
-
-      if (editBtn) {
-        const logId = editBtn.dataset.id;
-        const log = Storage.getLogById(logId);
-        if (!log) return;
-
-        UI.openHistoryForm(log);
-      }
-    });
+    historyTableBody.addEventListener('click', handleHistoryEntryAction);
   }
 
   /* ==================== MOBILE SIDEBAR ==================== */
