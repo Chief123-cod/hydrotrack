@@ -1009,38 +1009,87 @@ const UI = (() => {
   function renderSettings() {
     const settings = Storage.getSettings();
 
-    const nameInput = document.getElementById('inputUserName');
-    if (nameInput) nameInput.value = settings.userName || 'User';
+    // 1. Profile Greeting & Display Name
+    const greetingEl = document.getElementById('profileGreeting');
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      let greeting = 'Selamat Sore';
+      if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi';
+      else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang';
+      else if (hour >= 15 && hour < 19) greeting = 'Selamat Sore';
+      else greeting = 'Selamat Malam';
+      greetingEl.textContent = greeting;
+    }
 
+    const displayNameEl = document.getElementById('profileNameDisplay');
+    if (displayNameEl) displayNameEl.textContent = settings.userName || 'Faith';
+
+    // 2. Inner Mini Card: today's entries, days tracked, today's Goal
+    const todayEntriesEl = document.getElementById('profileTodayEntries');
+    if (todayEntriesEl) {
+      const todayLogs = Storage.getTodayLogs ? Storage.getTodayLogs() : [];
+      todayEntriesEl.textContent = todayLogs.length;
+    }
+
+    const daysTrackedEl = document.getElementById('profileDaysTracked');
+    if (daysTrackedEl) {
+      const daysCount = Storage.getDaysTrackedCount ? Storage.getDaysTrackedCount() : 0;
+      daysTrackedEl.textContent = daysCount;
+    }
+
+    const todayGoalEl = document.getElementById('profileTodayGoal');
+    if (todayGoalEl) {
+      todayGoalEl.textContent = formatMl(settings.dailyGoal || 2000);
+    }
+
+    // 3. Personal: Name Input & Gender
+    const nameInput = document.getElementById('inputUserName');
+    if (nameInput) nameInput.value = settings.userName || 'Faith';
+
+    const gender = settings.gender || 'prefer-not-to-say';
+    const genderRadios = document.querySelectorAll('input[name="gender"]');
+    genderRadios.forEach(radio => {
+      radio.checked = (radio.value === gender);
+    });
+
+    // 4. Daily Goals: Water Goal & Activity Level
     const goalInput = document.getElementById('inputDailyGoal');
     if (goalInput) goalInput.value = settings.dailyGoal || 2000;
-
-    const weightInput = document.getElementById('inputWeight');
-    if (weightInput) weightInput.value = settings.weight || 60;
 
     const activitySelect = document.getElementById('selectActivity');
     if (activitySelect) activitySelect.value = settings.activityLevel || 'moderate';
 
-    updateWaterCalculator();
+    // 5. Appearance: Theme
+    const currentTheme = settings.theme || 'system';
+    updateThemePickerUI(currentTheme);
+
+    // 6. Data Management: Default date for delete before date
+    const deleteBeforeDateInput = document.getElementById('inputDeleteBeforeDate');
+    if (deleteBeforeDateInput && !deleteBeforeDateInput.value) {
+      deleteBeforeDateInput.value = Storage.formatDateKey(new Date());
+    }
   }
 
-  function updateWaterCalculator() {
-    const weightInput = document.getElementById('inputWeight');
-    const activitySelect = document.getElementById('selectActivity');
-    const resultEl = document.getElementById('calcResultValue');
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'system');
+    }
+  }
 
-    if (!weightInput || !activitySelect || !resultEl) return;
-
-    const weight = parseFloat(weightInput.value) || 60;
-    const activity = activitySelect.value;
-
-    let multiplier = 35;
-    if (activity === 'sedentary') multiplier = 30;
-    else if (activity === 'active') multiplier = 40;
-
-    const recommendedMl = Math.round((weight * multiplier) / 50) * 50;
-    resultEl.textContent = formatMl(recommendedMl);
-    resultEl.dataset.recommended = recommendedMl;
+  function updateThemePickerUI(activeTheme) {
+    const cards = document.querySelectorAll('#themePicker .theme-card');
+    cards.forEach(card => {
+      const val = card.dataset.themeValue;
+      if (val === activeTheme) {
+        card.classList.add('active');
+      } else {
+        card.classList.remove('active');
+      }
+    });
   }
 
   /* ==================== PUBLIC API ==================== */
@@ -1071,7 +1120,9 @@ const UI = (() => {
     renderStatisticsPage,
     renderAnalytics,
     renderSettings,
-    updateWaterCalculator,
+    applyTheme,
+    updateThemePickerUI,
+    // updateWaterCalculator,
     setFieldError,
     clearFormErrors,
     formatMl,

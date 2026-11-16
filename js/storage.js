@@ -2,6 +2,23 @@
    STORAGE.JS — LocalStorage CRUD Module
    ============================================ */
 
+// Apply saved theme early to prevent flash of wrong theme
+(function initEarlyTheme() {
+  try {
+    const raw = localStorage.getItem('hydrotrack_settings');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else if (parsed.theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'system');
+      }
+    }
+  } catch (e) {}
+})();
+
 const Storage = (() => {
   // LocalStorage Keys
   const KEYS = {
@@ -15,6 +32,8 @@ const Storage = (() => {
     dailyGoal: 2000,
     weight: 60,
     activityLevel: 'moderate',
+    gender: 'prefer-not-to-say',
+    theme: 'system',
     enableSound: true
   };
 
@@ -231,6 +250,45 @@ const Storage = (() => {
   // DELETE ALL — Clear all logs
   function clearAllLogs() {
     _save(KEYS.logs, []);
+  }
+
+  // DELETE BEFORE DATE — Delete logs strictly before specified date (YYYY-MM-DD)
+  function deleteLogsBeforeDate(cutoffDate) {
+    if (!cutoffDate) return 0;
+    const logs = getAllLogs();
+    const remaining = logs.filter(log => log.date >= cutoffDate);
+    const count = logs.length - remaining.length;
+    _save(KEYS.logs, remaining);
+    return count;
+  }
+
+  // DELETE LOCAL DATA ONLY — Clear only log entries for local device
+  function deleteLocalLogsOnly() {
+    _save(KEYS.logs, []);
+    return true;
+  }
+
+  // RESET ALL DATA — Wipe all logs, settings, and custom items
+  function resetAllData() {
+    try {
+      localStorage.removeItem(KEYS.logs);
+      localStorage.removeItem(KEYS.settings);
+      localStorage.removeItem(CUSTOM_BEVERAGES_KEY);
+      localStorage.removeItem('hydrotrack_containers');
+      localStorage.removeItem('hydrotrack_custom_containers');
+      localStorage.removeItem('hydrotrack_logs_cleared_fresh');
+      return true;
+    } catch (e) {
+      console.error('Error resetting all data:', e);
+      return false;
+    }
+  }
+
+  // Get total unique active days tracked
+  function getDaysTrackedCount() {
+    const logs = getAllLogs();
+    const uniqueDates = new Set(logs.map(log => log.date));
+    return uniqueDates.size;
   }
 
   // EXPORT — Download all logs as CSV file (Bonus Feature)
@@ -953,6 +1011,10 @@ const Storage = (() => {
     updateLog,
     deleteLog,
     clearAllLogs,
+    deleteLogsBeforeDate,
+    deleteLocalLogsOnly,
+    resetAllData,
+    getDaysTrackedCount,
     exportLogsToCSV,
     getSettings,
     saveSettings,

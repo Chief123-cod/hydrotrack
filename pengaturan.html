@@ -99,178 +99,362 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ========== MAIN CONTENT ========== -->
-    <main class="main-content">
-
-        <!-- Top Header Bar -->
-        <header class="top-header">
-            <div class="top-header__left">
-                <h1 class="top-header__greeting">Pengaturan & Profil</h1>
-                <p class="top-header__subtitle">Kustomisasi target hidrasi, profil, kalkulator cairan, dan manajemen
-                    data.</p>
-            </div>
-            <div class="top-header__right">
-                <div class="top-header__date" id="headerDate"></div>
-            </div>
-        </header>
+    <main class="main-content main-content--settings">
 
         <!-- ===== VIEW: SETTINGS ===== -->
         <section class="view view--active" id="view-settings">
+            <div class="settings-page-container">
 
-            <!-- Settings Grid: Profile & Target + Water Calculator -->
-            <div class="settings-grid">
-
-                <!-- Card 1: User Profile & Custom Goal -->
-                <div class="card settings-card">
-                    <div class="settings-card__header">
-                        <div class="settings-card__icon"><i class="ri-user-settings-line"></i></div>
-                        <h3 class="settings-card__title">Profil & Target Harian</h3>
+                <!-- ========== 1. PROFIL & GOALS ========== -->
+                <div class="card settings-section-card">
+                    <!-- Profile Header / Hero -->
+                    <div class="profile-hero">
+                        <div class="profile-avatar-wrap">
+                            <div class="profile-avatar">
+                                <i class="ri-user-3-fill"></i>
+                            </div>
+                            <div class="profile-avatar-badge" title="Profile Avatar">
+                                <i class="ri-sparkling-fill"></i>
+                            </div>
+                        </div>
+                        <div class="profile-hero-info">
+                            <span class="profile-greeting" id="profileGreeting">Selamat Sore</span>
+                            <h2 class="profile-name-display" id="profileNameDisplay">Faith</h2>
+                            <p class="profile-tagline">Kelola profil pribadi dan preferensi konsumsi air harian Anda.</p>
+                        </div>
                     </div>
 
-                    <!-- Profile Form -->
-                    <form id="profileForm" class="settings-form" novalidate>
-                        <div class="form-group">
-                            <label class="form-label" for="inputUserName">Nama Pengguna</label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-user-line"></i>
-                                <input type="text" id="inputUserName" class="form-input"
-                                    placeholder="Masukkan nama Anda" maxlength="30" required>
+                    <!-- Inner Mini Card: Today's Entries, Days Tracked, Today's Goal -->
+                    <div class="profile-stats-card">
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-icon">
+                                <i class="ri-cup-line"></i>
+                            </div>
+                            <div class="profile-stat-data">
+                                <span class="profile-stat-value" id="profileTodayEntries">0</span>
+                                <span class="profile-stat-label">today's entries</span>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn--primary">
-                            <i class="ri-check-line"></i>
-                            <span>Simpan Nama</span>
-                        </button>
-                    </form>
 
-                    <div class="my-4 border-top"></div>
+                        <div class="profile-stat-divider"></div>
 
-                    <!-- Daily Goal Form -->
-                    <form id="goalForm" class="settings-form" novalidate>
-                        <div class="form-group">
-                            <label class="form-label" for="inputDailyGoal">Target Air Harian (ml)</label>
-                            <div class="form-input-wrapper">
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-icon">
+                                <i class="ri-calendar-check-line"></i>
+                            </div>
+                            <div class="profile-stat-data">
+                                <span class="profile-stat-value" id="profileDaysTracked">0</span>
+                                <span class="profile-stat-label">days tracked</span>
+                            </div>
+                        </div>
+
+                        <div class="profile-stat-divider"></div>
+
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-icon">
                                 <i class="ri-focus-3-line"></i>
-                                <input type="number" id="inputDailyGoal" class="form-input" placeholder="Contoh: 2000"
-                                    min="500" max="6000" step="50" required>
                             </div>
-                            <span class="text-muted small">Standar umum berkisar antara 2.000 ml hingga 3.000 ml /
-                                hari.</span>
+                            <div class="profile-stat-data">
+                                <span class="profile-stat-value" id="profileTodayGoal">2.000 ml</span>
+                                <span class="profile-stat-label">today's Goal</span>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn--primary">
-                            <i class="ri-save-line"></i>
-                            <span>Simpan Target</span>
-                        </button>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <!-- Profile Form: Personal & Daily Goals -->
+                    <form id="settingsProfileForm" class="settings-form-grid" novalidate>
+                        <!-- Label: Personal -->
+                        <div class="settings-group">
+                            <div class="settings-group-header">
+                                <span class="settings-group-tag">Personal</span>
+                                <h4 class="settings-group-title">Data Diri</h4>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="inputUserName">Nama Pengguna</label>
+                                <div class="form-input-wrapper">
+                                    <i class="ri-user-line"></i>
+                                    <input type="text" id="inputUserName" class="form-input"
+                                        placeholder="Masukkan nama pengguna" maxlength="30" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <div class="segmented-picker" id="genderPicker">
+                                    <label class="segmented-option">
+                                        <input type="radio" name="gender" value="male">
+                                        <span class="segmented-box">
+                                            <i class="ri-men-line"></i> Male
+                                        </span>
+                                    </label>
+                                    <label class="segmented-option">
+                                        <input type="radio" name="gender" value="female">
+                                        <span class="segmented-box">
+                                            <i class="ri-women-line"></i> Female
+                                        </span>
+                                    </label>
+                                    <label class="segmented-option">
+                                        <input type="radio" name="gender" value="prefer-not-to-say" checked>
+                                        <span class="segmented-box">
+                                            <i class="ri-user-shared-line"></i> Prefer not to say
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-divider"></div>
+
+                        <!-- Label: Daily Goals -->
+                        <div class="settings-group">
+                            <div class="settings-group-header">
+                                <span class="settings-group-tag">Daily Goals</span>
+                                <h4 class="settings-group-title">Target & Tingkat Aktivitas</h4>
+                            </div>
+
+                            <!-- 1. Daily Water Goal -->
+                            <div class="form-group">
+                                <label class="form-label" for="inputDailyGoal">1. Daily Water Goal (ml)</label>
+                                <div class="form-input-wrapper">
+                                    <i class="ri-drop-line"></i>
+                                    <input type="number" id="inputDailyGoal" class="form-input"
+                                        placeholder="Contoh: 2000" min="500" max="6000" step="50" required>
+                                </div>
+                                <span class="text-muted small">Standar kebutuhan hidrasi sehat berkisar antara 2.000 ml
+                                    – 3.000 ml / hari.</span>
+                            </div>
+
+                            <!-- 2. Activity Level -->
+                            <div class="form-group">
+                                <label class="form-label" for="selectActivity">2. Activity Level</label>
+                                <div class="form-input-wrapper">
+                                    <i class="ri-run-line"></i>
+                                    <select id="selectActivity" class="form-input form-select">
+                                        <option value="sedentary">1. Sedentary (Santai / Duduk bekerja)</option>
+                                        <option value="light">2. Light activity (Aktivitas ringan 1-2x/minggu)</option>
+                                        <option value="moderate" selected>3. Moderate activity (Olahraga sedang 3-5x/minggu)</option>
+                                        <option value="active">4. Active (Aktivitas tinggi / Olahraga setiap hari)</option>
+                                        <option value="very_active">5. Very active (Sangat aktif / Latihan fisik berat)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Submit -->
+                        <div class="settings-form-actions">
+                            <button type="submit" class="btn btn--primary" id="btnSaveProfile">
+                                <i class="ri-check-line"></i>
+                                <span>Simpan Profil & Target</span>
+                            </button>
+                        </div>
                     </form>
                 </div>
 
-                <!-- Card 2: Hydration Calculator -->
-                <div class="card settings-card">
+                <!-- ========== 2. APPEARANCE ========== -->
+                <div class="card settings-section-card">
                     <div class="settings-card__header">
-                        <div class="settings-card__icon"><i class="ri-calculator-line"></i></div>
-                        <h3 class="settings-card__title">Kalkulator Kebutuhan Air</h3>
+                        <div class="settings-card__icon"><i class="ri-palette-line"></i></div>
+                        <div>
+                            <h3 class="settings-card__title">Appearance</h3>
+                            <p class="settings-card__subtitle">Pilih tema visual antarmuka aplikasi sesuai kenyamanan Anda.</p>
+                        </div>
                     </div>
 
-                    <p class="text-muted small mb-3">
-                        Hitung estimasi kebutuhan cairan tubuh harian yang ideal berdasarkan berat badan dan tingkat
-                        aktivitas fisikmu.
-                    </p>
+                    <div class="theme-selection-area">
+                        <label class="form-label mb-2">Thema</label>
+                        <div class="theme-cards-grid" id="themePicker">
+                            <button type="button" class="theme-card active" data-theme-value="system">
+                                <div class="theme-card__icon"><i class="ri-computer-line"></i></div>
+                                <div class="theme-card__content">
+                                    <span class="theme-card__title">System</span>
+                                    <span class="theme-card__desc">Mengikuti pengaturan tema sistem perangkat</span>
+                                </div>
+                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                            </button>
 
-                    <div class="settings-form">
-                        <!-- Weight Input -->
-                        <div class="form-group">
-                            <label class="form-label" for="inputWeight">Berat Badan (kg)</label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-scales-3-line"></i>
-                                <input type="number" id="inputWeight" class="form-input" placeholder="Contoh: 60"
-                                    min="30" max="200" value="60">
-                            </div>
-                        </div>
+                            <button type="button" class="theme-card" data-theme-value="light">
+                                <div class="theme-card__icon"><i class="ri-sun-line"></i></div>
+                                <div class="theme-card__content">
+                                    <span class="theme-card__title">Light</span>
+                                    <span class="theme-card__desc">Mode terang bersih & kontras tinggi</span>
+                                </div>
+                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                            </button>
 
-                        <!-- Activity Level -->
-                        <div class="form-group">
-                            <label class="form-label" for="selectActivity">Tingkat Aktivitas Fisik</label>
-                            <div class="form-input-wrapper">
-                                <i class="ri-run-line"></i>
-                                <select id="selectActivity" class="form-input form-select">
-                                    <option value="sedentary">Santai / Duduk Bekerja (30 ml/kg)</option>
-                                    <option value="moderate" selected>Sedang / Olahraga Ringan (35 ml/kg)</option>
-                                    <option value="active">Aktif / Pekerja Fisik (40 ml/kg)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Result Box -->
-                        <div class="calc-result-box" id="calcResultBox">
-                            <div class="calc-result-info">
-                                <span class="calc-result-label">Rekomendasi Air Harian:</span>
-                                <span id="calcResultValue" class="calc-result-value" data-recommended="2100">2.100
-                                    ml</span>
-                            </div>
-                            <button type="button" class="btn btn--primary" id="btnApplyCalc">
-                                <i class="ri-check-double-line"></i>
-                                <span>Gunakan Target Ini</span>
+                            <button type="button" class="theme-card" data-theme-value="dark">
+                                <div class="theme-card__icon"><i class="ri-moon-line"></i></div>
+                                <div class="theme-card__content">
+                                    <span class="theme-card__title">Dark</span>
+                                    <span class="theme-card__desc">Mode gelap lembut, nyaman untuk mata</span>
+                                </div>
+                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
                             </button>
                         </div>
                     </div>
                 </div>
 
-            </div>
-
-            <!-- Card 3: Data Management & Export -->
-            <div class="card data-mgmt-card">
-                <div class="settings-card__header">
-                    <div class="settings-card__icon"><i class="ri-database-2-line"></i></div>
-                    <h3 class="settings-card__title">Manajemen Data & Penyimpanan</h3>
-                </div>
-
-                <p class="data-mgmt-desc">
-                    Kelola data browser (LocalStorage) aplikasi HydroTrack Anda. Muat data simulasi untuk keperluan
-                    presentasi atau demo dosen, unduh seluruh catatan ke format file CSV, atau bersihkan penyimpanan.
-                </p>
-
-                <div class="data-mgmt-actions">
-                    <!-- Load Sample Data -->
-                    <button type="button" class="btn btn--secondary" id="btnLoadSample">
-                        <i class="ri-sparkling-fill text-primary"></i>
-                        <span>Muat Data Contoh (Demo Dosen)</span>
-                    </button>
-
-                    <!-- Export CSV -->
-                    <button type="button" class="btn btn--secondary" id="btnExportCSV">
-                        <i class="ri-file-excel-2-line text-success"></i>
-                        <span>Ekspor Data ke CSV</span>
-                    </button>
-
-                    <!-- Reset All Data -->
-                    <button type="button" class="btn btn--danger" id="btnResetAll">
-                        <i class="ri-delete-bin-line"></i>
-                        <span>Reset Semua Data</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Card 4: About HydroTrack Project -->
-            <div class="card">
-                <div class="settings-card__header">
-                    <div class="settings-card__icon"><i class="ri-information-line"></i></div>
-                    <h3 class="settings-card__title">Tentang Proyek HydroTrack</h3>
-                </div>
-                <div class="row g-3 small text-muted">
-                    <div class="col-md-4">
-                        <strong class="d-block text-dark mb-1">Tipe Proyek:</strong>
-                        <span>Final Project — Web Design (Interactive Web Application)</span>
+                <!-- ========== 3. DATA MANAGEMENT ========== -->
+                <div class="card settings-section-card">
+                    <div class="settings-card__header">
+                        <div class="settings-card__icon"><i class="ri-database-2-line"></i></div>
+                        <div>
+                            <h3 class="settings-card__title">Data Management</h3>
+                            <p class="settings-card__subtitle">Kelola ekspor catatan riwayat, pembersihan data lokal, dan reset sistem.</p>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <strong class="d-block text-dark mb-1">Teknologi:</strong>
-                        <span>HTML5, CSS3 (Flexbox & Grid), Vanilla JS, Bootstrap 5, Chart.js, LocalStorage</span>
+
+                    <!-- Export -->
+                    <div class="data-mgmt-block">
+                        <div class="data-mgmt-block-header">
+                            <span class="settings-group-tag text-success">Export</span>
+                            <h4 class="settings-group-title">Unduh Riwayat Minum</h4>
+                        </div>
+                        <div class="data-mgmt-row">
+                            <div class="data-mgmt-info">
+                                <strong class="d-block text-dark mb-1">Export as CSV</strong>
+                                <p class="data-mgmt-text">Unduh seluruh catatan riwayat konsumsi air ke dalam file spreadsheet (.csv) untuk analisis di Excel atau Google Sheets.</p>
+                            </div>
+                            <button type="button" class="btn btn--secondary" id="btnExportCSV">
+                                <i class="ri-file-excel-2-line text-success"></i>
+                                <span>Export as CSV</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <strong class="d-block text-dark mb-1">Arsitektur:</strong>
-                        <span>Multi-Page Application (4 Halaman Mandiri & Terintegrasi)</span>
+
+                    <div class="settings-divider"></div>
+
+                    <!-- Delete Data -->
+                    <div class="data-mgmt-block">
+                        <div class="data-mgmt-block-header">
+                            <span class="settings-group-tag text-danger">Delete Data</span>
+                            <h4 class="settings-group-title">Penghapusan & Pembersihan Data</h4>
+                        </div>
+
+                        <!-- 1. Delete entries before date -->
+                        <div class="data-mgmt-row">
+                            <div class="data-mgmt-info">
+                                <strong class="d-block text-dark mb-1">Delete entries before date</strong>
+                                <p class="data-mgmt-text">Hapus semua riwayat catatan sebelum tanggal tertentu. Data setelah tanggal tersebut akan tetap tersimpan.</p>
+                            </div>
+                            <div class="delete-before-actions">
+                                <input type="date" id="inputDeleteBeforeDate" class="form-input form-input--date">
+                                <button type="button" class="btn btn--outline-danger" id="btnDeleteBeforeDate">
+                                    <i class="ri-calendar-close-line"></i>
+                                    <span>Delete entries before date</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Delete local data only -->
+                        <div class="data-mgmt-row">
+                            <div class="data-mgmt-info">
+                                <strong class="d-block text-dark mb-1">Delete local data only</strong>
+                                <p class="data-mgmt-text">Hapus seluruh riwayat entri pada penyimpanan browser ini tanpa menghapus profil dan target Anda.</p>
+                            </div>
+                            <button type="button" class="btn btn--outline-danger" id="btnDeleteLocalOnly">
+                                <i class="ri-device-line"></i>
+                                <span>Delete local data only</span>
+                            </button>
+                        </div>
+
+                        <!-- 3. Delete everything -->
+                        <div class="data-mgmt-row delete-row--danger">
+                            <div class="data-mgmt-info">
+                                <strong class="d-block text-danger mb-1">Delete everything</strong>
+                                <p class="data-mgmt-text text-danger-soft">Reset seluruh data aplikasi (semua entri riwayat, pengaturan akun, dan wadah kustom) kembali ke kondisi awal pabrik.</p>
+                            </div>
+                            <button type="button" class="btn btn--danger" id="btnDeleteEverything">
+                                <i class="ri-delete-bin-2-line"></i>
+                                <span>Delete everything</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- ========== 4. ABOUT ========== -->
+                <div class="card settings-section-card">
+                    <div class="settings-card__header">
+                        <div class="settings-card__icon"><i class="ri-information-line"></i></div>
+                        <div>
+                            <h3 class="settings-card__title">About</h3>
+                            <p class="settings-card__subtitle">Informasi mengenai proyek HydroTrack dan tim pengembang.</p>
+                        </div>
+                    </div>
+
+                    <!-- Project Info -->
+                    <div class="about-hero">
+                        <div class="about-logo">
+                            <i class="ri-drop-fill"></i>
+                        </div>
+                        <div class="about-details">
+                            <div class="about-app-name">
+                                <span>HydroTrack</span>
+                                <span class="about-version">v1.0.0</span>
+                            </div>
+                            <p class="about-desc">
+                                HydroTrack adalah aplikasi pelacak konsumsi air harian yang dirancang untuk membantu Anda membangun kebiasaan hidrasi yang sehat, disiplin mencapai target cairan tubuh, dan memantau perkembangan kesehatan secara terstruktur melalui visualisasi interaktif.
+                            </p>
+                            <div class="about-badges">
+                                <span class="badge-tech"><i class="ri-html5-line"></i> HTML5</span>
+                                <span class="badge-tech"><i class="ri-css3-line"></i> CSS3 Pure</span>
+                                <span class="badge-tech"><i class="ri-javascript-line"></i> Vanilla JS (ES6+)</span>
+                                <span class="badge-tech"><i class="ri-bar-chart-fill"></i> Chart.js</span>
+                                <span class="badge-tech"><i class="ri-remixicon-line"></i> Remix Icon</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <!-- Contributors -->
+                    <div class="contributors-section">
+                        <div class="settings-group-header">
+                            <span class="settings-group-tag">Contributors</span>
+                            <h4 class="settings-group-title">Tim Pendiri Web HydroTrack</h4>
+                            <p class="text-muted small">Anggota tim pengembang Tugas Akhir Desain Web:</p>
+                        </div>
+
+                        <div class="contributors-grid">
+                            <div class="contributor-card">
+                                <div class="contributor-avatar">
+                                    <span>FA</span>
+                                </div>
+                                <div class="contributor-info">
+                                    <span class="contributor-name">Faith</span>
+                                    <span class="contributor-role">Lead Developer & UI Designer</span>
+                                    <span class="contributor-badge">Founder</span>
+                                </div>
+                            </div>
+
+                            <div class="contributor-card">
+                                <div class="contributor-avatar contributor-avatar--alt1">
+                                    <span>HT</span>
+                                </div>
+                                <div class="contributor-info">
+                                    <span class="contributor-name">HydroTrack Team</span>
+                                    <span class="contributor-role">Frontend & UI/UX Specialist</span>
+                                    <span class="contributor-badge">Contributor</span>
+                                </div>
+                            </div>
+
+                            <div class="contributor-card">
+                                <div class="contributor-avatar contributor-avatar--alt2">
+                                    <span>WD</span>
+                                </div>
+                                <div class="contributor-info">
+                                    <span class="contributor-name">Web Design Final Project</span>
+                                    <span class="contributor-role">System Architecture & QA</span>
+                                    <span class="contributor-badge">Contributor</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </section>
     </main>
 

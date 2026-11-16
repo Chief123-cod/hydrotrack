@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ==================== INITIALIZATION ==================== */
 
+  // Apply saved theme across all pages immediately
+  const initialSettings = Storage.getSettings();
+  if (initialSettings && initialSettings.theme) {
+    UI.applyTheme(initialSettings.theme);
+  }
+
   // Display date & user info
   UI.updateDateDisplay();
   UI.updateUserInfo();
@@ -60,6 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.renderStatisticsPage(e.target.value);
       });
     }
+  }
+
+  // Render settings if on settings page (pengaturan.html)
+  if (document.getElementById('settingsProfileForm') || document.getElementById('view-settings')) {
+    initSettingsPage();
   }
 
   /* ==================== NAVIGATION ==================== */
@@ -1292,6 +1303,150 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  /* ==================== SETTINGS PAGE CONTROLLER ==================== */
+  function initSettingsPage() {
+    UI.renderSettings();
+
+    // 1. Profile Form (Personal: Gender, Name & Daily Goals: Goal, Activity)
+    const profileForm = document.getElementById('settingsProfileForm');
+    if (profileForm) {
+      profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const userNameInput = document.getElementById('inputUserName');
+        const userName = userNameInput ? userNameInput.value.trim() : 'Faith';
+
+        const genderRadio = document.querySelector('input[name="gender"]:checked');
+        const gender = genderRadio ? genderRadio.value : 'prefer-not-to-say';
+
+        const goalInput = document.getElementById('inputDailyGoal');
+        const dailyGoal = parseInt(goalInput?.value) || 2000;
+
+        const activitySelect = document.getElementById('selectActivity');
+        const activityLevel = activitySelect ? activitySelect.value : 'moderate';
+
+        if (!userName) {
+          UI.showToast('Nama pengguna tidak boleh kosong!', 'warning');
+          return;
+        }
+
+        if (dailyGoal < 500 || dailyGoal > 6000) {
+          UI.showToast('Target air harian harus antara 500 dan 6000 ml!', 'warning');
+          return;
+        }
+
+        Storage.saveSettings({
+          userName,
+          gender,
+          dailyGoal,
+          activityLevel
+        });
+
+        UI.updateUserInfo();
+        UI.renderSettings();
+        UI.showToast('Profil dan target berhasil disimpan! ✨', 'success');
+      });
+    }
+
+    // 2. Appearance: Theme Picker
+    const themeCards = document.querySelectorAll('#themePicker .theme-card');
+    themeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const selectedTheme = card.dataset.themeValue;
+        if (!selectedTheme) return;
+
+        Storage.saveSettings({ theme: selectedTheme });
+        UI.applyTheme(selectedTheme);
+        UI.updateThemePickerUI(selectedTheme);
+
+        const themeLabels = {
+          system: 'System (Mengikuti Perangkat)',
+          light: 'Light (Mode Terang)',
+          dark: 'Dark (Mode Gelap)'
+        };
+        UI.showToast(`Tema ${themeLabels[selectedTheme] || selectedTheme} diterapkan!`, 'info');
+      });
+    });
+
+    // 3. Data Management: Export CSV
+    const btnExportCSV = document.getElementById('btnExportCSV');
+    if (btnExportCSV) {
+      btnExportCSV.addEventListener('click', () => {
+        const logs = Storage.getAllLogs();
+        if (logs.length === 0) {
+          UI.showToast('Belum ada riwayat konsumsi untuk diekspor!', 'warning');
+          return;
+        }
+        Storage.exportLogsToCSV();
+        UI.showToast('File CSV berhasil diunduh! 📄', 'success');
+      });
+    }
+
+    // 4. Data Management: Delete entries before date
+    const btnDeleteBeforeDate = document.getElementById('btnDeleteBeforeDate');
+    const inputDeleteBeforeDate = document.getElementById('inputDeleteBeforeDate');
+    if (btnDeleteBeforeDate && inputDeleteBeforeDate) {
+      btnDeleteBeforeDate.addEventListener('click', () => {
+        const cutoffDate = inputDeleteBeforeDate.value;
+        if (!cutoffDate) {
+          UI.showToast('Silakan pilih batas tanggal terlebih dahulu!', 'warning');
+          return;
+        }
+
+        UI.showModal(
+          'Hapus Riwayat Sebelum Tanggal',
+          `Apakah Anda yakin ingin menghapus seluruh catatan minum sebelum tanggal <strong>${cutoffDate}</strong>?<br><span class="text-muted small">Catatan pada atau setelah tanggal tersebut akan tetap tersimpan.</span>`,
+          'Hapus Entri',
+          () => {
+            const deletedCount = Storage.deleteLogsBeforeDate(cutoffDate);
+            UI.renderSettings();
+            if (deletedCount > 0) {
+              UI.showToast(`Berhasil menghapus ${deletedCount} entri riwayat lama.`, 'success');
+            } else {
+              UI.showToast('Tidak ada entri sebelum tanggal tersebut.', 'info');
+            }
+          }
+        );
+      });
+    }
+
+    // 5. Data Management: Delete local data only
+    const btnDeleteLocalOnly = document.getElementById('btnDeleteLocalOnly');
+    if (btnDeleteLocalOnly) {
+      btnDeleteLocalOnly.addEventListener('click', () => {
+        UI.showModal(
+          'Hapus Data Lokal',
+          'Apakah Anda yakin ingin menghapus seluruh riwayat entri konsumsi air pada perangkat ini?<br><span class="text-muted small">Profil dan target air Anda tidak akan terhapus.</span>',
+          'Hapus Riwayat Lokal',
+          () => {
+            Storage.deleteLocalLogsOnly();
+            UI.renderSettings();
+            UI.showToast('Seluruh riwayat catatan lokal berhasil dihapus!', 'success');
+          }
+        );
+      });
+    }
+
+    // 6. Data Management: Delete everything
+    const btnResetAll = document.getElementById('btnDeleteEverything');
+    if (btnResetAll) {
+      btnResetAll.addEventListener('click', () => {
+        UI.showModal(
+          'Reset Semua Data (Pabrik)',
+          '<strong class="text-danger">Peringatan:</strong> Seluruh riwayat catatan minum, profil, target air, dan wadah kustom Anda akan dihapus secara permanen dari browser ini.',
+          'Reset Total',
+          () => {
+            Storage.resetAllData();
+            UI.renderSettings();
+            UI.showToast('Aplikasi berhasil direset ke kondisi awal!', 'info');
+            setTimeout(() => {
+              window.location.reload();
+            }, 800);
+          }
+        );
+      });
+    }
+  }
 
   /* ==================== PREVENT PAGE HORIZONTAL SHIFT ==================== */
 

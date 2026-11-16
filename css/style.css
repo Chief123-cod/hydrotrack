@@ -66,6 +66,66 @@
   --transition-slow: 0.4s ease;
 }
 
+/* ---------- Dark Theme Overrides ---------- */
+[data-theme="dark"] {
+  --color-bg: #12141C;
+  --color-surface: #1B1E2B;
+  --color-surface-hover: #242938;
+  --color-border: #2D3349;
+  --color-text-primary: #F1F4F9;
+  --color-text-secondary: #9DA6BD;
+  --color-text-muted: #646D82;
+  --color-primary-bg: rgba(46, 134, 222, 0.18);
+  --sidebar-bg: #0C0E14;
+  --sidebar-text: #8E96AB;
+  --sidebar-active-bg: rgba(46, 134, 222, 0.22);
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --color-bg: #12141C;
+    --color-surface: #1B1E2B;
+    --color-surface-hover: #242938;
+    --color-border: #2D3349;
+    --color-text-primary: #F1F4F9;
+    --color-text-secondary: #9DA6BD;
+    --color-text-muted: #646D82;
+    --color-primary-bg: rgba(46, 134, 222, 0.18);
+    --sidebar-bg: #0C0E14;
+    --sidebar-text: #8E96AB;
+    --sidebar-active-bg: rgba(46, 134, 222, 0.22);
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+  }
+}
+
+[data-theme="dark"] .form-input {
+  background: #141724;
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .form-input:focus {
+  background: #1A1E2E;
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .btn--secondary {
+  background: #24293A;
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .btn--secondary:hover {
+  background: #2D3449;
+}
+
+[data-theme="dark"] .mobile-header,
+[data-theme="dark"] .bottom-nav {
+  background: #181B26;
+  border-color: var(--color-border);
+}
+
 /* ---------- Reset & Base ---------- */
 *,
 *::before,

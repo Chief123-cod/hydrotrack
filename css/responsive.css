@@ -156,8 +156,49 @@
   }
 
   /* Settings View Responsive */
-  .settings-grid {
+  .main-content--settings {
+    padding: var(--spacing-md);
+    padding-top: calc(60px + var(--spacing-md));
+    padding-bottom: 84px;
+  }
+
+  .settings-section-card {
+    padding: 20px 18px;
+  }
+
+  .profile-stats-card {
     grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .profile-stat-divider {
+    display: none;
+  }
+
+  .theme-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .contributors-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .data-mgmt-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .delete-before-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .form-input--date {
+    width: 100%;
   }
 }
 
@@ -626,5 +667,31 @@
     padding: 10px 12px;
     font-size: 12.5px;
     text-align: left;
+  }
+
+  /* Settings Mobile Specific */
+  .segmented-picker {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .profile-hero {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+  }
+
+  .profile-hero-info {
+    align-items: center;
+  }
+
+  .about-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .about-badges {
+    justify-content: center;
   }
 }
