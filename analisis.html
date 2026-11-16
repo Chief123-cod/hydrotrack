@@ -110,17 +110,6 @@
                 <h1 class="top-header__greeting">Statistics</h1>
                 <p class="top-header__subtitle">Analisis kebiasaan hidrasi, distribusi minuman, dan statistik penggunaan wadah.</p>
             </div>
-            <div class="top-header__right">
-                <div class="filter-group">
-                    <label class="filter-label" for="analyticsPeriod">Periode:</label>
-                    <select id="analyticsPeriod" class="form-input form-select form-select--sm">
-                        <option value="all" selected>Semua Waktu</option>
-                        <option value="30">30 Hari Terakhir</option>
-                        <option value="7">7 Hari Terakhir</option>
-                    </select>
-                </div>
-                <div class="top-header__date" id="headerDate"></div>
-            </div>
         </header>
 
         <!-- ===== VIEW: STATISTICS ===== -->
@@ -309,8 +298,8 @@
                     </div>
                 </div>
 
-                <div class="table-container">
-                    <table class="data-table container-usage-table">
+                <div class="table-container" id="containerTableContainer">
+                    <table class="data-table container-usage-table" id="containerUsageTable">
                         <thead>
                             <tr>
                                 <th>Container</th>
@@ -322,6 +311,11 @@
                             <!-- Populated dynamically via JS -->
                         </tbody>
                     </table>
+                </div>
+
+                <div class="container-empty-state hidden" id="containerUsageEmpty">
+                    <i class="ri-inbox-line"></i>
+                    <p>Belum ada riwayat penggunaan wadah minuman.<br>Catat minuman di halaman Home untuk melihat statistik wadah di sini.</p>
                 </div>
             </div>
 

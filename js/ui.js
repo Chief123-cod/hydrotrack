@@ -911,13 +911,24 @@ const UI = (() => {
         bevListEl.innerHTML = `
           <div class="beverage-empty-hint">
             <i class="ri-drop-line"></i>
-            <p>Belum ada catatan minuman pada periode ini. Catat minuman di Home untuk melihat distribusinya!</p>
+            <p>Belum ada catatan minuman. Catat minuman di Home untuk melihat distribusinya!</p>
           </div>
         `;
       } else {
-        activeBeverages.forEach(b => {
+        // Agar bentuk dan tinggi seimbang dengan 8 item (4 baris) di kartu Overview:
+        // Tampilkan minuman aktif, dan genapkan hingga 4 baris dengan jenis minuman utama
+        let displayList = [...activeBeverages];
+        if (displayList.length < 4) {
+          const inactive = data.beverageBreakdown.filter(b => b.amount === 0);
+          for (let i = 0; i < inactive.length && displayList.length < 4; i++) {
+            displayList.push(inactive[i]);
+          }
+        }
+
+        displayList.forEach(b => {
+          const isZero = b.amount === 0;
           const row = document.createElement('div');
-          row.className = 'beverage-item-row';
+          row.className = `beverage-item-row ${isZero ? 'is-zero' : ''}`;
           row.innerHTML = `
             <div class="beverage-item-main">
               <span class="beverage-dot" style="background-color: ${b.color};"></span>
@@ -938,17 +949,20 @@ const UI = (() => {
 
     // 4. Container Usage (Table: container, volume dan uses)
     const containerTbody = document.getElementById('containerUsageTableBody');
+    const containerTableContainer = document.getElementById('containerTableContainer');
+    const containerUsageEmpty = document.getElementById('containerUsageEmpty');
+
     if (containerTbody) {
       containerTbody.innerHTML = '';
-      if (!data.containerUsage || data.containerUsage.length === 0) {
-        containerTbody.innerHTML = `
-          <tr>
-            <td colspan="3" class="text-center text-muted" style="padding: 20px;">
-              Belum ada data wadah minuman.
-            </td>
-          </tr>
-        `;
+      const hasContainers = Array.isArray(data.containerUsage) && data.containerUsage.length > 0;
+
+      if (!hasContainers) {
+        if (containerTableContainer) containerTableContainer.classList.add('hidden');
+        if (containerUsageEmpty) containerUsageEmpty.classList.remove('hidden');
       } else {
+        if (containerTableContainer) containerTableContainer.classList.remove('hidden');
+        if (containerUsageEmpty) containerUsageEmpty.classList.add('hidden');
+
         data.containerUsage.forEach(c => {
           const isSvg = c.icon && c.icon.startsWith('icon-');
           const iconHtml = isSvg

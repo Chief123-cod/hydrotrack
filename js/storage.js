@@ -11,7 +11,7 @@ const Storage = (() => {
 
   // Default Settings
   const DEFAULT_SETTINGS = {
-    userName: 'User',
+    userName: 'Faith',
     dailyGoal: 2000,
     weight: 60,
     activityLevel: 'moderate',
@@ -49,7 +49,7 @@ const Storage = (() => {
   try {
     const storedCustom = _parse(CUSTOM_BEVERAGES_KEY, {});
     Object.assign(DRINK_TYPES, storedCustom);
-  } catch (e) {}
+  } catch (e) { }
 
   function getCustomBeverages() {
     return _parse(CUSTOM_BEVERAGES_KEY, {});
@@ -549,17 +549,21 @@ const Storage = (() => {
     // Urutkan: yang sudah ada asupan didahulukan
     beverageBreakdown.sort((a, b) => b.amount - a.amount);
 
-    // 7. Container Usage
+    // 7. Container Usage (Hanya tampil jika ada input minuman)
     const allContainers = getAllContainers();
-    const containerUsage = allContainers.map(c => {
+    const containerUsage = [];
+
+    allContainers.forEach(c => {
       const uses = logs.filter(l => l.containerId === c.id || l.amount === c.amount).length;
-      return {
-        id: c.id,
-        name: c.name,
-        amount: c.amount,
-        icon: c.icon,
-        uses: uses
-      };
+      if (uses > 0) {
+        containerUsage.push({
+          id: c.id,
+          name: c.name,
+          amount: c.amount,
+          icon: c.icon,
+          uses: uses
+        });
+      }
     });
 
     const totalUses = containerUsage.reduce((s, c) => s + c.uses, 0);
