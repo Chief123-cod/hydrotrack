@@ -253,6 +253,14 @@ img {
   gap: var(--spacing-sm);
   padding: 0 var(--spacing-lg);
   margin-bottom: var(--spacing-2xl);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar__logo:hover {
+  opacity: 0.92;
 }
 
 .sidebar__logo i {
@@ -384,6 +392,14 @@ img {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.mobile-header__logo:hover {
+  opacity: 0.92;
 }
 
 .mobile-header__logo i {

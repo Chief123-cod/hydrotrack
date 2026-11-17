@@ -260,22 +260,116 @@
     display: none;
   }
 
+  /* Theme Cards on Tablet & Mobile (<= 768px): 3-Pill Horizontal Segmented Row Sesuai Referensi Gambar */
   .theme-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    width: 100% !important;
   }
 
   .theme-card {
-    padding: 12px 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 10px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    border-radius: 999px !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: none !important;
+    text-align: center !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: #E2E8F0 !important;
+    border: 1px solid #CBD5E1 !important;
+    color: #475569 !important;
   }
 
-  .theme-card__preview {
-    height: 46px;
-    margin-bottom: 8px;
+  .theme-card:hover:not(.active) {
+    background: #CBD5E1 !important;
+    color: #1E293B !important;
+    transform: none !important;
   }
 
-  .theme-card__desc {
-    font-size: 11px;
+  .theme-card.active {
+    background: #BFDBFE !important;
+    border: 1.5px solid #93C5FD !important;
+    color: #1E3A8A !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(46, 134, 222, 0.22) !important;
+    transform: none !important;
+  }
+
+  /* Sembunyikan preview mockup box, deskripsi, dan tanda check di mobile */
+  .theme-card__preview,
+  .theme-card__desc,
+  .theme-card__check {
+    display: none !important;
+  }
+
+  .theme-card__body {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .theme-card__icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 18px !important;
+    color: inherit !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  .theme-card__content {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+  }
+
+  .theme-card__title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: inherit !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+  }
+
+  /* Dark Theme Mobile Styling (Sesuai Referensi Gambar) */
+  [data-theme="dark"] .theme-card {
+    background: #1B2130 !important;
+    border: 1px solid #283248 !important;
+    color: #94A3B8 !important;
+  }
+
+  [data-theme="dark"] .theme-card:hover:not(.active) {
+    background: #232B3E !important;
+    color: #E2E8F0 !important;
+  }
+
+  [data-theme="dark"] .theme-card.active {
+    background: #BFDBFE !important;
+    border: 1.5px solid #93C5FD !important;
+    color: #0F172A !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
   }
 
   .contributors-grid {
@@ -850,29 +944,6 @@
   .m3-accordion-header {
     padding: 16px 18px;
     gap: 14px;
-  }
-
-  .theme-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .theme-card {
-    flex-direction: row;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 14px;
-  }
-
-  .theme-card__preview {
-    width: 72px;
-    height: 48px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  .theme-card__icon {
-    display: none;
   }
 
   .profile-stats-card {
