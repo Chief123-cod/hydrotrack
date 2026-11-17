@@ -1460,7 +1460,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* ==================== PREVENT PAGE HORIZONTAL SHIFT ==================== */
+  /* ==================== PREVENT PAGE HORIZONTAL SHIFT & MOBILE ZOOM ==================== */
 
   // Keep page horizontal scroll locked at 0 so only inner containers scroll
   window.addEventListener('scroll', () => {
@@ -1468,6 +1468,26 @@ document.addEventListener('DOMContentLoaded', () => {
       window.scrollTo(0, window.scrollY);
     }
   }, { passive: true });
+
+  // Lock pinch-to-zoom & double-tap zoom on mobile so header & layout never shift
+  document.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
+  document.addEventListener('gestureend', (e) => e.preventDefault(), { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
 
 });
 
