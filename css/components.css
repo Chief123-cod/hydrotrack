@@ -20,8 +20,13 @@
   flex-direction: column;
   gap: 22px;
   width: 100%;
-  padding: 24px 40px 48px;
   box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .dashboard-page-container {
+    padding: 24px 40px 48px;
+  }
 }
 
 /* ---------- Banner ---------- */
@@ -2029,8 +2034,13 @@
   width: 100%;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 24px 40px 64px;
   box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .main-content--stats #view-analytics {
+    padding: 24px 40px 64px;
+  }
 }
 
 /* 1. Medium Metric Cards Row */
