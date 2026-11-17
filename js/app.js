@@ -90,6 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
     item.addEventListener('click', (e) => {
       if (item.classList.contains('active')) {
         e.preventDefault();
+        const mainMenu = document.getElementById('settingsMainMenu');
+        if (mainMenu && !mainMenu.classList.contains('active')) {
+          document.querySelectorAll('.m3-settings-view').forEach(v => v.classList.remove('active'));
+          mainMenu.classList.add('active');
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
         const mainEl = document.querySelector('.main-content');
         if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1322,12 +1327,121 @@ document.addEventListener('DOMContentLoaded', () => {
   function initSettingsPage() {
     UI.renderSettings();
 
-    // 1. Profile Form (Personal: Gender, Name & Daily Goals: Goal, Activity)
+    // 0. Sub-view Navigation (Main Settings Menu <-> Profile / Appearance / Data / About)
+    const allSettingsViews = document.querySelectorAll('.m3-settings-view');
+    const mainMenuView = document.getElementById('settingsMainMenu');
+
+    function showSettingsSubview(targetId) {
+      allSettingsViews.forEach(v => v.classList.remove('active'));
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.classList.add('active');
+      } else if (mainMenuView) {
+        mainMenuView.classList.add('active');
+      }
+      const mainEl = document.querySelector('.main-content');
+      if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('[data-open-subview]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-open-subview');
+        if (targetId) showSettingsSubview(targetId);
+      });
+    });
+
+    document.querySelectorAll('[data-back-main]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showSettingsSubview('settingsMainMenu');
+      });
+    });
+
+    // Accordion Expand / Collapse Cards
+    document.querySelectorAll('[data-toggle-accordion]').forEach(headerBtn => {
+      headerBtn.addEventListener('click', () => {
+        const cardId = headerBtn.getAttribute('data-toggle-accordion');
+        const cardEl = document.getElementById(cardId);
+        if (cardEl) {
+          cardEl.classList.toggle('is-open');
+        }
+      });
+    });
+
+    // Inline Profile Name Editor
+    const btnToggleEditName = document.getElementById('btnToggleEditName');
+    const inlineNameEditor = document.getElementById('inlineNameEditor');
+    const btnApplyName = document.getElementById('btnApplyName');
+    const userNameInput = document.getElementById('inputUserName');
+
+    if (btnToggleEditName && inlineNameEditor) {
+      btnToggleEditName.addEventListener('click', () => {
+        inlineNameEditor.classList.toggle('hidden');
+        if (!inlineNameEditor.classList.contains('hidden') && userNameInput) {
+          userNameInput.focus();
+          userNameInput.select();
+        }
+      });
+    }
+
+    if (btnApplyName && userNameInput) {
+      btnApplyName.addEventListener('click', () => {
+        const newName = userNameInput.value.trim();
+        if (!newName) {
+          UI.showToast('Nama pengguna tidak boleh kosong!', 'warning');
+          return;
+        }
+        Storage.saveSettings({ userName: newName });
+        UI.updateUserInfo();
+        UI.renderSettings();
+        if (inlineNameEditor) inlineNameEditor.classList.add('hidden');
+        UI.showToast('Nama pengguna berhasil diperbarui! ✨', 'success');
+      });
+    }
+
+    // Instant Gender Selection
+    document.querySelectorAll('input[name="gender"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) {
+          Storage.saveSettings({ gender: radio.value });
+          UI.renderSettings();
+          UI.showToast('Gender berhasil disimpan! ✨', 'success');
+        }
+      });
+    });
+
+    // Instant Activity Level Selection
+    document.querySelectorAll('input[name="activity_radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) {
+          const activitySelect = document.getElementById('selectActivity');
+          if (activitySelect) activitySelect.value = radio.value;
+          Storage.saveSettings({ activityLevel: radio.value });
+          UI.renderSettings();
+          UI.showToast('Tingkat aktivitas berhasil disimpan! ✨', 'success');
+        }
+      });
+    });
+
+    // Instant Daily Goal Presets
+    document.querySelectorAll('[data-goal-preset]').forEach(presetBtn => {
+      presetBtn.addEventListener('click', () => {
+        const val = parseInt(presetBtn.getAttribute('data-goal-preset'));
+        const goalInput = document.getElementById('inputDailyGoal');
+        if (val && goalInput) {
+          goalInput.value = val;
+          Storage.saveSettings({ dailyGoal: val });
+          UI.renderSettings();
+          UI.showToast(`Target harian ${val.toLocaleString('id-ID')} ml berhasil disimpan! ✨`, 'success');
+        }
+      });
+    });
+
+    // 1. Profile Form Submit (Personal: Gender, Name & Daily Goals: Goal, Activity)
     const profileForm = document.getElementById('settingsProfileForm');
     if (profileForm) {
       profileForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const userNameInput = document.getElementById('inputUserName');
         const userName = userNameInput ? userNameInput.value.trim() : 'Faith';
 
         const genderRadio = document.querySelector('input[name="gender"]:checked');
@@ -1358,6 +1472,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         UI.updateUserInfo();
         UI.renderSettings();
+        if (inlineNameEditor) inlineNameEditor.classList.add('hidden');
         UI.showToast('Profil dan target berhasil disimpan! ✨', 'success');
       });
     }

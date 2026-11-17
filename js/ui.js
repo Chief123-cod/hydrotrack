@@ -1008,26 +1008,37 @@ const UI = (() => {
 
   function renderSettings() {
     const settings = Storage.getSettings();
+    const userName = (settings.userName || 'Faith').trim() || 'Faith';
+    const initial = userName.charAt(0).toUpperCase();
 
-    // 1. Profile Greeting & Display Name
+    // 1. Main Menu & Profile Header Avatar Initial & Name
+    const menuInitialEl = document.getElementById('menuProfileInitial');
+    if (menuInitialEl) menuInitialEl.textContent = initial;
+
+    const profileInitialEl = document.getElementById('profileInitial');
+    if (profileInitialEl) profileInitialEl.textContent = initial;
+
+    const menuNameEl = document.getElementById('menuProfileName');
+    if (menuNameEl) menuNameEl.textContent = userName;
+
+    const displayNameEl = document.getElementById('profileNameDisplay');
+    if (displayNameEl) displayNameEl.textContent = userName;
+
     const greetingEl = document.getElementById('profileGreeting');
     if (greetingEl) {
       const hour = new Date().getHours();
-      let greeting = 'Selamat Sore';
-      if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi';
-      else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang';
-      else if (hour >= 15 && hour < 19) greeting = 'Selamat Sore';
-      else greeting = 'Selamat Malam';
+      let greeting = 'Selamat Sore,';
+      if (hour >= 4 && hour < 11) greeting = 'Selamat Pagi,';
+      else if (hour >= 11 && hour < 15) greeting = 'Selamat Siang,';
+      else if (hour >= 15 && hour < 19) greeting = 'Selamat Sore,';
+      else greeting = 'Selamat Malam,';
       greetingEl.textContent = greeting;
     }
 
-    const displayNameEl = document.getElementById('profileNameDisplay');
-    if (displayNameEl) displayNameEl.textContent = settings.userName || 'Faith';
-
-    // 2. Inner Mini Card: today's entries, days tracked, today's Goal
+    // 2. Inner Mini Card: Today's Entries, Days Tracked, Today's Goal
+    const todayLogs = Storage.getTodayLogs ? Storage.getTodayLogs() : [];
     const todayEntriesEl = document.getElementById('profileTodayEntries');
     if (todayEntriesEl) {
-      const todayLogs = Storage.getTodayLogs ? Storage.getTodayLogs() : [];
       todayEntriesEl.textContent = todayLogs.length;
     }
 
@@ -1037,16 +1048,28 @@ const UI = (() => {
       daysTrackedEl.textContent = daysCount;
     }
 
+    const dailyGoalVal = settings.dailyGoal || 2000;
     const todayGoalEl = document.getElementById('profileTodayGoal');
     if (todayGoalEl) {
-      todayGoalEl.textContent = formatMl(settings.dailyGoal || 2000);
+      const todayTotal = todayLogs.reduce((sum, l) => sum + (l.amount || 0), 0);
+      const pct = dailyGoalVal > 0 ? Math.min(100, Math.round((todayTotal / dailyGoalVal) * 100)) : 0;
+      todayGoalEl.textContent = `${pct}%`;
+      todayGoalEl.title = `${formatMl(todayTotal)} / ${formatMl(dailyGoalVal)}`;
     }
 
     // 3. Personal: Name Input & Gender
     const nameInput = document.getElementById('inputUserName');
-    if (nameInput) nameInput.value = settings.userName || 'Faith';
+    if (nameInput) nameInput.value = userName;
 
     const gender = settings.gender || 'prefer-not-to-say';
+    const genderLabels = {
+      'male': 'Male',
+      'female': 'Female',
+      'prefer-not-to-say': 'Prefer not to say'
+    };
+    const genderLabelEl = document.getElementById('genderCurrentLabel');
+    if (genderLabelEl) genderLabelEl.textContent = genderLabels[gender] || 'Prefer not to say';
+
     const genderRadios = document.querySelectorAll('input[name="gender"]');
     genderRadios.forEach(radio => {
       radio.checked = (radio.value === gender);
@@ -1054,10 +1077,33 @@ const UI = (() => {
 
     // 4. Daily Goals: Water Goal & Activity Level
     const goalInput = document.getElementById('inputDailyGoal');
-    if (goalInput) goalInput.value = settings.dailyGoal || 2000;
+    if (goalInput) goalInput.value = dailyGoalVal;
+
+    const dailyGoalLabelEl = document.getElementById('dailyGoalCurrentLabel');
+    if (dailyGoalLabelEl) {
+      dailyGoalLabelEl.textContent = dailyGoalVal >= 1000 && dailyGoalVal % 500 === 0
+        ? `${dailyGoalVal / 1000} L (${formatMl(dailyGoalVal)})`
+        : formatMl(dailyGoalVal);
+    }
+
+    const activity = settings.activityLevel || 'moderate';
+    const activityLabels = {
+      'sedentary': 'Sedentary',
+      'light': 'Light Activity',
+      'moderate': 'Moderate Activity',
+      'active': 'Active',
+      'very_active': 'Very Active'
+    };
+    const activityLabelEl = document.getElementById('activityCurrentLabel');
+    if (activityLabelEl) activityLabelEl.textContent = activityLabels[activity] || 'Moderate Activity';
 
     const activitySelect = document.getElementById('selectActivity');
-    if (activitySelect) activitySelect.value = settings.activityLevel || 'moderate';
+    if (activitySelect) activitySelect.value = activity;
+
+    const activityRadios = document.querySelectorAll('input[name="activity_radio"]');
+    activityRadios.forEach(radio => {
+      radio.checked = (radio.value === activity);
+    });
 
     // 5. Appearance: Theme
     const currentTheme = settings.theme || 'system';

@@ -104,10 +104,10 @@
 
         <!-- ===== VIEW: SETTINGS ===== -->
         <section class="view view--active" id="view-settings">
-            <div class="settings-page-container">
+            <div class="settings-page-container m3-settings-container">
 
-                <!-- Top Header Bar -->
-                <header class="top-header settings-top-header">
+                <!-- Top Header Bar (Desktop Only > 1024px) -->
+                <header class="top-header settings-top-header desktop-only-header">
                     <div class="top-header__left">
                         <h1 class="top-header__greeting">Settings</h1>
                         <p class="top-header__subtitle">Kelola profil pribadi, target hidrasi harian, tema tampilan, dan data aplikasi.</p>
@@ -117,378 +117,457 @@
                     </div>
                 </header>
 
-                <!-- ========== 1. PROFIL & GOALS ========== -->
-                <div class="card settings-section-card">
-                    <!-- Profile Header / Hero -->
-                    <div class="profile-hero">
-                        <div class="profile-avatar-wrap">
-                            <div class="profile-avatar">
-                                <i class="ri-user-3-fill"></i>
-                            </div>
-                            <div class="profile-avatar-badge" title="Profile Avatar">
-                                <i class="ri-sparkling-fill"></i>
-                            </div>
+                <!-- ==========================================
+                     MAIN SETTINGS MENU (Mobile & Tablet <= 1024px — Gambar 1)
+                     ========================================== -->
+                <div class="m3-settings-view active" id="settingsMainMenu">
+                    <h1 class="m3-page-title">Settings</h1>
+
+                    <!-- 1. Standalone Profile Pill Card -->
+                    <button type="button" class="m3-nav-card m3-nav-card--profile" data-open-subview="subview-profile">
+                        <div class="m3-avatar-circle" id="menuProfileInitial">F</div>
+                        <div class="m3-nav-card__info">
+                            <span class="m3-nav-card__title">Profile</span>
+                            <span class="m3-nav-card__sub" id="menuProfileName">Faith</span>
                         </div>
-                        <div class="profile-hero-info">
-                            <span class="profile-greeting" id="profileGreeting">Selamat Sore</span>
-                            <h2 class="profile-name-display" id="profileNameDisplay">Faith</h2>
-                            <p class="profile-tagline">Kelola profil pribadi dan preferensi konsumsi air harian Anda.</p>
-                        </div>
+                    </button>
+
+                    <!-- 2. Segmented Group: Appearance, Data Management, About -->
+                    <div class="m3-segmented-list">
+                        <!-- Appearance -->
+                        <button type="button" class="m3-nav-card m3-nav-card--top" data-open-subview="subview-appearance">
+                            <div class="m3-nav-card__icon">
+                                <i class="ri-palette-fill"></i>
+                            </div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Appearance</span>
+                                <span class="m3-nav-card__sub" id="menuAppearanceSub">System, Light and Dark theme</span>
+                            </div>
+                        </button>
+
+                        <!-- Data Management -->
+                        <button type="button" class="m3-nav-card m3-nav-card--mid" data-open-subview="subview-data">
+                            <div class="m3-nav-card__icon">
+                                <i class="ri-save-3-fill"></i>
+                            </div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Data Management</span>
+                                <span class="m3-nav-card__sub">Export as CSV and delete your data</span>
+                            </div>
+                        </button>
+
+                        <!-- About -->
+                        <button type="button" class="m3-nav-card m3-nav-card--bottom" data-open-subview="subview-about">
+                            <div class="m3-nav-card__icon">
+                                <i class="ri-information-fill"></i>
+                            </div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">About</span>
+                                <span class="m3-nav-card__sub">Tentang project ini dan contributors</span>
+                            </div>
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Inner Mini Card: Today's Entries, Days Tracked, Today's Goal -->
-                    <div class="profile-stats-card">
-                        <div class="profile-stat-item">
-                            <div class="profile-stat-icon">
-                                <i class="ri-cup-line"></i>
-                            </div>
-                            <div class="profile-stat-data">
-                                <span class="profile-stat-value" id="profileTodayEntries">0</span>
-                                <span class="profile-stat-label">today's entries</span>
-                            </div>
-                        </div>
+                <!-- ==========================================
+                     SUB-VIEW 1: PROFILE (Gambar 2)
+                     ========================================== -->
+                <div class="m3-settings-view" id="subview-profile">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                        <i class="ri-arrow-left-line"></i>
+                    </button>
+                    <h1 class="m3-page-title">Profile</h1>
 
-                        <div class="profile-stat-divider"></div>
-
-                        <div class="profile-stat-item">
-                            <div class="profile-stat-icon">
-                                <i class="ri-calendar-check-line"></i>
-                            </div>
-                            <div class="profile-stat-data">
-                                <span class="profile-stat-value" id="profileDaysTracked">0</span>
-                                <span class="profile-stat-label">days tracked</span>
-                            </div>
-                        </div>
-
-                        <div class="profile-stat-divider"></div>
-
-                        <div class="profile-stat-item">
-                            <div class="profile-stat-icon">
-                                <i class="ri-focus-3-line"></i>
-                            </div>
-                            <div class="profile-stat-data">
-                                <span class="profile-stat-value" id="profileTodayGoal">2.000 ml</span>
-                                <span class="profile-stat-label">today's Goal</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-divider"></div>
-
-                    <!-- Profile Form: Personal & Daily Goals -->
-                    <form id="settingsProfileForm" class="settings-form-grid" novalidate>
-                        <div class="settings-form-columns">
-                            <!-- Label: Personal -->
-                            <div class="settings-group">
-                                <div class="settings-group-header">
-                                    <span class="settings-group-tag">Personal</span>
-                                    <h4 class="settings-group-title">Data Diri</h4>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="inputUserName">Nama Pengguna</label>
-                                    <div class="form-input-wrapper">
-                                        <i class="ri-user-line"></i>
-                                        <input type="text" id="inputUserName" class="form-input"
-                                            placeholder="Masukkan nama pengguna" maxlength="30" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Gender</label>
-                                    <div class="segmented-picker" id="genderPicker">
-                                        <label class="segmented-option">
-                                            <input type="radio" name="gender" value="male">
-                                            <span class="segmented-box">
-                                                <i class="ri-men-line"></i> Male
-                                            </span>
-                                        </label>
-                                        <label class="segmented-option">
-                                            <input type="radio" name="gender" value="female">
-                                            <span class="segmented-box">
-                                                <i class="ri-women-line"></i> Female
-                                            </span>
-                                        </label>
-                                        <label class="segmented-option">
-                                            <input type="radio" name="gender" value="prefer-not-to-say" checked>
-                                            <span class="segmented-box">
-                                                <i class="ri-user-shared-line"></i> Prefer not to say
-                                            </span>
-                                        </label>
+                    <form id="settingsProfileForm" novalidate>
+                        <!-- Unified Hero Card (Avatar + Greeting + Name + 3 Stats Inside) -->
+                        <div class="m3-profile-hero-card">
+                            <div class="m3-profile-hero__top">
+                                <div class="m3-avatar-circle m3-avatar-circle--lg" id="profileInitial">F</div>
+                                <div class="m3-profile-hero__text">
+                                    <span class="m3-profile-greeting" id="profileGreeting">Good morning,</span>
+                                    <div class="m3-profile-name-wrap">
+                                        <h2 class="m3-profile-name" id="profileNameDisplay">Faith</h2>
+                                        <button type="button" class="m3-name-edit-btn" id="btnToggleEditName" title="Ubah Nama">
+                                            <i class="ri-Edit-2-line ri-pencil-line"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Label: Daily Goals -->
-                            <div class="settings-group">
-                                <div class="settings-group-header">
-                                    <span class="settings-group-tag">Daily Goals</span>
-                                    <h4 class="settings-group-title">Target & Tingkat Aktivitas</h4>
-                                </div>
+                            <!-- Collapsible Inline Name Editor -->
+                            <div class="m3-inline-name-editor hidden" id="inlineNameEditor">
+                                <input type="text" id="inputUserName" class="m3-input" placeholder="Masukkan nama Anda" maxlength="30" required>
+                                <button type="button" class="m3-btn-chip m3-btn-chip--primary" id="btnApplyName">Simpan</button>
+                            </div>
 
-                                <!-- 1. Daily Water Goal -->
-                                <div class="form-group">
-                                    <label class="form-label" for="inputDailyGoal">1. Daily Water Goal (ml)</label>
-                                    <div class="form-input-wrapper">
-                                        <i class="ri-drop-line"></i>
-                                        <input type="number" id="inputDailyGoal" class="form-input"
-                                            placeholder="Contoh: 2000" min="500" max="6000" step="50" required>
-                                    </div>
-                                    <span class="text-muted small">Standar kebutuhan hidrasi sehat berkisar antara 2.000 ml
-                                        – 3.000 ml / hari.</span>
+                            <!-- 3 Stats Row Inside Card -->
+                            <div class="m3-profile-hero__stats">
+                                <div class="m3-hero-stat">
+                                    <span class="m3-hero-stat__val" id="profileTodayEntries">0</span>
+                                    <span class="m3-hero-stat__lbl">Today's Entries</span>
                                 </div>
-
-                                <!-- 2. Activity Level -->
-                                <div class="form-group">
-                                    <label class="form-label" for="selectActivity">2. Activity Level</label>
-                                    <div class="form-input-wrapper">
-                                        <i class="ri-run-line"></i>
-                                        <select id="selectActivity" class="form-input form-select">
-                                            <option value="sedentary">1. Sedentary (Santai / Duduk bekerja)</option>
-                                            <option value="light">2. Light activity (Aktivitas ringan 1-2x/minggu)</option>
-                                            <option value="moderate" selected>3. Moderate activity (Olahraga sedang 3-5x/minggu)</option>
-                                            <option value="active">4. Active (Aktivitas tinggi / Olahraga setiap hari)</option>
-                                            <option value="very_active">5. Very active (Sangat aktif / Latihan fisik berat)</option>
-                                        </select>
-                                    </div>
+                                <div class="m3-hero-stat-divider"></div>
+                                <div class="m3-hero-stat">
+                                    <span class="m3-hero-stat__val" id="profileDaysTracked">0</span>
+                                    <span class="m3-hero-stat__lbl">Days Tracked</span>
+                                </div>
+                                <div class="m3-hero-stat-divider"></div>
+                                <div class="m3-hero-stat">
+                                    <span class="m3-hero-stat__val" id="profileTodayGoal">0%</span>
+                                    <span class="m3-hero-stat__lbl">Today's Goal</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Action Submit -->
-                        <div class="settings-form-actions">
-                            <button type="submit" class="btn btn--primary" id="btnSaveProfile">
-                                <i class="ri-check-line"></i>
-                                <span>Simpan Profil & Target</span>
-                            </button>
+                        <div class="m3-profile-sections-grid">
+                            <div class="m3-profile-col">
+                                <!-- Section Label: Personal -->
+                                <h3 class="m3-section-heading">Personal</h3>
+                                <div class="m3-accordion-card m3-accordion-card--single" id="accordionGender">
+                                    <button type="button" class="m3-accordion-header" data-toggle-accordion="accordionGender">
+                                        <div class="m3-nav-card__icon">
+                                            <i class="ri-user-3-fill"></i>
+                                        </div>
+                                        <div class="m3-nav-card__info">
+                                            <span class="m3-nav-card__title">Gender</span>
+                                            <span class="m3-nav-card__sub" id="genderCurrentLabel">Male</span>
+                                        </div>
+                                        <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
+                                    </button>
+                                    <div class="m3-accordion-body">
+                                        <div class="m3-radio-list" id="genderPicker">
+                                            <label class="m3-radio-item">
+                                                <input type="radio" name="gender" value="male">
+                                                <span class="m3-radio-item__box">
+                                                    <i class="ri-men-line"></i>
+                                                    <span>Male</span>
+                                                    <i class="ri-check-line m3-radio-check"></i>
+                                                </span>
+                                            </label>
+                                            <label class="m3-radio-item">
+                                                <input type="radio" name="gender" value="female">
+                                                <span class="m3-radio-item__box">
+                                                    <i class="ri-women-line"></i>
+                                                    <span>Female</span>
+                                                    <i class="ri-check-line m3-radio-check"></i>
+                                                </span>
+                                            </label>
+                                            <label class="m3-radio-item">
+                                                <input type="radio" name="gender" value="prefer-not-to-say" checked>
+                                                <span class="m3-radio-item__box">
+                                                    <i class="ri-user-shared-line"></i>
+                                                    <span>Prefer not to say</span>
+                                                    <i class="ri-check-line m3-radio-check"></i>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="m3-profile-col">
+                                <!-- Section Label: Daily Goals -->
+                                <h3 class="m3-section-heading">Daily Goals</h3>
+                                <div class="m3-segmented-list">
+                                    <!-- 1. Daily Water Goal -->
+                                    <div class="m3-accordion-card m3-nav-card--top" id="accordionGoal">
+                                        <button type="button" class="m3-accordion-header" data-toggle-accordion="accordionGoal">
+                                            <div class="m3-nav-card__icon">
+                                                <i class="ri-drop-fill"></i>
+                                            </div>
+                                            <div class="m3-nav-card__info">
+                                                <span class="m3-nav-card__title">Daily Water Goal</span>
+                                                <span class="m3-nav-card__sub" id="dailyGoalCurrentLabel">2.000 ml</span>
+                                            </div>
+                                            <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
+                                        </button>
+                                        <div class="m3-accordion-body">
+                                            <div class="m3-goal-editor">
+                                                <div class="m3-goal-input-row">
+                                                    <input type="number" id="inputDailyGoal" class="m3-input" placeholder="2000" min="500" max="6000" step="50" required>
+                                                    <span class="m3-goal-unit">ml</span>
+                                                    <button type="submit" class="m3-btn-chip m3-btn-chip--primary" id="btnSaveProfile">Simpan</button>
+                                                </div>
+                                                <div class="m3-goal-presets">
+                                                    <button type="button" class="m3-preset-pill" data-goal-preset="1500">1.5 L</button>
+                                                    <button type="button" class="m3-preset-pill" data-goal-preset="2000">2 L</button>
+                                                    <button type="button" class="m3-preset-pill" data-goal-preset="2500">2.5 L</button>
+                                                    <button type="button" class="m3-preset-pill" data-goal-preset="3000">3 L</button>
+                                                </div>
+                                                <p class="m3-goal-hint">
+                                                    <i class="ri-information-line"></i>
+                                                    <span>Standar kebutuhan hidrasi sehat berkisar <strong>2.000 ml – 3.000 ml</strong> per hari sesuai aktivitas fisik Anda.</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Activity Level -->
+                                    <div class="m3-accordion-card m3-nav-card--bottom" id="accordionActivity">
+                                        <button type="button" class="m3-accordion-header" data-toggle-accordion="accordionActivity">
+                                            <div class="m3-nav-card__icon">
+                                                <svg class="m3-dumbbell-svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                                                    <path d="M5.64 3.51L3.51 5.64l1.42 1.41L3.51 8.46l2.13 2.13 1.41-1.42 6.36 6.36-1.42 1.41 2.13 2.13 1.41-1.42 1.41 1.42 2.13-2.13-1.42-1.41 1.42-1.41-2.13-2.13-1.41 1.42-6.36-6.36 1.42-1.41L8.46 3.51 7.05 4.93 5.64 3.51z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="m3-nav-card__info">
+                                                <span class="m3-nav-card__title">Activity Level</span>
+                                                <span class="m3-nav-card__sub" id="activityCurrentLabel">Moderate Activity</span>
+                                            </div>
+                                            <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
+                                        </button>
+                                        <div class="m3-accordion-body">
+                                            <select id="selectActivity" class="hidden" aria-hidden="true">
+                                                <option value="sedentary">Sedentary</option>
+                                                <option value="light">Light Activity</option>
+                                                <option value="moderate" selected>Moderate Activity</option>
+                                                <option value="active">Active</option>
+                                                <option value="very_active">Very Active</option>
+                                            </select>
+                                            <div class="m3-radio-list" id="activityPickerList">
+                                                <label class="m3-radio-item">
+                                                    <input type="radio" name="activity_radio" value="sedentary">
+                                                    <span class="m3-radio-item__box">
+                                                        <span>1. Sedentary (Santai / Duduk bekerja)</span>
+                                                        <i class="ri-check-line m3-radio-check"></i>
+                                                    </span>
+                                                </label>
+                                                <label class="m3-radio-item">
+                                                    <input type="radio" name="activity_radio" value="light">
+                                                    <span class="m3-radio-item__box">
+                                                        <span>2. Light Activity (Olahraga 1–2x/minggu)</span>
+                                                        <i class="ri-check-line m3-radio-check"></i>
+                                                    </span>
+                                                </label>
+                                                <label class="m3-radio-item">
+                                                    <input type="radio" name="activity_radio" value="moderate" checked>
+                                                    <span class="m3-radio-item__box">
+                                                        <span>3. Moderate Activity (Olahraga 3–5x/minggu)</span>
+                                                        <i class="ri-check-line m3-radio-check"></i>
+                                                    </span>
+                                                </label>
+                                                <label class="m3-radio-item">
+                                                    <input type="radio" name="activity_radio" value="active">
+                                                    <span class="m3-radio-item__box">
+                                                        <span>4. Active (Aktif olahraga setiap hari)</span>
+                                                        <i class="ri-check-line m3-radio-check"></i>
+                                                    </span>
+                                                </label>
+                                                <label class="m3-radio-item">
+                                                    <input type="radio" name="activity_radio" value="very_active">
+                                                    <span class="m3-radio-item__box">
+                                                        <span>5. Very Active (Latihan fisik berat)</span>
+                                                        <i class="ri-check-line m3-radio-check"></i>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
 
-                <!-- ========== 2. APPEARANCE ========== -->
-                <div class="card settings-section-card">
-                    <div class="settings-card__header">
-                        <div class="settings-card__icon"><i class="ri-palette-line"></i></div>
-                        <div>
-                            <h3 class="settings-card__title">Appearance</h3>
-                            <p class="settings-card__subtitle">Pilih tema visual antarmuka aplikasi sesuai kenyamanan Anda.</p>
-                        </div>
-                    </div>
+                <!-- ==========================================
+                     SUB-VIEW 2: APPEARANCE
+                     ========================================== -->
+                <div class="m3-settings-view" id="subview-appearance">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                        <i class="ri-arrow-left-line"></i>
+                    </button>
+                    <h1 class="m3-page-title">Appearance</h1>
 
-                    <div class="theme-selection-area">
-                        <label class="form-label mb-2">Thema</label>
-                        <div class="theme-cards-grid" id="themePicker">
-                            <!-- 1. System Theme -->
-                            <button type="button" class="theme-card theme-card--system active" data-theme-value="system">
-                                <div class="theme-card__preview theme-card__preview--system" aria-hidden="true">
-                                    <div class="preview-split preview-split--light">
-                                        <span class="preview-pill"></span>
-                                        <span class="preview-bar"></span>
-                                    </div>
-                                    <div class="preview-split preview-split--dark">
-                                        <span class="preview-pill"></span>
-                                        <span class="preview-bar"></span>
-                                    </div>
-                                </div>
-                                <div class="theme-card__body">
-                                    <div class="theme-card__icon"><i class="ri-computer-line"></i></div>
-                                    <div class="theme-card__content">
-                                        <span class="theme-card__title">System</span>
-                                        <span class="theme-card__desc">Otomatis ikuti tema perangkat</span>
-                                    </div>
-                                    <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
-                                </div>
-                            </button>
-
-                            <!-- 2. Light Theme -->
-                            <button type="button" class="theme-card theme-card--light" data-theme-value="light">
-                                <div class="theme-card__preview theme-card__preview--light" aria-hidden="true">
+                    <h3 class="m3-section-heading">Thema</h3>
+                    <div class="theme-cards-grid" id="themePicker">
+                        <!-- 1. System Theme -->
+                        <button type="button" class="theme-card theme-card--system active" data-theme-value="system">
+                            <div class="theme-card__preview theme-card__preview--system" aria-hidden="true">
+                                <div class="preview-split preview-split--light">
                                     <span class="preview-pill"></span>
                                     <span class="preview-bar"></span>
                                 </div>
-                                <div class="theme-card__body">
-                                    <div class="theme-card__icon"><i class="ri-sun-line"></i></div>
-                                    <div class="theme-card__content">
-                                        <span class="theme-card__title">Light</span>
-                                        <span class="theme-card__desc">Mode terang bersih & tajam</span>
-                                    </div>
-                                    <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
-                                </div>
-                            </button>
-
-                            <!-- 3. Dark Theme -->
-                            <button type="button" class="theme-card theme-card--dark" data-theme-value="dark">
-                                <div class="theme-card__preview theme-card__preview--dark" aria-hidden="true">
+                                <div class="preview-split preview-split--dark">
                                     <span class="preview-pill"></span>
                                     <span class="preview-bar"></span>
                                 </div>
-                                <div class="theme-card__body">
-                                    <div class="theme-card__icon"><i class="ri-moon-line"></i></div>
-                                    <div class="theme-card__content">
-                                        <span class="theme-card__title">Dark</span>
-                                        <span class="theme-card__desc">Mode gelap pekat & kontras jelas</span>
-                                    </div>
-                                    <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                            </div>
+                            <div class="theme-card__body">
+                                <div class="theme-card__icon"><i class="ri-computer-line"></i></div>
+                                <div class="theme-card__content">
+                                    <span class="theme-card__title">System</span>
+                                    <span class="theme-card__desc">Otomatis ikuti tema perangkat</span>
                                 </div>
-                            </button>
-                        </div>
+                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                            </div>
+                        </button>
+
+                        <!-- 2. Light Theme -->
+                        <button type="button" class="theme-card theme-card--light" data-theme-value="light">
+                            <div class="theme-card__preview theme-card__preview--light" aria-hidden="true">
+                                <span class="preview-pill"></span>
+                                <span class="preview-bar"></span>
+                            </div>
+                            <div class="theme-card__body">
+                                <div class="theme-card__icon"><i class="ri-sun-line"></i></div>
+                                <div class="theme-card__content">
+                                    <span class="theme-card__title">Light</span>
+                                    <span class="theme-card__desc">Mode terang bersih & tajam</span>
+                                </div>
+                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                            </div>
+                        </button>
+
+                        <!-- 3. Dark Theme -->
+                        <button type="button" class="theme-card theme-card--dark" data-theme-value="dark">
+                            <div class="theme-card__preview theme-card__preview--dark" aria-hidden="true">
+                                <span class="preview-pill"></span>
+                                <span class="preview-bar"></span>
+                            </div>
+                            <div class="theme-card__body">
+                                <div class="theme-card__icon"><i class="ri-moon-line"></i></div>
+                                <div class="theme-card__content">
+                                    <span class="theme-card__title">Dark</span>
+                                    <span class="theme-card__desc">Mode gelap pekat & kontras jelas</span>
+                                </div>
+                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
-                <!-- ========== 3. DATA MANAGEMENT ========== -->
-                <div class="card settings-section-card">
-                    <div class="settings-card__header">
-                        <div class="settings-card__icon"><i class="ri-database-2-line"></i></div>
-                        <div>
-                            <h3 class="settings-card__title">Data Management</h3>
-                            <p class="settings-card__subtitle">Kelola ekspor catatan riwayat, pembersihan data lokal, dan reset sistem.</p>
-                        </div>
-                    </div>
+                <!-- ==========================================
+                     SUB-VIEW 3: DATA MANAGEMENT
+                     ========================================== -->
+                <div class="m3-settings-view" id="subview-data">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                        <i class="ri-arrow-left-line"></i>
+                    </button>
+                    <h1 class="m3-page-title">Data Management</h1>
 
                     <!-- Export -->
-                    <div class="data-mgmt-block">
-                        <div class="data-mgmt-block-header">
-                            <span class="settings-group-tag text-success">Export</span>
-                            <h4 class="settings-group-title">Unduh Riwayat Minum</h4>
+                    <h3 class="m3-section-heading">Export</h3>
+                    <button type="button" class="m3-nav-card m3-nav-card--single" id="btnExportCSV">
+                        <div class="m3-nav-card__icon">
+                            <i class="ri-file-excel-2-fill"></i>
                         </div>
-                        <div class="data-mgmt-row">
-                            <div class="data-mgmt-info">
-                                <strong class="d-block text-dark mb-1">Export as CSV</strong>
-                                <p class="data-mgmt-text">Unduh seluruh catatan riwayat konsumsi air ke dalam file spreadsheet (.csv) untuk analisis di Excel atau Google Sheets.</p>
-                            </div>
-                            <button type="button" class="btn btn--secondary" id="btnExportCSV">
-                                <i class="ri-file-excel-2-line text-success"></i>
-                                <span>Export as CSV</span>
-                            </button>
+                        <div class="m3-nav-card__info">
+                            <span class="m3-nav-card__title">Export as CSV</span>
+                            <span class="m3-nav-card__sub">Unduh seluruh catatan riwayat konsumsi air ke file spreadsheet (.csv)</span>
                         </div>
-                    </div>
-
-                    <div class="settings-divider"></div>
+                        <i class="ri-download-2-line m3-action-trailing"></i>
+                    </button>
 
                     <!-- Delete Data -->
-                    <div class="data-mgmt-block">
-                        <div class="data-mgmt-block-header">
-                            <span class="settings-group-tag text-danger">Delete Data</span>
-                            <h4 class="settings-group-title">Penghapusan & Pembersihan Data</h4>
-                        </div>
-
+                    <h3 class="m3-section-heading">Delete Data</h3>
+                    <div class="m3-segmented-list">
                         <!-- 1. Delete entries before date -->
-                        <div class="data-mgmt-row">
-                            <div class="data-mgmt-info">
-                                <strong class="d-block text-dark mb-1">Delete entries before date</strong>
-                                <p class="data-mgmt-text">Hapus semua riwayat catatan sebelum tanggal tertentu. Data setelah tanggal tersebut akan tetap tersimpan.</p>
-                            </div>
-                            <div class="delete-before-actions">
-                                <input type="date" id="inputDeleteBeforeDate" class="form-input form-input--date">
-                                <button type="button" class="btn btn--outline-danger" id="btnDeleteBeforeDate">
-                                    <i class="ri-calendar-close-line"></i>
-                                    <span>Delete entries before date</span>
-                                </button>
+                        <div class="m3-accordion-card m3-nav-card--top" id="accordionDeleteBefore">
+                            <button type="button" class="m3-accordion-header" data-toggle-accordion="accordionDeleteBefore">
+                                <div class="m3-nav-card__icon">
+                                    <i class="ri-calendar-close-fill"></i>
+                                </div>
+                                <div class="m3-nav-card__info">
+                                    <span class="m3-nav-card__title">Delete entries before date</span>
+                                    <span class="m3-nav-card__sub">Hapus semua riwayat catatan sebelum tanggal tertentu</span>
+                                </div>
+                                <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
+                            </button>
+                            <div class="m3-accordion-body">
+                                <div class="m3-delete-date-row">
+                                    <input type="date" id="inputDeleteBeforeDate" class="m3-input">
+                                    <button type="button" class="m3-btn-chip m3-btn-chip--danger" id="btnDeleteBeforeDate">Hapus</button>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 2. Delete local data only -->
-                        <div class="data-mgmt-row">
-                            <div class="data-mgmt-info">
-                                <strong class="d-block text-dark mb-1">Delete local data only</strong>
-                                <p class="data-mgmt-text">Hapus seluruh riwayat entri pada penyimpanan browser ini tanpa menghapus profil dan target Anda.</p>
+                        <button type="button" class="m3-nav-card m3-nav-card--mid" id="btnDeleteLocalOnly">
+                            <div class="m3-nav-card__icon">
+                                <i class="ri-device-fill"></i>
                             </div>
-                            <button type="button" class="btn btn--outline-danger" id="btnDeleteLocalOnly">
-                                <i class="ri-device-line"></i>
-                                <span>Delete local data only</span>
-                            </button>
-                        </div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Delete local data only</span>
+                                <span class="m3-nav-card__sub">Hapus seluruh riwayat entri tanpa menghapus profil dan target Anda</span>
+                            </div>
+                        </button>
 
                         <!-- 3. Delete everything -->
-                        <div class="data-mgmt-row delete-row--danger">
-                            <div class="data-mgmt-info">
-                                <strong class="d-block text-danger mb-1">Delete everything</strong>
-                                <p class="data-mgmt-text text-danger-soft">Reset seluruh data aplikasi (semua entri riwayat, pengaturan akun, dan wadah kustom) kembali ke kondisi awal pabrik.</p>
+                        <button type="button" class="m3-nav-card m3-nav-card--bottom m3-nav-card--danger" id="btnDeleteEverything">
+                            <div class="m3-nav-card__icon m3-nav-card__icon--danger">
+                                <i class="ri-delete-bin-2-fill"></i>
                             </div>
-                            <button type="button" class="btn btn--danger" id="btnDeleteEverything">
-                                <i class="ri-delete-bin-2-line"></i>
-                                <span>Delete everything</span>
-                            </button>
-                        </div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Delete everything</span>
+                                <span class="m3-nav-card__sub">Reset seluruh data aplikasi kembali ke kondisi awal pabrik</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
-                <!-- ========== 4. ABOUT ========== -->
-                <div class="card settings-section-card">
-                    <div class="settings-card__header">
-                        <div class="settings-card__icon"><i class="ri-information-line"></i></div>
-                        <div>
-                            <h3 class="settings-card__title">About</h3>
-                            <p class="settings-card__subtitle">Informasi mengenai proyek HydroTrack dan tim pengembang.</p>
-                        </div>
-                    </div>
+                <!-- ==========================================
+                     SUB-VIEW 4: ABOUT
+                     ========================================== -->
+                <div class="m3-settings-view" id="subview-about">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                        <i class="ri-arrow-left-line"></i>
+                    </button>
+                    <h1 class="m3-page-title">About</h1>
 
-                    <!-- Project Info -->
-                    <div class="about-hero">
-                        <div class="about-logo">
-                            <i class="ri-drop-fill"></i>
-                        </div>
-                        <div class="about-details">
-                            <div class="about-app-name">
-                                <span>HydroTrack</span>
-                                <span class="about-version">v1.0.0</span>
+                    <!-- Project Info Card -->
+                    <div class="m3-profile-hero-card m3-about-hero-card">
+                        <div class="m3-about-top">
+                            <div class="m3-avatar-circle m3-avatar-circle--lg">
+                                <i class="ri-drop-fill"></i>
                             </div>
-                            <p class="about-desc">
-                                HydroTrack adalah aplikasi pelacak konsumsi air harian yang dirancang untuk membantu Anda membangun kebiasaan hidrasi yang sehat, disiplin mencapai target cairan tubuh, dan memantau perkembangan kesehatan secara terstruktur melalui visualisasi interaktif.
-                            </p>
-                            <div class="about-badges">
-                                <span class="badge-tech"><i class="ri-html5-line"></i> HTML5</span>
-                                <span class="badge-tech"><i class="ri-css3-line"></i> CSS3 Pure</span>
-                                <span class="badge-tech"><i class="ri-javascript-line"></i> Vanilla JS (ES6+)</span>
-                                <span class="badge-tech"><i class="ri-bar-chart-fill"></i> Chart.js</span>
-                                <span class="badge-tech"><i class="ri-remixicon-line"></i> Remix Icon</span>
+                            <div class="m3-about-title-wrap">
+                                <div class="about-app-name">
+                                    <span>HydroTrack</span>
+                                    <span class="about-version">v1.0.0</span>
+                                </div>
+                                <span class="m3-nav-card__sub">Daily Water Intake Tracker</span>
                             </div>
                         </div>
+                        <p class="m3-about-desc">
+                            HydroTrack adalah aplikasi pelacak konsumsi air harian yang dirancang untuk membantu Anda membangun kebiasaan hidrasi yang sehat, disiplin mencapai target cairan tubuh, dan memantau perkembangan kesehatan secara terstruktur melalui visualisasi interaktif.
+                        </p>
+                        <div class="about-badges">
+                            <span class="badge-tech"><i class="ri-html5-line"></i> HTML5</span>
+                            <span class="badge-tech"><i class="ri-css3-line"></i> CSS3 Pure</span>
+                            <span class="badge-tech"><i class="ri-javascript-line"></i> Vanilla JS (ES6+)</span>
+                            <span class="badge-tech"><i class="ri-bar-chart-fill"></i> Chart.js</span>
+                            <span class="badge-tech"><i class="ri-remixicon-line"></i> Remix Icon</span>
+                        </div>
                     </div>
-
-                    <div class="settings-divider"></div>
 
                     <!-- Contributors -->
-                    <div class="contributors-section">
-                        <div class="settings-group-header">
-                            <span class="settings-group-tag">Contributors</span>
-                            <h4 class="settings-group-title">Tim Pendiri Web HydroTrack</h4>
-                            <p class="text-muted small">Anggota tim pengembang Tugas Akhir Desain Web:</p>
+                    <h3 class="m3-section-heading">Contributors</h3>
+                    <div class="m3-segmented-list">
+                        <div class="m3-nav-card m3-nav-card--top m3-contributor-row">
+                            <div class="m3-avatar-circle">FA</div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Faith</span>
+                                <span class="m3-nav-card__sub">Lead Developer & UI Designer</span>
+                            </div>
+                            <span class="contributor-badge">Founder</span>
                         </div>
 
-                        <div class="contributors-grid">
-                            <div class="contributor-card">
-                                <div class="contributor-avatar">
-                                    <span>FA</span>
-                                </div>
-                                <div class="contributor-info">
-                                    <span class="contributor-name">Faith</span>
-                                    <span class="contributor-role">Lead Developer & UI Designer</span>
-                                    <span class="contributor-badge">Founder</span>
-                                </div>
+                        <div class="m3-nav-card m3-nav-card--mid m3-contributor-row">
+                            <div class="m3-avatar-circle m3-avatar-circle--alt1">HT</div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">HydroTrack Team</span>
+                                <span class="m3-nav-card__sub">Frontend & UI/UX Specialist</span>
                             </div>
+                            <span class="contributor-badge">Contributor</span>
+                        </div>
 
-                            <div class="contributor-card">
-                                <div class="contributor-avatar contributor-avatar--alt1">
-                                    <span>HT</span>
-                                </div>
-                                <div class="contributor-info">
-                                    <span class="contributor-name">HydroTrack Team</span>
-                                    <span class="contributor-role">Frontend & UI/UX Specialist</span>
-                                    <span class="contributor-badge">Contributor</span>
-                                </div>
+                        <div class="m3-nav-card m3-nav-card--bottom m3-contributor-row">
+                            <div class="m3-avatar-circle m3-avatar-circle--alt2">WD</div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Web Design Final Project</span>
+                                <span class="m3-nav-card__sub">System Architecture & QA</span>
                             </div>
-
-                            <div class="contributor-card">
-                                <div class="contributor-avatar contributor-avatar--alt2">
-                                    <span>WD</span>
-                                </div>
-                                <div class="contributor-info">
-                                    <span class="contributor-name">Web Design Final Project</span>
-                                    <span class="contributor-role">System Architecture & QA</span>
-                                    <span class="contributor-badge">Contributor</span>
-                                </div>
-                            </div>
+                            <span class="contributor-badge">Contributor</span>
                         </div>
                     </div>
                 </div>
