@@ -523,6 +523,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 50);
     });
 
+    window.addEventListener('blur', () => {
+      isDown = false;
+      hasMoved = false;
+      container.classList.remove('is-dragging');
+    });
+
     // Capture phase: if the user dragged/scrolled, suppress the button click so no drink is logged accidentally!
     container.addEventListener('click', (e) => {
       if (hasMoved) {

@@ -1406,6 +1406,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  pointer-events: none;
 }
 
 .toast {
@@ -1421,6 +1422,7 @@
   max-width: 420px;
   animation: toastIn 0.35s ease;
   transition: all var(--transition-base);
+  pointer-events: auto;
 }
 
 .toast--success {
@@ -4266,6 +4268,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  pointer-events: none;
 }
 
 .fab-main-btn {
@@ -4284,6 +4287,7 @@
   transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   z-index: 1002;
+  pointer-events: auto;
 }
 
 .fab-main-btn i {
