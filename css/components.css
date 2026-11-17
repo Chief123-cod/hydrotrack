@@ -4460,36 +4460,35 @@
 @media (max-width: 768px) {
   body.page-history,
   body:has(.main-content--history) {
-    overflow: hidden !important;
-    height: 100vh;
-    max-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+    min-height: 100%;
   }
 }
 
-/* Pada Desktop (>= 769px), body tidak dikunci sehingga navbar & header bebas berdiri rapi seperti halaman lain */
+/* Pada Desktop (>= 769px), halaman Riwayat tidak boleh di-scroll ke bawah (kunci 100vh presisi tanpa scrollbar) */
 @media (min-width: 769px) {
   body.page-history,
   body:has(.main-content--history) {
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: auto;
-    max-height: none;
+    overflow: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
   }
 
   .main-content--history {
     margin-left: var(--sidebar-width);
     width: calc(100% - var(--sidebar-width));
     max-width: calc(100vw - var(--sidebar-width));
-    min-height: 100vh;
-    height: auto !important;
-    max-height: none !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
     padding: 0 !important;
     box-sizing: border-box;
-    overflow: visible !important;
+    overflow: hidden !important;
   }
 
   .history-top-header {
@@ -4521,12 +4520,14 @@
   .main-content--history #view-history {
     width: 100%;
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px 40px 48px;
+    padding: 12px 32px 18px;
     box-sizing: border-box;
+    overflow: hidden !important;
   }
 }
 
@@ -4548,18 +4549,18 @@
   width: 100%;
   max-width: 920px;
   margin: 0 auto;
-  padding: 20px 28px;
-  gap: 12px;
+  padding: 18px 28px;
+  gap: 10px;
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
   border: 1px solid var(--color-border);
   box-sizing: border-box;
   overflow: hidden;
-  /* Ketinggian dikunci permanen agar card tetap diam dan tidak melompat */
-  height: 590px;
-  min-height: 590px;
-  max-height: 590px;
+  /* Ketinggian adaptif presisi agar di layar desktop tidak memicu scrollbar */
+  height: min(565px, calc(100vh - var(--top-header-height) - 34px));
+  min-height: 460px;
+  max-height: 565px;
 }
 
 /* Segmented Control Tabs */
@@ -4691,7 +4692,7 @@
   justify-content: space-between;
   align-items: flex-end;
   height: 100%;
-  padding: 8px 6px 4px;
+  padding: 8px 12px 4px;
   gap: 10px;
   position: relative;
   box-sizing: border-box;
@@ -4700,9 +4701,9 @@
 .weekly-chart-bars::before {
   content: '';
   position: absolute;
-  top: 14px;
-  left: 6px;
-  right: 6px;
+  bottom: 181px;
+  left: 12px;
+  right: 12px;
   border-top: 1.5px dashed #CBD5E1;
   pointer-events: none;
   z-index: 1;
@@ -4819,6 +4820,9 @@
   align-items: center;
   line-height: 1.15;
   gap: 2px;
+  height: 32px;
+  min-height: 32px;
+  justify-content: center;
 }
 
 .weekly-day-num {
@@ -5205,15 +5209,15 @@
   }
 
   .main-content--history #view-history {
-    padding: 12px 24px 24px !important;
+    padding: 10px 24px 16px !important;
   }
 
   .history-visual-card {
-    height: 520px;
-    min-height: 520px;
-    max-height: 520px;
-    padding: 16px 24px;
-    gap: 10px;
+    height: 490px;
+    min-height: 450px;
+    max-height: 490px;
+    padding: 14px 24px;
+    gap: 8px;
   }
 
   .history-visual-container {
@@ -5226,9 +5230,14 @@
     height: 110px;
   }
 
+  .weekly-chart-bars::before {
+    bottom: 156px !important;
+    top: auto !important;
+  }
+
   .history-recent-entries {
-    height: 125px;
-    min-height: 125px;
+    height: 115px;
+    min-height: 115px;
     max-height: 125px;
   }
 }
@@ -5588,6 +5597,12 @@
 /* Weekly Chart Dark Mode */
 [data-theme="dark"] .weekly-chart-bars::before {
   border-top-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] .weekly-chart-bars::before {
+    border-top-color: rgba(255, 255, 255, 0.16) !important;
+  }
 }
 
 [data-theme="dark"] .weekly-bar-col:hover {

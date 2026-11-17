@@ -623,6 +623,48 @@ img {
   color: var(--color-primary);
 }
 
+/* Konsistensi warna teks header saat pergantian tema (Light, Dark, System) */
+[data-theme="dark"] .top-header__greeting,
+[data-theme="dark"] .history-top-header .top-header__greeting,
+[data-theme="dark"] .stats-top-header .top-header__greeting,
+[data-theme="dark"] .settings-top-header .top-header__greeting,
+[data-theme="dark"] .m3-page-title,
+[data-theme="dark"] #greetingTime {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] #headerUserName {
+  color: var(--color-primary) !important;
+}
+
+[data-theme="light"] .top-header__greeting,
+[data-theme="light"] .history-top-header .top-header__greeting,
+[data-theme="light"] .stats-top-header .top-header__greeting,
+[data-theme="light"] .settings-top-header .top-header__greeting,
+[data-theme="light"] .m3-page-title,
+[data-theme="light"] #greetingTime {
+  color: #1E293B !important;
+}
+
+[data-theme="light"] #headerUserName {
+  color: var(--color-primary) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] .top-header__greeting,
+  [data-theme="system"] .history-top-header .top-header__greeting,
+  [data-theme="system"] .stats-top-header .top-header__greeting,
+  [data-theme="system"] .settings-top-header .top-header__greeting,
+  [data-theme="system"] .m3-page-title,
+  [data-theme="system"] #greetingTime {
+    color: #FFFFFF !important;
+  }
+
+  [data-theme="system"] #headerUserName {
+    color: var(--color-primary) !important;
+  }
+}
+
 .top-header__subtitle {
   display: none !important;
 }
