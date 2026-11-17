@@ -13,6 +13,8 @@ const UI = (() => {
     if (headerUser) headerUser.textContent = settings.userName;
     const sidebarUser = document.getElementById('sidebarUserName');
     if (sidebarUser) sidebarUser.textContent = settings.userName;
+    const topHeaderUser = document.getElementById('topHeaderUserName');
+    if (topHeaderUser) topHeaderUser.textContent = settings.userName;
     updateGreeting();
   }
 
@@ -238,7 +240,9 @@ const UI = (() => {
     const headerDate = document.getElementById('headerDate');
     const mobileDate = document.getElementById('mobileDate');
 
-    if (headerDate) headerDate.textContent = dateStr;
+    if (headerDate) {
+      headerDate.innerHTML = `<i class="ri-calendar-2-line"></i><span>${dateStr}</span>`;
+    }
     if (mobileDate) {
       mobileDate.textContent = now.toLocaleDateString('id-ID', {
         day: 'numeric',

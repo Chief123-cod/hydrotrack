@@ -121,6 +121,12 @@
     margin-bottom: 8px;
     width: 100%;
     flex-shrink: 0;
+    border-bottom: none !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    background: transparent !important;
+    padding: 0 !important;
   }
 
   .history-top-header .top-header__right {
@@ -151,6 +157,16 @@
   .top-header {
     flex-direction: column;
     gap: var(--spacing-md);
+    border-bottom: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    background: transparent !important;
+  }
+
+  .top-header__profile {
+    display: none !important;
   }
 
   .top-header__right {
@@ -525,6 +541,12 @@
     width: 100%;
     max-width: 100%;
     flex-shrink: 0;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    border-bottom: none !important;
+    background: transparent !important;
+    padding: 0 !important;
   }
 
   .history-top-header .top-header__greeting {

@@ -7,7 +7,7 @@
    ============================================ */
 
 .main-content--dashboard {
-  padding: 32px 40px;
+  padding: 0;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -20,10 +20,8 @@
   flex-direction: column;
   gap: 22px;
   width: 100%;
-}
-
-.dashboard-page-container .top-header {
-  margin-bottom: 0;
+  padding: 24px 40px 48px;
+  box-sizing: border-box;
 }
 
 /* ---------- Banner ---------- */
@@ -1991,7 +1989,7 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding: 32px 28px 64px 28px;
+  padding: 0;
   min-height: 100vh;
 }
 
@@ -2002,14 +2000,15 @@
     max-width: calc(100vw - var(--sidebar-width));
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    padding: 0;
   }
 }
 
 .stats-top-header {
-  width: 100%;
-  max-width: 1020px;
-  margin: 0 auto 24px auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
   flex-shrink: 0;
 }
 
@@ -2028,8 +2027,10 @@
 
 .main-content--stats #view-analytics {
   width: 100%;
-  max-width: 1020px;
+  max-width: 1040px;
   margin: 0 auto;
+  padding: 24px 40px 64px;
+  box-sizing: border-box;
 }
 
 /* 1. Medium Metric Cards Row */
@@ -2595,14 +2596,22 @@
 
 /* Desktop Mode (> 1024px): Tampilkan seluruh section terbuka sekaligus seperti dashboard Desktop */
 @media (min-width: 1025px) {
-  .m3-settings-container {
-    max-width: 1020px;
-    gap: 28px;
+  .main-content--settings {
+    padding: 0;
   }
 
   .desktop-only-header {
     display: flex !important;
-    margin-bottom: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .m3-settings-container {
+    max-width: 1040px;
+    gap: 28px;
+    padding: 28px 40px 64px;
+    box-sizing: border-box;
   }
 
   #settingsMainMenu,
@@ -4437,53 +4446,78 @@
    ============================================================ */
 
 /* ==================== MODERN HISTORY DASHBOARD (Weekly / Monthly / Yearly) ==================== */
-body.page-history,
-body:has(.main-content--history) {
-  overflow: hidden !important;
-  height: 100vh;
-  max-height: 100vh;
+/* Pada mobile (<= 768px), body dan container tetap terkunci agar pas di layar HP */
+@media (max-width: 768px) {
+  body.page-history,
+  body:has(.main-content--history) {
+    overflow: hidden !important;
+    height: 100vh;
+    max-height: 100vh;
+  }
 }
 
-.main-content--history {
-  height: 100vh;
-  max-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0 24px;
-  overflow: hidden !important;
-  box-sizing: border-box;
-}
+/* Pada Desktop (>= 769px), body tidak dikunci sehingga navbar & header bebas berdiri rapi seperti halaman lain */
+@media (min-width: 769px) {
+  body.page-history,
+  body:has(.main-content--history) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    max-height: none;
+  }
 
-.history-top-header {
-  max-width: 920px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 12px;
-  width: 100%;
-  flex-shrink: 0;
-}
+  .main-content--history {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    max-width: calc(100vw - var(--sidebar-width));
+    min-height: 100vh;
+    height: auto !important;
+    max-height: none !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0 !important;
+    box-sizing: border-box;
+    overflow: visible !important;
+  }
 
-.history-top-header .top-header__greeting {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--color-text-primary);
-  letter-spacing: -0.3px;
-}
+  .history-top-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--top-header-height) !important;
+    min-height: var(--top-header-height) !important;
+    max-height: var(--top-header-height) !important;
+    padding: 0 40px !important;
+    margin: 0 !important;
+    border-bottom: 1.5px solid var(--border-divider) !important;
+    background: var(--color-surface);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0;
+  }
 
-.history-top-header .top-header__subtitle {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
-}
+  .history-top-header .top-header__greeting {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.2;
+    margin: 0;
+  }
 
-.main-content--history #view-history {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  .main-content--history #view-history {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 40px 48px;
+    box-sizing: border-box;
+  }
 }
 
 .history-dashboard-grid {
@@ -5153,11 +5187,15 @@ body:has(.main-content--history) {
 /* Responsif Laptop dengan Layar Lebih Pendek (<= 760px Height) */
 @media (max-height: 760px) and (min-width: 769px) {
   .main-content--history {
-    padding: 10px 24px;
+    padding: 0 !important;
   }
 
   .history-top-header {
-    margin-bottom: 8px;
+    margin-bottom: 0 !important;
+  }
+
+  .main-content--history #view-history {
+    padding: 12px 24px 24px !important;
   }
 
   .history-visual-card {
