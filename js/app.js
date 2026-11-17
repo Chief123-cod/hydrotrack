@@ -4,6 +4,18 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* ==================== ONBOARDING CHECK ==================== */
+  // Redirect to welcome onboarding if settings don't exist or after a factory reset
+  const isWelcomePage = window.location.pathname.endsWith('welcome.html');
+  if (!isWelcomePage) {
+    const hasSettings = localStorage.getItem('hydrotrack_settings');
+    const needsOnboarding = localStorage.getItem('hydrotrack_onboarding_needed') === 'true';
+    if (!hasSettings || needsOnboarding) {
+      window.location.href = 'welcome.html';
+      return;
+    }
+  }
+
   /* ==================== HISTORY STATE ==================== */
   const historyState = {
     period: 'weekly',
@@ -1566,11 +1578,11 @@ document.addEventListener('DOMContentLoaded', () => {
           'Reset Total',
           () => {
             Storage.resetAllData();
-            UI.renderSettings();
-            UI.showToast('Aplikasi berhasil direset ke kondisi awal!', 'info');
+            localStorage.setItem('hydrotrack_onboarding_needed', 'true');
+            UI.showToast('Aplikasi berhasil direset. Mengalihkan ke pendaftaran...', 'info');
             setTimeout(() => {
-              window.location.reload();
-            }, 800);
+              window.location.href = 'welcome.html';
+            }, 600);
           }
         );
       });

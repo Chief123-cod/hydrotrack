@@ -42,6 +42,17 @@ Proyek ini dibangun menggunakan **HTML5**, **CSS3 Murni (Custom Properties, Flex
   - **Delete Data:** Opsi *Delete entries before date* (hapus catatan sebelum tanggal tertentu), *Delete local data only* (hapus riwayat tanpa menghapus profil), dan *Delete everything* (reset penuh ke pengaturan awal).
 - **About & Contributors:** Informasi versi aplikasi, teknologi yang digunakan, dan daftar tim pengembang.
 
+### 5. 🌊 Welcome & Onboarding Setup (`welcome.html`)
+- **Interactive Multi-Step Setup:** Tampilan wizard 8 langkah interaktif yang otomatis muncul saat pertama kali membuka aplikasi atau setelah pengguna melakukan *Delete everything (Reset Pabrik)* di halaman pengaturan:
+  1. **Welcome Screen:** Pengenalan fitur personalisasi dan sambutan.
+  2. **Tell Us About Yourself:** Pemilihan gender (*Male*, *Female*, *Prefer not to say*).
+  3. **Age Group:** Penentuan kelompok usia (*18–30*, *31–50*, *51–60*, *60+ years*).
+  4. **Activity Level:** Penyesuaian tingkat aktivitas harian (*Sedentary*, *Light*, *Moderate*, *Active*).
+  5. **Schedule (Wake & Sleep Time):** Waktu bangun & tidur dengan kalkulator otomatis durasi jam aktif (*Awake duration*).
+  6. **Complete Your Profile:** Pendaftaran nama panggilan dengan avatar inisial dinamis dan counter karakter.
+  7. **Personalized Goal Review:** Algoritma kalkulasi rekomendasi target air harian (*Daily Water Goal*) dan interval pengingat (*Reminder Interval*).
+  8. **You're All Set!:** Layar konfirmasi selebrasi dengan tombol *Start hydrating* untuk menyimpan data ke `localStorage` dan langsung dialihkan ke Dashboard.
+
 ---
 
 ## 🚀 Cara Menjalankan Aplikasi
@@ -76,21 +87,19 @@ Kemudian buka `http://localhost:8080` di browser Anda.
 
 ## 🖼️ Screenshot Aplikasi
 
-> Letakkan file gambar tangkapan layar aplikasi Anda pada folder `assets/screenshots/` sesuai nama file di bawah ini agar tampil otomatis di halaman GitHub.
-
 ### Tampilan Desktop
 | Home (`index.html`) | History (`riwayat.html`) |
 | :---: | :---: |
-| ![Home Desktop](home/home-desktop.png) | ![History Desktop](home/history-desktop.png) |
+| ![Home Desktop](img/home-desktop.png) | ![History Desktop](img/history-desktop.png) |
 
 | Statistics (`analisis.html`) | Settings (`pengaturan.html`) |
 | :---: | :---: |
-| ![Statistics Desktop](home/statistics-desktop.png) | ![Settings Desktop](home/settings-desktop.png) |
+| ![Statistics Desktop](img/statistics-desktop.png) | ![Settings Desktop](img/settings-desktop.png) |
 
 ### Tampilan Mobile (Responsive)
 | Home Mobile | History Mobile | Statistics Mobile | Settings Mobile |
 | :---: | :---: | :---: | :---: |
-| ![Home Mobile](img/home-mobile.png) | ![History Mobile](img/history-mobile.png) | ![Statistics Mobile](img/statistics-mobile.png) | ![Settings Mobile](home/settings-mobile.png) |
+| ![Home Mobile](img/home-mobile.png) | ![History Mobile](img/history-mobile.png) | ![Statistics Mobile](img/statistics-mobile.png) | ![Settings Mobile](img/settings-mobile.png) |
 
 ---
 
@@ -98,19 +107,31 @@ Kemudian buka `http://localhost:8080` di browser Anda.
 
 ```text
 hydrotrack/
+├── img/                # Screenshot aplikasi untuk dokumentasi
+│   ├── home-desktop.png
+│   ├── history-desktop.png
+│   ├── statistics-desktop.png
+│   ├── settings-desktop.png
+│   ├── home-mobile.png
+│   ├── history-mobile.png
+│   ├── statistics-mobile.png
+│   └── settings-mobile.png
 ├── index.html          # Halaman utama (Dashboard, Quick Log, Botol Hidrasi, Recent Entries)
 ├── riwayat.html        # Halaman riwayat (Weekly Bar, Monthly Calendar, Yearly Heatmap)
 ├── analisis.html       # Halaman statistik (Overview 8 Metrik, Beverage Breakdown, Container Usage)
 ├── pengaturan.html     # Halaman pengaturan (Profile, Appearance, Data Management, About)
+├── welcome.html        # Halaman onboarding & wizard pendaftaran profil baru
 ├── css/
 │   ├── style.css       # Variabel CSS global (Light & Dark Mode), reset, sidebar, bottom-nav
 │   ├── components.css  # Styling komponen kartu, botol, tabel, grafik, modal, dan form
-│   └── responsive.css  # Media queries untuk Desktop, Tablet (<= 1024px, <= 768px), dan Mobile (<= 640px)
+│   ├── responsive.css  # Media queries untuk Desktop, Tablet (<= 1024px, <= 768px), dan Mobile (<= 640px)
+│   └── welcome.css     # Styling responsif halaman onboarding, kartu opsi, dan animasi gelombang
 ├── js/
 │   ├── storage.js      # Manajemen data LocalStorage (CRUD log minum, wadah, pengaturan, ekspor CSV)
 │   ├── ui.js           # Manipulasi DOM, rendering komponen, kalkulasi metrik, modal, dan toast
 │   ├── chart.js        # Konfigurasi dan pembaruan grafik Chart.js (Doughnut & Bar Chart)
-│   └── app.js          # Event listener utama, navigasi, drag-to-scroll, dan kontrol interaksi
+│   ├── app.js          # Event listener utama, navigasi, drag-to-scroll, dan kontrol interaksi
+│   └── welcome.js      # Logika multi-step onboarding, kalkulator target air & interval pengingat
 └── docs/
     ├── PRD.md          # Dokumen Spesifikasi Kebutuhan Produk
     └── WORKFLOW.md     # Standar Operasional Prosedur Pengembangan

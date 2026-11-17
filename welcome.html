@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0B0E14">
+  <title>Welcome to HydroTrack</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Remix Icon CDN -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- Base & Welcome CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/welcome.css">
+</head>
+
+<body class="welcome-body">
+  <main class="welcome-app" id="welcomeApp">
+
+    <!-- Top Navigation Header (Steps 2 - 7) -->
+    <header class="welcome-topbar" id="welcomeTopbar" aria-hidden="true" style="display: none;">
+      <button type="button" class="welcome-topbar__back" id="btnStepBack" aria-label="Kembali ke langkah sebelumnya">
+        <i class="ri-arrow-left-line"></i>
+      </button>
+
+      <!-- Liquid Wave Progress Indicator -->
+      <div class="welcome-wave-progress" id="waveProgressTrack" role="progressbar" aria-valuenow="1" aria-valuemin="1"
+        aria-valuemax="6" aria-label="Langkah pendaftaran">
+        <div class="welcome-wave-progress__track">
+          <!-- Background Wave (Unfilled) -->
+          <svg class="welcome-wave-svg welcome-wave-svg--bg" viewBox="0 0 400 20" preserveAspectRatio="none">
+            <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10 T250,10 T300,10 T350,10 T400,10" fill="none"
+              stroke="rgba(255,255,255,0.12)" stroke-width="4" stroke-linecap="round" />
+          </svg>
+          <!-- Active Wave (Filled) with dynamic width mask -->
+          <div class="welcome-wave-progress__fill-wrapper" id="waveFillWrapper" style="width: 16.6%;">
+            <svg class="welcome-wave-svg welcome-wave-svg--fill" viewBox="0 0 400 20" preserveAspectRatio="none">
+              <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10 T250,10 T300,10 T350,10 T400,10" fill="none"
+                stroke="#A8C7FA" stroke-width="4.5" stroke-linecap="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Slide Container for Steps -->
+    <div class="welcome-content" id="welcomeContent">
+
+      <!-- ================= STEP 1: WELCOME SCREEN ================= -->
+      <section class="welcome-step active" id="step1" data-step="1">
+        <div class="welcome-hero">
+          <div class="welcome-rosette">
+            <svg viewBox="0 0 100 100" class="welcome-rosette-svg" aria-hidden="true">
+              <path
+                d="M98.00,50.00 L95.33,53.97 L89.88,57.03 L86.71,59.84 L88.06,63.85 L91.24,69.23 L91.57,74.00 L87.27,76.10 L81.02,76.03 L76.87,76.87 L76.03,81.02 L76.10,87.27 L74.00,91.57 L69.23,91.24 L63.85,88.06 L59.84,86.71 L57.03,89.88 L53.97,95.33 L50.00,98.00 L46.03,95.33 L42.97,89.88 L40.16,86.71 L36.15,88.06 L30.77,91.24 L26.00,91.57 L23.90,87.27 L23.97,81.02 L23.13,76.87 L18.98,76.03 L12.73,76.10 L8.43,74.00 L8.76,69.23 L11.94,63.85 L13.29,59.84 L10.12,57.03 L4.67,53.97 L2.00,50.00 L4.67,46.03 L10.12,42.97 L13.29,40.16 L11.94,36.15 L8.76,30.77 L8.43,26.00 L12.73,23.90 L18.98,23.97 L23.13,23.13 L23.97,18.98 L23.90,12.73 L26.00,8.43 L30.77,8.76 L36.15,11.94 L40.16,13.29 L42.97,10.12 L46.03,4.67 L50.00,2.00 L53.97,4.67 L57.03,10.12 L59.84,13.29 L63.85,11.94 L69.23,8.76 L74.00,8.43 L76.10,12.73 L76.03,18.98 L76.87,23.13 L81.02,23.97 L87.27,23.90 L91.57,26.00 L91.24,30.77 L88.06,36.15 L86.71,40.16 L89.88,42.97 L95.33,46.03 L98.00,50.00Z"
+                fill="#B9CEF8" />
+            </svg>
+            <i class="ri-drop-fill welcome-rosette__icon"></i>
+          </div>
+
+          <h1 class="welcome-title">
+            <span class="welcome-title__light">Welcome to</span>
+            <span class="welcome-title__bold">HydroTracker</span>
+          </h1>
+
+          <p class="welcome-subtitle">
+            Let's set up your personalized water intake goal based on your lifestyle and preferences.
+          </p>
+        </div>
+
+        <div class="welcome-features">
+          <div class="welcome-feature-item">
+            <div class="welcome-feature-icon welcome-feature-icon--red">
+              <i class="ri-focus-3-line"></i>
+            </div>
+            <div class="welcome-feature-text">
+              <h3 class="welcome-feature-title">Personalized Goals</h3>
+              <p class="welcome-feature-desc">Based on scientific research and your profile</p>
+            </div>
+          </div>
+
+          <div class="welcome-feature-item">
+            <div class="welcome-feature-icon welcome-feature-icon--orange">
+              <i class="ri-alarm-line"></i>
+            </div>
+            <div class="welcome-feature-text">
+              <h3 class="welcome-feature-title">Smart Reminders</h3>
+              <p class="welcome-feature-desc">Gentle nudges during your active hours</p>
+            </div>
+          </div>
+
+          <div class="welcome-feature-item">
+            <div class="welcome-feature-icon welcome-feature-icon--green">
+              <i class="ri-bar-chart-box-line"></i>
+            </div>
+            <div class="welcome-feature-text">
+              <h3 class="welcome-feature-title">Progress Tracking</h3>
+              <p class="welcome-feature-desc">Detailed insights and history</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-footer">
+          <button type="button" class="welcome-btn-primary" id="btnGetStarted">
+            Get Started
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= STEP 2: GENDER SELECTION ================= -->
+      <section class="welcome-step" id="step2" data-step="2">
+        <div class="welcome-step-header">
+          <h2 class="welcome-step-title">Tell us about yourself</h2>
+          <p class="welcome-step-desc">Choose the option that best describes you.</p>
+        </div>
+
+          <div class="welcome-options-list" role="radiogroup" aria-label="Pilihan gender">
+            <label class="welcome-option-card selected" data-field="gender" data-value="male">
+              <div class="welcome-option-card__avatar">
+                <span class="welcome-emoji">👨</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Male</span>
+                <span class="welcome-option-card__subtitle">Stay hydrated, champion!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="gender" value="male" checked class="sr-only">
+            </label>
+
+            <label class="welcome-option-card" data-field="gender" data-value="female">
+              <div class="welcome-option-card__avatar">
+                <span class="welcome-emoji">👩</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Female</span>
+                <span class="welcome-option-card__subtitle">Keep glowing with hydration!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="gender" value="female" class="sr-only">
+            </label>
+
+            <label class="welcome-option-card" data-field="gender" data-value="prefer-not-to-say">
+              <div class="welcome-option-card__avatar">
+                <span class="welcome-emoji">👤</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Prefer not to say</span>
+                <span class="welcome-option-card__subtitle">You've got this!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="gender" value="prefer-not-to-say" class="sr-only">
+            </label>
+          </div>
+
+          <div class="welcome-footer">
+            <button type="button" class="welcome-btn-primary" id="btnNextStep2">
+              Next
+            </button>
+          </div>
+      </section>
+
+      <!-- ================= STEP 3: AGE GROUP ================= -->
+      <section class="welcome-step" id="step3" data-step="3">
+        <div class="welcome-step-header">
+          <h2 class="welcome-step-title">What's your age group?</h2>
+          <p class="welcome-step-desc">Select your age range.</p>
+        </div>
+
+          <div class="welcome-options-list" role="radiogroup" aria-label="Pilihan rentang usia">
+            <label class="welcome-option-card" data-field="ageGroup" data-value="18-30">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--gold">
+                <span class="welcome-emoji">⭐</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">18–30 years</span>
+                <span class="welcome-option-card__subtitle">Your body is building its foundation - keep it
+                  hydrated!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="ageGroup" value="18-30" class="sr-only">
+            </label>
+
+            <label class="welcome-option-card selected" data-field="ageGroup" data-value="31-50">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--gold">
+                <span class="welcome-emoji">💪</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">31–50 years</span>
+                <span class="welcome-option-card__subtitle">Hydration is your energy source - fuel your busy
+                  life!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="ageGroup" value="31-50" checked class="sr-only">
+            </label>
+
+            <label class="welcome-option-card" data-field="ageGroup" data-value="51-60">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--green">
+                <span class="welcome-emoji">🌿</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">51–60 years</span>
+                <span class="welcome-option-card__subtitle">Stay refreshed and vibrant with proper hydration!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="ageGroup" value="51-60" class="sr-only">
+            </label>
+
+            <label class="welcome-option-card" data-field="ageGroup" data-value="60+">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--pink">
+                <span class="welcome-emoji">🌸</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">60+ years</span>
+                <span class="welcome-option-card__subtitle">Hydration supports your wellness journey every day!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="ageGroup" value="60+" class="sr-only">
+            </label>
+          </div>
+
+          <div class="welcome-footer">
+            <button type="button" class="welcome-btn-primary" id="btnNextStep3">
+              Next
+            </button>
+          </div>
+      </section>
+
+      <!-- ================= STEP 4: ACTIVITY LEVEL ================= -->
+      <section class="welcome-step" id="step4" data-step="4">
+        <div class="welcome-step-header">
+          <h2 class="welcome-step-title">How active are you?</h2>
+          <p class="welcome-step-desc">Pick your general daily activity level.</p>
+        </div>
+
+          <div class="welcome-options-list" role="radiogroup" aria-label="Pilihan tingkat aktivitas">
+            <label class="welcome-option-card" data-field="activityLevel" data-value="sedentary">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--icon">
+                <span class="welcome-emoji">🪑</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Sedentary</span>
+                <span class="welcome-option-card__subtitle">Even at rest, your body needs consistent hydration!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="activityLevel" value="sedentary" class="sr-only">
+            </label>
+
+            <label class="welcome-option-card" data-field="activityLevel" data-value="light">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--icon">
+                <span class="welcome-emoji">🚶</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Light Activity</span>
+                <span class="welcome-option-card__subtitle">Light activity still means you need extra hydration
+                  support!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="activityLevel" value="light" class="sr-only">
+            </label>
+
+            <label class="welcome-option-card selected" data-field="activityLevel" data-value="moderate">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--icon">
+                <span class="welcome-emoji">🏃</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Moderate Activity</span>
+                <span class="welcome-option-card__subtitle">Regular exercise requires regular hydration - you're doing
+                  great!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="activityLevel" value="moderate" checked class="sr-only">
+            </label>
+
+            <label class="welcome-option-card" data-field="activityLevel" data-value="active">
+              <div class="welcome-option-card__avatar welcome-option-card__avatar--icon">
+                <span class="welcome-emoji">🏋️</span>
+              </div>
+              <div class="welcome-option-card__info">
+                <span class="welcome-option-card__title">Active</span>
+                <span class="welcome-option-card__subtitle">Your active lifestyle deserves premium hydration
+                  care!</span>
+              </div>
+              <div class="welcome-radio-indicator">
+                <div class="welcome-radio-dot"></div>
+              </div>
+              <input type="radio" name="activityLevel" value="active" class="sr-only">
+            </label>
+          </div>
+
+          <div class="welcome-footer">
+            <button type="button" class="welcome-btn-primary" id="btnNextStep4">
+              Next
+            </button>
+          </div>
+      </section>
+
+      <!-- ================= STEP 5: WAKE & SLEEP TIME ================= -->
+      <section class="welcome-step" id="step5" data-step="5">
+        <div class="welcome-step-header">
+          <h2 class="welcome-step-title">When are you awake?</h2>
+          <p class="welcome-step-desc">Tell us your wake and sleep times.</p>
+        </div>
+
+        <div class="welcome-time-inputs">
+          <div class="welcome-time-cards-row">
+            <!-- Wake Time Card -->
+            <div class="welcome-time-card">
+              <div class="welcome-time-card__left">
+                <i class="ri-time-line welcome-time-card__icon"></i>
+                <div class="welcome-time-card__labels">
+                  <span class="welcome-time-card__title">Wake-Up Time</span>
+                  <input type="time" id="inputWakeTime" value="07:00" class="welcome-time-card__input"
+                    aria-label="Waktu bangun tidur">
+                </div>
+              </div>
+              <div class="welcome-time-card__right">
+                <span class="welcome-time-symbol">☀️</span>
+              </div>
+            </div>
+
+            <!-- Sleep Time Card -->
+            <div class="welcome-time-card">
+              <div class="welcome-time-card__left">
+                <i class="ri-time-line welcome-time-card__icon"></i>
+                <div class="welcome-time-card__labels">
+                  <span class="welcome-time-card__title">Sleep Time</span>
+                  <input type="time" id="inputSleepTime" value="23:00" class="welcome-time-card__input"
+                    aria-label="Waktu tidur malam">
+                </div>
+              </div>
+              <div class="welcome-time-card__right">
+                <span class="welcome-time-symbol">🌙</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Awake Duration Visual Bar -->
+          <div class="welcome-awake-visual">
+            <div class="welcome-awake-bar">
+              <div class="welcome-awake-bar__fill" id="awakeBarFill" style="width: 66.7%;"></div>
+            </div>
+            <p class="welcome-awake-label" id="awakeDurationLabel">Awake for 16h 0m</p>
+          </div>
+        </div>
+
+        <div class="welcome-footer">
+          <button type="button" class="welcome-btn-primary" id="btnNextStep5">
+            Next
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= STEP 6: COMPLETE YOUR PROFILE (NAME) ================= -->
+      <section class="welcome-step" id="step6" data-step="6">
+        <div class="welcome-step-header">
+          <h2 class="welcome-step-title">Complete Your Profile</h2>
+          <p class="welcome-step-desc">Add your name and a profile photo to personalize your experience.</p>
+        </div>
+
+        <div class="welcome-profile-setup">
+          <!-- Avatar Preview Circle -->
+          <div class="welcome-profile-avatar" id="avatarPreviewContainer">
+            <div class="welcome-avatar-circle" id="avatarCircle">
+              <span class="welcome-avatar-letter" id="avatarLetter">T</span>
+            </div>
+            <button type="button" class="welcome-avatar-btn" id="btnChangeAvatar" aria-label="Pilih foto profil">
+              <i class="ri-camera-line"></i> Add Photo
+            </button>
+          </div>
+
+          <!-- Name Input Field with Floating Outline Label -->
+          <div class="welcome-input-group">
+            <p class="welcome-input-label">What should we call you?</p>
+            <div class="welcome-input-box">
+              <label for="inputUserName" class="welcome-input-box__floating-label">Your name</label>
+              <input type="text" id="inputUserName" class="welcome-input-box__input" placeholder="e.g. Tat, Faith"
+                maxlength="15" value="Tat" required autocomplete="name">
+            </div>
+            <div class="welcome-input-helper">
+              <span id="charCountLabel" class="welcome-char-counter">3/15 characters</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-footer">
+          <button type="button" class="welcome-btn-primary" id="btnNextStep6">
+            Next
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= STEP 7: REVIEW PERSONALIZED GOAL ================= -->
+      <section class="welcome-step" id="step7" data-step="7">
+        <div class="welcome-step-header">
+          <h2 class="welcome-step-title">Your personalized goal</h2>
+          <p class="welcome-step-desc">Review your calculated goal.</p>
+        </div>
+
+        <div class="welcome-goal-summary">
+          <div class="welcome-metrics-grid">
+            <!-- Daily Goal Card -->
+            <div class="welcome-metric-card">
+              <div class="welcome-metric-icon welcome-metric-icon--blue">
+                <i class="ri-drop-fill"></i>
+              </div>
+              <div class="welcome-metric-content">
+                <h3 class="welcome-metric-val" id="summaryDailyGoalVal">3 L</h3>
+                <p class="welcome-metric-lbl">Daily Water Goal</p>
+              </div>
+            </div>
+
+            <!-- Reminder Interval Card -->
+            <div class="welcome-metric-card">
+              <div class="welcome-metric-icon welcome-metric-icon--purple">
+                <i class="ri-time-line"></i>
+              </div>
+              <div class="welcome-metric-content">
+                <h3 class="welcome-metric-val" id="summaryIntervalVal">96 minutes</h3>
+                <p class="welcome-metric-lbl">Reminder Interval</p>
+              </div>
+            </div>
+
+            <!-- Activity Level Card -->
+            <div class="welcome-metric-card">
+              <div class="welcome-metric-icon welcome-metric-icon--cyan">
+                <i class="ri-boxing-line"></i>
+              </div>
+              <div class="welcome-metric-content">
+                <h3 class="welcome-metric-val" id="summaryActivityVal">Moderate Activity</h3>
+                <p class="welcome-metric-lbl">Activity Level</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personalized Rationale Box -->
+          <div class="welcome-rationale-box">
+            <h4 class="welcome-rationale-title">How we personalized this</h4>
+            <p class="welcome-rationale-desc">
+              Your goal considers your profile and schedule. These factors influence total intake and notification
+              cadence.
+            </p>
+            <div class="welcome-tags-row" id="summaryTagsRow">
+              <span class="welcome-tag" id="tagGender">Male</span>
+              <span class="welcome-tag" id="tagAge">31–50 years</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-footer">
+          <button type="button" class="welcome-btn-primary" id="btnFinishSetup">
+            Finish
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= STEP 8: SUCCESS / YOU'RE ALL SET! ================= -->
+      <section class="welcome-step" id="step8" data-step="8">
+        <div class="welcome-hero welcome-hero--success">
+          <div class="welcome-rosette welcome-rosette--celebration">
+            <svg viewBox="0 0 100 100" class="welcome-rosette-svg" aria-hidden="true">
+              <path
+                d="M98.00,50.00 L95.33,53.97 L89.88,57.03 L86.71,59.84 L88.06,63.85 L91.24,69.23 L91.57,74.00 L87.27,76.10 L81.02,76.03 L76.87,76.87 L76.03,81.02 L76.10,87.27 L74.00,91.57 L69.23,91.24 L63.85,88.06 L59.84,86.71 L57.03,89.88 L53.97,95.33 L50.00,98.00 L46.03,95.33 L42.97,89.88 L40.16,86.71 L36.15,88.06 L30.77,91.24 L26.00,91.57 L23.90,87.27 L23.97,81.02 L23.13,76.87 L18.98,76.03 L12.73,76.10 L8.43,74.00 L8.76,69.23 L11.94,63.85 L13.29,59.84 L10.12,57.03 L4.67,53.97 L2.00,50.00 L4.67,46.03 L10.12,42.97 L13.29,40.16 L11.94,36.15 L8.76,30.77 L8.43,26.00 L12.73,23.90 L18.98,23.97 L23.13,23.13 L23.97,18.98 L23.90,12.73 L26.00,8.43 L30.77,8.76 L36.15,11.94 L40.16,13.29 L42.97,10.12 L46.03,4.67 L50.00,2.00 L53.97,4.67 L57.03,10.12 L59.84,13.29 L63.85,11.94 L69.23,8.76 L74.00,8.43 L76.10,12.73 L76.03,18.98 L76.87,23.13 L81.02,23.97 L87.27,23.90 L91.57,26.00 L91.24,30.77 L88.06,36.15 L86.71,40.16 L89.88,42.97 L95.33,46.03 L98.00,50.00Z"
+                fill="#3B82F6" />
+            </svg>
+            <span class="welcome-rosette__emoji">🎉</span>
+          </div>
+
+          <h2 class="welcome-title welcome-title--success">You're all set!</h2>
+          <p class="welcome-subtitle">
+            Your personalized hydration plan is ready.
+          </p>
+        </div>
+
+        <div class="welcome-celebrate-card">
+          <p class="welcome-celebrate-card__caption">Your Daily Goal</p>
+          <div class="welcome-celebrate-card__large-val" id="finalDailyGoalDisplay">3 L</div>
+          <div class="welcome-celebrate-card__pills">
+            <span class="welcome-pill-badge" id="finalPillInterval">96 min</span>
+            <span class="welcome-pill-badge" id="finalPillActivity">Moderate Activity</span>
+          </div>
+        </div>
+
+        <div class="welcome-footer">
+          <button type="button" class="welcome-btn-primary welcome-btn-primary--glow" id="btnStartHydrating">
+            <i class="ri-drop-fill"></i> Start hydrating
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Core Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/welcome.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,857 @@
+/* =======================================================
+   WELCOME.CSS — Unified Compact Onboarding Card System
+   Consistent Frame & Identical Card Dimensions Across All Steps
+   ======================================================= */
+
+:root {
+  --welcome-bg: #0B0E14;
+  --welcome-surface: #151822;
+  --welcome-surface-elevated: #1B202D;
+  --welcome-surface-active: #192236;
+  --welcome-border: #232736;
+  --welcome-border-active: #5580E9;
+  --welcome-border-hover: rgba(255, 255, 255, 0.16);
+  --welcome-text-primary: #FFFFFF;
+  --welcome-text-secondary: #94A3B8;
+  --welcome-text-muted: #64748B;
+  --welcome-accent: #A8C7FA;
+  --welcome-accent-text: #051530;
+  --welcome-accent-hover: #BFD8FF;
+  --welcome-accent-glow: rgba(168, 199, 250, 0.28);
+  --welcome-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --welcome-radius-card: 18px;
+  --welcome-radius-btn: 9999px;
+  --welcome-card-height: 60px;
+  --welcome-container-max: 440px;
+  /* Exact uniform width matching the Get Started screen */
+}
+
+/* Base Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  height: 100%;
+}
+
+body.welcome-body {
+  background-color: var(--welcome-bg);
+  color: var(--welcome-text-primary);
+  font-family: var(--welcome-font);
+  min-height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* Safe alignment: allows natural scrolling, never clips content */
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.45;
+  padding: 12px 14px 20px;
+}
+
+/* Screen Reader Utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==================== CORE CONTAINER (FIXED UNIFORM FRAME) ==================== */
+
+.welcome-app {
+  width: 100%;
+  max-width: var(--welcome-container-max);
+  min-height: calc(100dvh - 24px);
+  background-color: var(--welcome-bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 16px 18px 20px;
+  margin: 0 auto;
+}
+
+/* Desktop & Laptop Frame: Fixed stable width & min-height matching Step 1 (Get Started) */
+@media (min-width: 641px) {
+  body.welcome-body {
+    background: radial-gradient(circle at 50% 15%, #181D2C 0%, #0A0C13 100%);
+    padding: 24px 16px 32px;
+  }
+
+  .welcome-app {
+    min-height: 640px;
+    border-radius: 28px;
+    border: 1px solid var(--welcome-border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    padding: 24px 22px 26px;
+    background-color: var(--welcome-bg);
+    margin: auto;
+  }
+}
+
+/* ==================== TOPBAR & WAVE PROGRESS ==================== */
+
+.welcome-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  min-height: 38px;
+}
+
+.welcome-topbar__back {
+  background: transparent;
+  border: none;
+  color: var(--welcome-text-primary);
+  font-size: 22px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s ease, transform 0.1s ease;
+  flex-shrink: 0;
+}
+
+.welcome-topbar__back:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.welcome-topbar__back:active {
+  transform: scale(0.92);
+}
+
+.welcome-topbar__back:focus-visible {
+  outline: 2px solid var(--welcome-border-active);
+  outline-offset: 2px;
+}
+
+/* Wave Progress Bar */
+.welcome-wave-progress {
+  flex: 1;
+  position: relative;
+  height: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.welcome-wave-progress__track {
+  position: relative;
+  width: 100%;
+  height: 18px;
+}
+
+.welcome-wave-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.welcome-wave-progress__fill-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: hidden;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.welcome-wave-svg--fill {
+  width: 380px;
+}
+
+/* ==================== STEP SECTIONS & TRANSITIONS ==================== */
+
+.welcome-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.welcome-step {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.welcome-step.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Header typography for steps */
+.welcome-step-header {
+  margin-bottom: 14px;
+}
+
+.welcome-step-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--welcome-text-primary);
+  margin-bottom: 3px;
+  letter-spacing: -0.015em;
+}
+
+.welcome-step-desc {
+  font-size: 13.5px;
+  color: var(--welcome-text-secondary);
+  line-height: 1.4;
+}
+
+/* Footer & Buttons */
+.welcome-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.welcome-btn-primary {
+  width: 100%;
+  background-color: var(--welcome-accent);
+  color: var(--welcome-accent-text);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 20px;
+  border: none;
+  border-radius: var(--welcome-radius-btn);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  min-height: 48px;
+}
+
+.welcome-btn-primary:hover {
+  background-color: var(--welcome-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(168, 199, 250, 0.3);
+}
+
+.welcome-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.welcome-btn-primary:focus-visible {
+  outline: 3px solid var(--welcome-border-active);
+  outline-offset: 2px;
+}
+
+.welcome-btn-primary--glow {
+  box-shadow: 0 4px 18px rgba(168, 199, 250, 0.3);
+}
+
+/* ==================== STEP 1: WELCOME SCREEN ==================== */
+
+.welcome-hero {
+  text-align: center;
+  padding: 8px 0 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Rosette Scalloped Flower Badge (76px) */
+.welcome-rosette {
+  width: 76px;
+  height: 76px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.welcome-rosette-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: drop-shadow(0 6px 16px rgba(185, 206, 248, 0.25));
+  transition: transform 0.3s ease;
+}
+
+.welcome-rosette:hover .welcome-rosette-svg {
+  transform: scale(1.05) rotate(10deg);
+}
+
+.welcome-rosette__icon {
+  font-size: 32px;
+  color: #173874;
+  position: relative;
+  z-index: 2;
+}
+
+.welcome-rosette__emoji {
+  font-size: 30px;
+  position: relative;
+  z-index: 2;
+  line-height: 1;
+}
+
+.welcome-rosette--celebration .welcome-rosette-svg {
+  filter: drop-shadow(0 6px 20px rgba(59, 130, 246, 0.4));
+}
+
+.welcome-title {
+  display: flex;
+  flex-direction: column;
+  font-size: 26px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.welcome-title__light {
+  font-weight: 400;
+  color: #F1F5F9;
+}
+
+.welcome-title__bold {
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.welcome-subtitle {
+  font-size: 13px;
+  color: var(--welcome-text-secondary);
+  line-height: 1.4;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+  /* ==================== UNIFIED CARD STYLING (MATCHES GET STARTED STEP) ==================== */
+
+  /* Container for lists of cards */
+  .welcome-features,
+  .welcome-options-list,
+  .welcome-time-cards-row,
+  .welcome-metrics-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+
+    .welcome-features {
+      margin: 10px 0 16px;
+    }
+
+
+      /* Master Card Specification — Applied to ALL Cards Across Steps */
+      .welcome-feature-item,
+      .welcome-option-card,
+      .welcome-time-card,
+      .welcome-metric-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 16px;
+        min-height: var(--welcome-card-height);
+        width: 100%;
+        background-color: var(--welcome-surface);
+        border: 1.5px solid var(--welcome-border);
+        border-radius: var(--welcome-radius-card);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+        user-select: none;
+        position: relative;
+      }
+
+
+        /* Hover effect */
+        .welcome-feature-item:hover,
+        .welcome-option-card:hover,
+        .welcome-time-card:hover,
+        .welcome-metric-card:hover {
+          background-color: var(--welcome-surface-elevated);
+          border-color: var(--welcome-border-hover);
+          transform: translateY(-1px);
+        }
+
+        /* Selected state for option cards */
+        .welcome-option-card.selected {
+          background-color: var(--welcome-surface-active);
+          border-color: var(--welcome-border-active);
+          box-shadow: 0 4px 16px rgba(85, 128, 233, 0.18), inset 0 0 0 1px rgba(85, 128, 233, 0.2);
+        }
+
+        .welcome-option-card:focus-within {
+          outline: 2px solid var(--welcome-border-active);
+          outline-offset: 2px;
+        }
+
+
+          /* Circular Avatar / Icon Badge (Identical 40px across cards) */
+          .welcome-feature-icon,
+          .welcome-option-card__avatar,
+          .welcome-metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+          }
+
+          .welcome-feature-icon {
+            border-radius: 12px;
+          }
+
+          .welcome-feature-icon--red {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+          }
+
+          .welcome-feature-icon--orange {
+            background-color: rgba(249, 115, 22, 0.15);
+            color: #F97316;
+          }
+
+          .welcome-feature-icon--green {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: #22C55E;
+          }
+
+          .welcome-option-card.selected .welcome-option-card__avatar {
+            background-color: rgba(85, 128, 233, 0.18);
+            box-shadow: 0 0 0 2px var(--welcome-border-active);
+          }
+
+          .welcome-emoji {
+            line-height: 1;
+          }
+
+
+            /* Card Content / Typography */
+            .welcome-feature-text,
+            .welcome-option-card__info,
+            .welcome-metric-content {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+            }
+
+            .welcome-feature-title,
+            .welcome-option-card__title {
+              font-size: 14.5px;
+              font-weight: 600;
+              color: var(--welcome-text-primary);
+              margin-bottom: 2px;
+              letter-spacing: -0.01em;
+            }
+
+
+              .welcome-feature-desc,
+              .welcome-option-card__subtitle,
+              .welcome-metric-lbl {
+                font-size: 12.5px;
+                color: var(--welcome-text-secondary);
+                line-height: 1.35;
+              }
+
+              /* Radio Indicator on Cards */
+              .welcome-radio-indicator {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                border: 2px solid #3F4756;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                transition: border-color 0.2s ease;
+              }
+
+              .welcome-radio-dot {
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                background-color: transparent;
+                transform: scale(0);
+                opacity: 0;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+              }
+
+              .welcome-option-card.selected .welcome-radio-indicator {
+                border-color: var(--welcome-border-active);
+              }
+
+              .welcome-option-card.selected .welcome-radio-dot {
+                background-color: var(--welcome-border-active);
+                transform: scale(1);
+                opacity: 1;
+              }
+
+              /* ==================== STEP 5: WAKE & SLEEP TIME ==================== */
+
+              .welcome-time-inputs {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+              }
+
+              .welcome-time-card {
+                justify-content: space-between;
+              }
+
+              .welcome-time-card:focus-within {
+                border-color: var(--welcome-border-active);
+                background-color: var(--welcome-surface-active);
+              }
+
+              .welcome-time-card__left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+              }
+
+              .welcome-time-card__icon {
+                font-size: 22px;
+                color: var(--welcome-text-secondary);
+              }
+
+              .welcome-time-card__labels {
+                display: flex;
+                flex-direction: column;
+              }
+
+              .welcome-time-card__title {
+                font-size: 12.5px;
+                color: var(--welcome-text-secondary);
+                margin-bottom: 2px;
+              }
+
+              .welcome-time-card__input {
+                background: transparent;
+                border: none;
+                color: var(--welcome-text-primary);
+                font-family: inherit;
+                font-size: 19px;
+                font-weight: 700;
+                outline: none;
+                cursor: pointer;
+                letter-spacing: 0.02em;
+              }
+
+              .welcome-time-card__input::-webkit-calendar-picker-indicator {
+                filter: invert(1);
+                opacity: 0.7;
+                cursor: pointer;
+              }
+
+              .welcome-time-symbol {
+                font-size: 22px;
+              }
+
+              /* Awake duration visual bar */
+              .welcome-awake-visual {
+                margin-top: 8px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+              }
+
+              .welcome-awake-bar {
+                width: 100%;
+                height: 8px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 9999px;
+                overflow: hidden;
+              }
+
+              .welcome-awake-bar__fill {
+                height: 100%;
+                background: linear-gradient(90deg, #60A5FA 0%, #A8C7FA 100%);
+                border-radius: 9999px;
+                transition: width 0.3s ease;
+              }
+
+              .welcome-awake-label {
+                font-size: 12.5px;
+                color: var(--welcome-text-secondary);
+                font-weight: 500;
+              }
+
+              /* ==================== STEP 6: COMPLETE YOUR PROFILE (NAME) ==================== */
+
+              .welcome-profile-setup {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 6px 0 14px;
+                width: 100%;
+              }
+
+              .welcome-profile-avatar {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 18px;
+              }
+
+              .welcome-avatar-circle {
+                width: 84px;
+                height: 84px;
+                border-radius: 50%;
+                background-color: #222E46;
+                border: 2.5px solid rgba(138, 180, 248, 0.35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                transition: transform 0.2s ease, border-color 0.2s ease;
+              }
+
+              .welcome-avatar-circle:hover {
+                transform: scale(1.04);
+                border-color: #8AB4F8;
+              }
+
+              .welcome-avatar-letter {
+                font-size: 34px;
+                font-weight: 700;
+                color: #A8C7FA;
+                text-transform: uppercase;
+              }
+
+              .welcome-avatar-btn {
+                background: transparent;
+                border: none;
+                color: #8AB4F8;
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                border-radius: 6px;
+                transition: background 0.15s ease;
+              }
+
+              .welcome-avatar-btn:hover {
+                background-color: rgba(138, 180, 248, 0.12);
+              }
+
+              .welcome-input-group {
+                width: 100%;
+              }
+
+              .welcome-input-label {
+                display: block;
+                font-size: 13.5px;
+                font-weight: 600;
+                color: var(--welcome-text-primary);
+                margin-bottom: 10px;
+                text-align: left;
+              }
+
+              /* Floating Label Notch Box */
+              .welcome-input-box {
+                width: 100%;
+                position: relative;
+                border: 1.5px solid var(--welcome-border-active);
+                border-radius: 14px;
+                padding: 12px 16px;
+                background-color: var(--welcome-surface);
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+              }
+
+              .welcome-input-box:focus-within {
+                border-color: #8AB4F8;
+                box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.2);
+              }
+
+              .welcome-input-box__floating-label {
+                position: absolute;
+                top: -9px;
+                left: 14px;
+                background-color: var(--welcome-bg);
+                padding: 0 6px;
+                font-size: 11px;
+                color: #8AB4F8;
+                font-weight: 600;
+              }
+
+              .welcome-input-box__input {
+                width: 100%;
+                background: transparent;
+                border: none;
+                color: var(--welcome-text-primary);
+                font-family: inherit;
+                font-size: 15.5px;
+                font-weight: 500;
+                outline: none;
+              }
+
+              .welcome-input-helper {
+                margin-top: 6px;
+                display: flex;
+                justify-content: flex-start;
+              }
+
+              .welcome-char-counter {
+                font-size: 11.5px;
+                color: var(--welcome-text-muted);
+              }
+
+              /* ==================== STEP 7: REVIEW PERSONALIZED GOAL ==================== */
+
+              .welcome-goal-summary {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+              }
+
+              .welcome-metric-icon--blue {
+                background-color: rgba(59, 130, 246, 0.2);
+                color: #60A5FA;
+              }
+
+              .welcome-metric-icon--purple {
+                background-color: rgba(168, 85, 247, 0.2);
+                color: #C084FC;
+              }
+
+              .welcome-metric-icon--cyan {
+                background-color: rgba(6, 182, 212, 0.2);
+                color: #38BDF8;
+              }
+
+              .welcome-metric-val {
+                font-size: 17px;
+                font-weight: 700;
+                color: var(--welcome-text-primary);
+                margin-bottom: 2px;
+              }
+
+              .welcome-rationale-box {
+                margin-top: 2px;
+                padding: 12px 16px;
+                background-color: #141722;
+                border-radius: var(--welcome-radius-card);
+                border: 1px solid rgba(255, 255, 255, 0.07);
+              }
+
+              .welcome-rationale-title {
+                font-size: 13.5px;
+                font-weight: 600;
+                color: var(--welcome-text-primary);
+                margin-bottom: 3px;
+              }
+
+              .welcome-rationale-desc {
+                font-size: 12px;
+                color: var(--welcome-text-secondary);
+                line-height: 1.4;
+                margin-bottom: 8px;
+              }
+
+              .welcome-tags-row {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+              }
+
+              .welcome-tag {
+                font-size: 11.5px;
+                font-weight: 500;
+                color: var(--welcome-text-primary);
+                background-color: #0E1118;
+                padding: 4px 12px;
+                border-radius: 9999px;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+              }
+
+              /* ==================== STEP 8: SUCCESS / YOU'RE ALL SET! ==================== */
+
+              .welcome-hero--success {
+                padding-bottom: 10px;
+              }
+
+              .welcome-title--success {
+                font-size: 24px;
+                font-weight: 700;
+              }
+
+              .welcome-celebrate-card {
+                background-color: #141E33;
+                border: 1.5px solid #2A3E6D;
+                border-radius: 20px;
+                padding: 18px 16px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                margin: 8px auto 14px;
+                width: 100%;
+                box-shadow: 0 10px 30px rgba(10, 20, 50, 0.45);
+              }
+
+              .welcome-celebrate-card__caption {
+                font-size: 12.5px;
+                color: #A8C7FA;
+                font-weight: 500;
+              }
+
+              .welcome-celebrate-card__large-val {
+                font-size: 42px;
+                font-weight: 800;
+                color: #FFFFFF;
+                letter-spacing: -0.03em;
+                line-height: 1;
+              }
+
+              .welcome-celebrate-card__pills {
+                display: flex;
+                gap: 8px;
+                margin-top: 2px;
+                flex-wrap: wrap;
+                justify-content: center;
+              }
+
+              .welcome-pill-badge {
+                background-color: #0C1424;
+                color: #A8C7FA;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 5px 14px;
+                border-radius: 9999px;
+                border: 1px solid rgba(148, 176, 234, 0.25);
+              }
