@@ -107,6 +107,9 @@
                 <h1 class="top-header__greeting">Riwayat Konsumsi</h1>
                 <p class="top-header__subtitle">Pantau konsumsi cairanmu dalam rentang mingguan, bulanan, dan tahunan.</p>
             </div>
+            <div class="top-header__right">
+                <div class="top-header__date" id="headerDate"></div>
+            </div>
         </header>
 
         <!-- ===== VIEW: HISTORY ===== -->
@@ -250,6 +253,103 @@
 
     <!-- ========== TOAST NOTIFICATION ========== -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========== MODAL EDIT WATER ENTRY (Sesuai Tema Web) ========== -->
+    <div class="modal-overlay" id="editLogModalOverlay">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <h3 class="container-modal__title" id="editLogModalTitle">Edit Water Entry</h3>
+                <div class="container-preview-badge" id="editLogPreviewBadge">
+                    <i class="custom-icon icon-coffee"></i>
+                </div>
+            </div>
+
+            <form id="formEditLog">
+                <input type="hidden" id="editLogId">
+
+                <!-- Field 1: Container Type -->
+                <div class="container-input-group">
+                    <div class="select-input-wrapper">
+                        <span class="select-input-icon" id="editLogContainerIcon">
+                            <i class="custom-icon icon-coffee"></i>
+                        </span>
+                        <select id="editLogContainerSelect" class="container-input container-select">
+                            <!-- Populated dynamically via JavaScript -->
+                        </select>
+                        <i class="ri-arrow-down-s-line select-chevron"></i>
+                    </div>
+                    <label class="container-label">Container Type</label>
+                </div>
+
+                <!-- Field 2: Beverage Type -->
+                <div class="container-input-group">
+                    <div class="select-input-wrapper">
+                        <span class="select-input-icon" id="editLogBeverageIcon">
+                            <i class="ri-drop-fill"></i>
+                        </span>
+                        <select id="editLogBeverageSelect" class="container-input container-select">
+                            <option value="water">Water</option>
+                            <option value="coffee">Coffee</option>
+                            <option value="energy">Energy Drink</option>
+                            <option value="juice">Fruit Juice</option>
+                            <option value="milk">Milk</option>
+                            <option value="qrs">QRS</option>
+                            <option value="soda">Soft drink</option>
+                            <option value="sports">Sports Drink</option>
+                            <option value="tea">Tea</option>
+                        </select>
+                        <i class="ri-arrow-down-s-line select-chevron"></i>
+                    </div>
+                    <label class="container-label">Beverage Type</label>
+                </div>
+
+                <!-- Field 3: Time -->
+                <div class="container-input-group">
+                    <div class="select-input-wrapper">
+                        <span class="select-input-icon">
+                            <i class="ri-time-line"></i>
+                        </span>
+                        <input type="time" id="editLogTimeInput" class="container-input container-input--with-icon" required>
+                    </div>
+                    <label class="container-label">Time</label>
+                </div>
+
+                <!-- Field 4: Amount (ml) -->
+                <div class="container-input-group">
+                    <input type="number" id="editLogAmountInput" class="container-input" placeholder=" " min="10" max="5000"
+                        required>
+                    <label class="container-label">Amount (ml)</label>
+                </div>
+
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelEditLog">Cancel</button>
+                    <button type="submit" class="btn-modal-save" id="btnSaveEditLog">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL DELETE WATER ENTRY (Sesuai Tema Web) ========== -->
+    <div class="modal-overlay" id="deleteLogModalOverlay">
+        <div class="container-modal-box text-center">
+            <div class="delete-icon-badge">
+                <i class="ri-delete-bin-line"></i>
+            </div>
+
+            <h3 class="container-modal__title text-center" id="deleteLogModalTitle">Delete Water Entry</h3>
+
+            <p class="dark-modal__desc" id="deleteLogModalDesc">
+                Are you sure you want to delete this entry?
+            </p>
+
+            <div class="container-modal__actions">
+                <button type="button" class="btn-modal-cancel" id="btnCancelDeleteLog">Cancel</button>
+                <button type="button" class="btn-modal-delete" id="btnConfirmDeleteLog">Delete</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ========== MODAL KONFIRMASI ========== -->
     <div class="modal-overlay" id="modalOverlay">

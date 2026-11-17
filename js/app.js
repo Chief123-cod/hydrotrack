@@ -21,6 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.applyTheme(initialSettings.theme);
   }
 
+  // Listen for OS theme changes when user chooses 'system'
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const current = Storage.getSettings();
+      if (!current.theme || current.theme === 'system') {
+        UI.applyTheme('system');
+      }
+    });
+  }
+
   // Display date & user info
   UI.updateDateDisplay();
   UI.updateUserInfo();
@@ -955,6 +965,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       UI.refreshDashboard();
+      if (typeof refreshHistory === 'function') refreshHistory();
       if (editLogModalOverlay) editLogModalOverlay.classList.remove('active');
       UI.showToast('Catatan berhasil diperbarui! ✨', 'success');
     });
@@ -978,7 +989,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const containerName = matched ? matched.name : drinkLabel;
     const amountStr = log.amount >= 1000 ? `${log.amount / 1000} L` : `${log.amount} ml`;
 
-    if (deleteLogModalTitle) deleteLogModalTitle.textContent = 'Edit Water Entry';
+    if (deleteLogModalTitle) deleteLogModalTitle.textContent = 'Delete Water Entry';
     if (deleteLogModalDesc) {
       deleteLogModalDesc.textContent = `Are you sure you want to delete this ${containerName} ${amountStr} entry?`;
     }
@@ -992,6 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!pendingDeleteLogId) return;
       Storage.deleteLog(pendingDeleteLogId);
       UI.refreshDashboard();
+      if (typeof refreshHistory === 'function') refreshHistory();
       if (deleteLogModalOverlay) deleteLogModalOverlay.classList.remove('active');
       pendingDeleteLogId = null;
       UI.showToast('Catatan berhasil dihapus! 🗑️', 'info');

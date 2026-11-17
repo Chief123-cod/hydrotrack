@@ -105,6 +105,17 @@
         <section class="view view--active" id="view-settings">
             <div class="settings-page-container">
 
+                <!-- Top Header Bar -->
+                <header class="top-header settings-top-header">
+                    <div class="top-header__left">
+                        <h1 class="top-header__greeting">Settings</h1>
+                        <p class="top-header__subtitle">Kelola profil pribadi, target hidrasi harian, tema tampilan, dan data aplikasi.</p>
+                    </div>
+                    <div class="top-header__right">
+                        <div class="top-header__date" id="headerDate"></div>
+                    </div>
+                </header>
+
                 <!-- ========== 1. PROFIL & GOALS ========== -->
                 <div class="card settings-section-card">
                     <!-- Profile Header / Hero -->
@@ -165,80 +176,80 @@
 
                     <!-- Profile Form: Personal & Daily Goals -->
                     <form id="settingsProfileForm" class="settings-form-grid" novalidate>
-                        <!-- Label: Personal -->
-                        <div class="settings-group">
-                            <div class="settings-group-header">
-                                <span class="settings-group-tag">Personal</span>
-                                <h4 class="settings-group-title">Data Diri</h4>
-                            </div>
+                        <div class="settings-form-columns">
+                            <!-- Label: Personal -->
+                            <div class="settings-group">
+                                <div class="settings-group-header">
+                                    <span class="settings-group-tag">Personal</span>
+                                    <h4 class="settings-group-title">Data Diri</h4>
+                                </div>
 
-                            <div class="form-group">
-                                <label class="form-label" for="inputUserName">Nama Pengguna</label>
-                                <div class="form-input-wrapper">
-                                    <i class="ri-user-line"></i>
-                                    <input type="text" id="inputUserName" class="form-input"
-                                        placeholder="Masukkan nama pengguna" maxlength="30" required>
+                                <div class="form-group">
+                                    <label class="form-label" for="inputUserName">Nama Pengguna</label>
+                                    <div class="form-input-wrapper">
+                                        <i class="ri-user-line"></i>
+                                        <input type="text" id="inputUserName" class="form-input"
+                                            placeholder="Masukkan nama pengguna" maxlength="30" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Gender</label>
+                                    <div class="segmented-picker" id="genderPicker">
+                                        <label class="segmented-option">
+                                            <input type="radio" name="gender" value="male">
+                                            <span class="segmented-box">
+                                                <i class="ri-men-line"></i> Male
+                                            </span>
+                                        </label>
+                                        <label class="segmented-option">
+                                            <input type="radio" name="gender" value="female">
+                                            <span class="segmented-box">
+                                                <i class="ri-women-line"></i> Female
+                                            </span>
+                                        </label>
+                                        <label class="segmented-option">
+                                            <input type="radio" name="gender" value="prefer-not-to-say" checked>
+                                            <span class="segmented-box">
+                                                <i class="ri-user-shared-line"></i> Prefer not to say
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label class="form-label">Gender</label>
-                                <div class="segmented-picker" id="genderPicker">
-                                    <label class="segmented-option">
-                                        <input type="radio" name="gender" value="male">
-                                        <span class="segmented-box">
-                                            <i class="ri-men-line"></i> Male
-                                        </span>
-                                    </label>
-                                    <label class="segmented-option">
-                                        <input type="radio" name="gender" value="female">
-                                        <span class="segmented-box">
-                                            <i class="ri-women-line"></i> Female
-                                        </span>
-                                    </label>
-                                    <label class="segmented-option">
-                                        <input type="radio" name="gender" value="prefer-not-to-say" checked>
-                                        <span class="segmented-box">
-                                            <i class="ri-user-shared-line"></i> Prefer not to say
-                                        </span>
-                                    </label>
+                            <!-- Label: Daily Goals -->
+                            <div class="settings-group">
+                                <div class="settings-group-header">
+                                    <span class="settings-group-tag">Daily Goals</span>
+                                    <h4 class="settings-group-title">Target & Tingkat Aktivitas</h4>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div class="settings-divider"></div>
-
-                        <!-- Label: Daily Goals -->
-                        <div class="settings-group">
-                            <div class="settings-group-header">
-                                <span class="settings-group-tag">Daily Goals</span>
-                                <h4 class="settings-group-title">Target & Tingkat Aktivitas</h4>
-                            </div>
-
-                            <!-- 1. Daily Water Goal -->
-                            <div class="form-group">
-                                <label class="form-label" for="inputDailyGoal">1. Daily Water Goal (ml)</label>
-                                <div class="form-input-wrapper">
-                                    <i class="ri-drop-line"></i>
-                                    <input type="number" id="inputDailyGoal" class="form-input"
-                                        placeholder="Contoh: 2000" min="500" max="6000" step="50" required>
+                                <!-- 1. Daily Water Goal -->
+                                <div class="form-group">
+                                    <label class="form-label" for="inputDailyGoal">1. Daily Water Goal (ml)</label>
+                                    <div class="form-input-wrapper">
+                                        <i class="ri-drop-line"></i>
+                                        <input type="number" id="inputDailyGoal" class="form-input"
+                                            placeholder="Contoh: 2000" min="500" max="6000" step="50" required>
+                                    </div>
+                                    <span class="text-muted small">Standar kebutuhan hidrasi sehat berkisar antara 2.000 ml
+                                        – 3.000 ml / hari.</span>
                                 </div>
-                                <span class="text-muted small">Standar kebutuhan hidrasi sehat berkisar antara 2.000 ml
-                                    – 3.000 ml / hari.</span>
-                            </div>
 
-                            <!-- 2. Activity Level -->
-                            <div class="form-group">
-                                <label class="form-label" for="selectActivity">2. Activity Level</label>
-                                <div class="form-input-wrapper">
-                                    <i class="ri-run-line"></i>
-                                    <select id="selectActivity" class="form-input form-select">
-                                        <option value="sedentary">1. Sedentary (Santai / Duduk bekerja)</option>
-                                        <option value="light">2. Light activity (Aktivitas ringan 1-2x/minggu)</option>
-                                        <option value="moderate" selected>3. Moderate activity (Olahraga sedang 3-5x/minggu)</option>
-                                        <option value="active">4. Active (Aktivitas tinggi / Olahraga setiap hari)</option>
-                                        <option value="very_active">5. Very active (Sangat aktif / Latihan fisik berat)</option>
-                                    </select>
+                                <!-- 2. Activity Level -->
+                                <div class="form-group">
+                                    <label class="form-label" for="selectActivity">2. Activity Level</label>
+                                    <div class="form-input-wrapper">
+                                        <i class="ri-run-line"></i>
+                                        <select id="selectActivity" class="form-input form-select">
+                                            <option value="sedentary">1. Sedentary (Santai / Duduk bekerja)</option>
+                                            <option value="light">2. Light activity (Aktivitas ringan 1-2x/minggu)</option>
+                                            <option value="moderate" selected>3. Moderate activity (Olahraga sedang 3-5x/minggu)</option>
+                                            <option value="active">4. Active (Aktivitas tinggi / Olahraga setiap hari)</option>
+                                            <option value="very_active">5. Very active (Sangat aktif / Latihan fisik berat)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -266,31 +277,58 @@
                     <div class="theme-selection-area">
                         <label class="form-label mb-2">Thema</label>
                         <div class="theme-cards-grid" id="themePicker">
-                            <button type="button" class="theme-card active" data-theme-value="system">
-                                <div class="theme-card__icon"><i class="ri-computer-line"></i></div>
-                                <div class="theme-card__content">
-                                    <span class="theme-card__title">System</span>
-                                    <span class="theme-card__desc">Mengikuti pengaturan tema sistem perangkat</span>
+                            <!-- 1. System Theme -->
+                            <button type="button" class="theme-card theme-card--system active" data-theme-value="system">
+                                <div class="theme-card__preview theme-card__preview--system" aria-hidden="true">
+                                    <div class="preview-split preview-split--light">
+                                        <span class="preview-pill"></span>
+                                        <span class="preview-bar"></span>
+                                    </div>
+                                    <div class="preview-split preview-split--dark">
+                                        <span class="preview-pill"></span>
+                                        <span class="preview-bar"></span>
+                                    </div>
                                 </div>
-                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                                <div class="theme-card__body">
+                                    <div class="theme-card__icon"><i class="ri-computer-line"></i></div>
+                                    <div class="theme-card__content">
+                                        <span class="theme-card__title">System</span>
+                                        <span class="theme-card__desc">Otomatis ikuti tema perangkat</span>
+                                    </div>
+                                    <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                                </div>
                             </button>
 
-                            <button type="button" class="theme-card" data-theme-value="light">
-                                <div class="theme-card__icon"><i class="ri-sun-line"></i></div>
-                                <div class="theme-card__content">
-                                    <span class="theme-card__title">Light</span>
-                                    <span class="theme-card__desc">Mode terang bersih & kontras tinggi</span>
+                            <!-- 2. Light Theme -->
+                            <button type="button" class="theme-card theme-card--light" data-theme-value="light">
+                                <div class="theme-card__preview theme-card__preview--light" aria-hidden="true">
+                                    <span class="preview-pill"></span>
+                                    <span class="preview-bar"></span>
                                 </div>
-                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                                <div class="theme-card__body">
+                                    <div class="theme-card__icon"><i class="ri-sun-line"></i></div>
+                                    <div class="theme-card__content">
+                                        <span class="theme-card__title">Light</span>
+                                        <span class="theme-card__desc">Mode terang bersih & tajam</span>
+                                    </div>
+                                    <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                                </div>
                             </button>
 
-                            <button type="button" class="theme-card" data-theme-value="dark">
-                                <div class="theme-card__icon"><i class="ri-moon-line"></i></div>
-                                <div class="theme-card__content">
-                                    <span class="theme-card__title">Dark</span>
-                                    <span class="theme-card__desc">Mode gelap lembut, nyaman untuk mata</span>
+                            <!-- 3. Dark Theme -->
+                            <button type="button" class="theme-card theme-card--dark" data-theme-value="dark">
+                                <div class="theme-card__preview theme-card__preview--dark" aria-hidden="true">
+                                    <span class="preview-pill"></span>
+                                    <span class="preview-bar"></span>
                                 </div>
-                                <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                                <div class="theme-card__body">
+                                    <div class="theme-card__icon"><i class="ri-moon-line"></i></div>
+                                    <div class="theme-card__content">
+                                        <span class="theme-card__title">Dark</span>
+                                        <span class="theme-card__desc">Mode gelap pekat & kontras jelas</span>
+                                    </div>
+                                    <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
+                                </div>
                             </button>
                         </div>
                     </div>

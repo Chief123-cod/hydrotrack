@@ -33,6 +33,14 @@
   .quick-goal-row {
     grid-template-columns: 1fr;
   }
+
+  .settings-form-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .contributors-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* ---------- Tablet (max-width: 768px) ---------- */
@@ -53,6 +61,82 @@
   }
 
   .main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--spacing-md);
+    padding-top: calc(60px + var(--spacing-md));
+    padding-bottom: 84px;
+  }
+
+  .main-content--dashboard {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--spacing-md);
+    padding-top: calc(60px + var(--spacing-md));
+    padding-bottom: 84px;
+  }
+
+  .dashboard-page-container {
+    gap: 16px;
+  }
+
+  .main-content--history {
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-top: calc(56px + 10px);
+    padding-bottom: calc(68px + 10px);
+    padding-left: 16px;
+    padding-right: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden !important;
+    box-sizing: border-box;
+  }
+
+  .history-top-header {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .history-top-header .top-header__right {
+    width: auto;
+  }
+
+  .main-content--history #view-history {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .history-dashboard-grid {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .history-visual-card {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    padding: 16px 20px;
+    gap: 10px;
+  }
+
+  .main-content--stats {
     margin-left: 0;
     width: 100%;
     max-width: 100vw;
@@ -167,9 +251,14 @@
   }
 
   .profile-stats-card {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .profile-stat-item {
+    padding: 12px;
+    gap: 10px;
   }
 
   .profile-stat-divider {
@@ -177,8 +266,21 @@
   }
 
   .theme-cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+  }
+
+  .theme-card {
+    padding: 12px 10px;
+  }
+
+  .theme-card__preview {
+    height: 46px;
+    margin-bottom: 8px;
+  }
+
+  .theme-card__desc {
+    font-size: 11px;
   }
 
   .contributors-grid {
@@ -190,6 +292,12 @@
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+  }
+
+  .data-mgmt-row > .btn,
+  .delete-before-actions .btn {
+    width: 100%;
+    min-width: 0;
   }
 
   .delete-before-actions {
@@ -265,6 +373,23 @@
 
   .dashboard-grid {
     gap: var(--spacing-md);
+  }
+
+  .main-content--dashboard {
+    padding: var(--spacing-sm);
+    padding-top: calc(56px + var(--spacing-sm));
+    padding-bottom: 84px;
+  }
+
+  .dashboard-page-container {
+    gap: 12px;
+  }
+
+  .goal-card,
+  .quick-log-card,
+  .bottle-card,
+  .drink-log-card {
+    padding: 16px 14px;
   }
 
   /* History modern dashboard mobile */
@@ -625,12 +750,13 @@
   }
 
   .stats-overview-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
 
   .stats-overview-item {
-    padding: 10px 12px;
+    padding: 10px;
+    gap: 8px;
     border-radius: 10px;
   }
 
@@ -670,6 +796,34 @@
   }
 
   /* Settings Mobile Specific */
+  .theme-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .theme-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+  }
+
+  .theme-card__preview {
+    width: 72px;
+    height: 48px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .theme-card__icon {
+    display: none;
+  }
+
+  .profile-stats-card {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
   .segmented-picker {
     grid-template-columns: 1fr;
     gap: 8px;

@@ -1073,10 +1073,15 @@ const UI = (() => {
   function applyTheme(theme) {
     if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.removeAttribute('data-theme-setting');
     } else if (theme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.removeAttribute('data-theme-setting');
     } else {
-      document.documentElement.setAttribute('data-theme', 'system');
+      // System: resolve OS preference
+      const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', isSystemDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme-setting', 'system');
     }
   }
 
@@ -1122,7 +1127,6 @@ const UI = (() => {
     renderSettings,
     applyTheme,
     updateThemePickerUI,
-    // updateWaterCalculator,
     setFieldError,
     clearFormErrors,
     formatMl,

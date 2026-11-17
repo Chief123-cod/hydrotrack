@@ -13,7 +13,9 @@
       } else if (parsed.theme === 'light') {
         document.documentElement.setAttribute('data-theme', 'light');
       } else {
-        document.documentElement.setAttribute('data-theme', 'system');
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme-setting', 'system');
       }
     }
   } catch (e) {}

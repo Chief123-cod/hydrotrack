@@ -207,9 +207,13 @@ const ChartModule = (() => {
     const activeItems = hasData ? breakdownList.filter(b => b.amount > 0) : [];
     const isReallyActive = activeItems.length > 0;
 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const emptyRingColor = isDark ? '#1E2536' : '#E2E8F0';
+    const segmentBorderColor = isDark ? '#121622' : '#FFFFFF';
+
     const finalLabels = isReallyActive ? activeItems.map(b => b.label) : ['Belum Ada Data'];
     const finalValues = isReallyActive ? activeItems.map(b => b.amount) : [1];
-    const finalColors = isReallyActive ? activeItems.map(b => b.color) : ['#E2E8F0'];
+    const finalColors = isReallyActive ? activeItems.map(b => b.color) : [emptyRingColor];
 
     const ctx = canvas.getContext('2d');
     doughnutChartInstance = new Chart(ctx, {
@@ -220,8 +224,8 @@ const ChartModule = (() => {
           {
             data: finalValues,
             backgroundColor: finalColors,
-            borderWidth: 2,
-            borderColor: '#FFFFFF',
+            borderWidth: finalValues.length > 1 ? 2 : 0,
+            borderColor: segmentBorderColor,
             hoverOffset: isReallyActive ? 5 : 0
           }
         ]

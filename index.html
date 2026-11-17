@@ -102,53 +102,57 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- ========== MAIN CONTENT ========== -->
-  <main class="main-content">
-
-    <!-- Top Header Bar -->
-    <header class="top-header">
-      <div class="top-header__left">
-        <h1 class="top-header__greeting" id="greetingText"><span id="greetingTime"></span>, <span
-            id="headerUserName">User</span></h1>
-        <p class="top-header__subtitle">Pantau konsumsi air harianmu dan tetap terhidrasi.</p>
-      </div>
-    </header>
+  <main class="main-content main-content--dashboard">
 
     <!-- ===== VIEW: DASHBOARD ===== -->
     <section class="view view--active" id="view-dashboard">
+      <div class="dashboard-page-container">
 
-      <!-- Motivational Banner -->
-      <div class="banner">
-        <div class="banner__content">
-          <div class="banner__icon"><i class="ri-sun-line"></i></div>
-          <div class="banner__text">
-            <h3>Hai, jangan lupa minum air hari ini! 💧</h3>
-            <p>Tetap terhidrasi agar tubuh dan pikiranmu selalu segar sepanjang hari.</p>
+        <!-- Top Header Bar -->
+        <header class="top-header">
+          <div class="top-header__left">
+            <h1 class="top-header__greeting" id="greetingText"><span id="greetingTime"></span>, <span
+                id="headerUserName">User</span></h1>
+            <p class="top-header__subtitle">Pantau konsumsi air harianmu dan tetap terhidrasi.</p>
+          </div>
+          <div class="top-header__right">
+            <div class="top-header__date" id="headerDate"></div>
+          </div>
+        </header>
+
+        <!-- Motivational Banner -->
+        <div class="banner">
+          <div class="banner__content">
+            <div class="banner__icon"><i class="ri-sun-line"></i></div>
+            <div class="banner__text">
+              <h3>Hai, jangan lupa minum air hari ini! 💧</h3>
+              <p>Tetap terhidrasi agar tubuh dan pikiranmu selalu segar sepanjang hari.</p>
+            </div>
+          </div>
+          <button class="banner__close" id="bannerClose" aria-label="Tutup banner">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+
+        <!-- Intake Goal Progress (Target Harian) -->
+        <div class="card goal-card">
+          <div class="goal-card__header">
+            <div>
+              <h3 class="card__title">Target Harian</h3>
+              <p class="goal-card__message" id="goalMessage">Mulai minum air untuk mencapai targetmu!</p>
+            </div>
+            <div class="goal-card__stats text-end">
+              <span class="goal-card__target" id="goalTarget">0 / 0 ml</span>
+              <span class="goal-card__pct-badge" id="metricPercentage">0%</span>
+            </div>
+          </div>
+          <div class="progress-bar progress-bar--lg">
+            <div class="progress-bar__fill" id="progressBarFill"></div>
           </div>
         </div>
-        <button class="banner__close" id="bannerClose" aria-label="Tutup banner">
-          <i class="ri-close-line"></i>
-        </button>
-      </div>
 
-      <!-- Intake Goal Progress (Target Harian Ditaruh di Atas) -->
-      <div class="card goal-card mb-4">
-        <div class="goal-card__header">
-          <div>
-            <h3 class="card__title">Target Harian</h3>
-            <p class="goal-card__message" id="goalMessage">Mulai minum air untuk mencapai targetmu!</p>
-          </div>
-          <div class="goal-card__stats text-end">
-            <span class="goal-card__target" id="goalTarget">0 / 0 ml</span>
-            <span class="goal-card__pct-badge" id="metricPercentage">0%</span>
-          </div>
-        </div>
-        <div class="progress-bar progress-bar--lg">
-          <div class="progress-bar__fill" id="progressBarFill"></div>
-        </div>
-      </div>
-
-      <!-- Quick Add Buttons (Menu Kategori Minuman + Ukuran Cup) -->
-      <div class="card quick-log-card mb-4">
+        <!-- Quick Add Buttons (Menu Kategori Minuman + Ukuran Cup) -->
+        <div class="card quick-log-card">
         <!-- Beverage Category Tabs (Pills Sedang Sesuai Referensi) -->
         <div class="beverage-tabs-wrapper">
           <div class="beverage-tabs" id="beverageTabs">
@@ -266,6 +270,7 @@
         </div>
       </div>
 
+      </div> <!-- /.dashboard-page-container -->
     </section>
   </main>
 
