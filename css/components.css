@@ -2018,7 +2018,7 @@
 }
 
 .stats-top-header .top-header__greeting {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--color-text-primary);
   letter-spacing: -0.4px;
@@ -2904,12 +2904,12 @@
 }
 
 .m3-page-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--color-text-primary);
-  letter-spacing: -0.6px;
-  line-height: 1.15;
-  margin: 4px 0 22px 2px;
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+  margin: 0 0 16px 2px;
 }
 
 .m3-back-btn {

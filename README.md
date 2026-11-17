@@ -1,6 +1,6 @@
 # 💧 HydroTrack — Daily Water Intake Tracker
 
-**HydroTrack** adalah aplikasi web pelacak konsumsi air harian (*Daily Water Intake Tracker*) yang dirancang untuk membantu pengguna mencatat asupan cairan, mencapai target hidrasi harian, dan memantau kebiasaan minum melalui visualisasi data interaktif.
+**HydroTrack** adalah aplikasi web pelacak konsumsi air harian (*Daily Water Intake Tracker*) modern yang dirancang untuk membantu pengguna mencatat asupan cairan, mencapai target hidrasi harian, dan memantau kebiasaan minum melalui visualisasi data interaktif.
 
 Proyek ini dibangun menggunakan **HTML5**, **CSS3 Murni (Custom Properties, Flexbox, Grid)**, dan **Vanilla JavaScript (ES6+)** tanpa *framework* CSS/JS eksternal, dengan penyimpanan data lokal berbasis `localStorage`.
 
@@ -9,49 +9,60 @@ Proyek ini dibangun menggunakan **HTML5**, **CSS3 Murni (Custom Properties, Flex
 ## ✨ Fitur Utama
 
 ### 1. 🏠 Home (Dashboard Utama — `index.html`)
-- **Progress Target Harian:** Menampilkan total konsumsi cairan hari ini dibandingkan target harian (`ml` dan persentase `%`) melalui *progress bar* dinamis.
-- **Quick Log Menu Minuman & Wadah Kustom:**
-  - Pilihan kategori minuman (*Water*, *Coffee*, *Tea*, *Milk*, *Fruit Juice*, *Energy Drink*, *Sports Drink*, *Soft Drink*, *QRS*, atau tambah kategori minuman baru).
-  - Tombol takaran cepat (*Coffee Cup 100 ml*, *Tea Cup 150 ml*, *Small Cup 175 ml*, *Medium Glass 200 ml*, *Large Glass 300 ml*, *Water Bottle 500 ml*, *Large Bottle 1.000 ml*) serta fitur **+ Add Container** untuk membuat ukuran wadah sendiri.
-- **Visualisasi Botol Hidrasi Interaktif:** Animasi ketinggian air dan gelombang di dalam botol yang naik secara *real-time* mengikuti persentase capaian target.
-- **Recent Entries (Catatan Hari Ini):** Daftar riwayat minum hari ini lengkap dengan fitur **Edit** (ubah wadah, jenis minuman, jam, volume) dan **Delete** langsung di tempat.
-- **Floating Action Button (FAB Speed Dial):** Jalan pintas cepat untuk menambahkan *New Beverage*, *New Container*, dan *+ Add Custom Intake*.
+- **Top Header & Sapaan Dinamis:** Menampilkan sapaan waktu otomatis (*Good Morning*, *Good Afternoon*, *Good Evening*, *Good Night*) yang terpersonalisasi dengan nama pengguna, indikator tanggal hari ini, serta chip profil interaktif yang terhubung langsung ke pengaturan.
+- **Progress Target Harian:** Menampilkan total asupan cairan hari ini dibandingkan target harian (`ml` dan persentase `%`) melalui *progress bar* dinamis.
+- **Quick Log Menu Minuman & Kustomisasi Wadah:**
+  - **Pills Kategori Minuman:** Pilihan 9 kategori minuman utama (*Water*, *Coffee*, *Energy Drink*, *Fruit Juice*, *Milk*, *QRS*, *Soft Drink*, *Sports Drink*, *Tea*) dengan ikon visual khas.
+  - **Tombol Takaran Cepat:** Tombol wadah dengan scroll horizontal halus (mendukung *mouse wheel*, *drag-to-scroll*, dan *touch swipe*) untuk wadah standar (*Small Cup 175 ml*, *Medium Glass 200 ml*, *Large Glass 300 ml*, *Water Bottle 500 ml*, *Large Bottle 1.000 ml*).
+  - **Fitur + Add Container:** Pengguna dapat menambahkan ukuran wadah kustom sendiri dengan pilihan ikon wadah SVG kustom (*Cup*, *Glass*, *Mug*, *Bottle*).
+- **Visualisasi Botol Hidrasi Interaktif:** Animasi level air dan efek gelombang dinamis di dalam botol yang bergerak naik secara *real-time* mencerminkan persentase capaian target hidrasi.
+- **Recent Entries (Catatan Hari Ini):** Daftar riwayat minum hari ini lengkap dengan aksi **Edit** (ubah takaran wadah, jenis minuman, jam konsumsi, dan volume) serta **Delete** langsung di tempat.
+- **Hydration Tips & Motivational Banner:** Banner pengingat minum dengan opsi tutup dan tips hidrasi harian yang informatif.
 
 ### 2. 📅 History (Riwayat Konsumsi — `riwayat.html`)
-- **3 Mode Rentang Waktu Interaktif:**
-  - **Weekly:** Grafik batang 7 hari dengan garis batas target dan lencana trofi (🏆) saat target harian tercapai.
-  - **Monthly:** Kalender bulanan interaktif dengan penanda hari aktif dan hari yang mencapai target.
-  - **Yearly:** *Heatmap* kontribusi 365 hari dalam setahun dengan 4 tingkatan intensitas warna.
-- **Ringkasan 3 Metrik Utama:** Menampilkan *Total Intake*, *Average*, *Best Day*, *Days Tracked*, *Goals Met*, dan *Success Rate* sesuai periode yang dipilih.
-- **Rincian Catatan Per Tanggal:** Klik tanggal mana pun pada grafik/kalender untuk melihat, mengedit, atau menghapus catatan minum pada tanggal tersebut.
+- **3 Mode Analisis Waktu (Segmented Tabs):**
+  - **Weekly:** Grafik batang 7 hari (Chart.js) dengan garis batas target harian dan lencana trofi emas (🏆) saat target tercapai.
+  - **Monthly:** Kalender bulanan interaktif dengan penanda status hari aktif dan tanggal pencapaian target.
+  - **Yearly:** *Heatmap* kontribusi aktivitas hidrasi 365 hari penuh dengan 4 tingkatan gradasi warna.
+- **Kartu Ringkasan Metrik:** Menampilkan ringkasan metrik periode terpilih: *Total Intake*, *Daily Average*, *Best Day*, *Days Tracked*, *Goals Met*, dan *Success Rate*.
+- **Rincian Catatan Per Tanggal & Manajemen Data:** Klik tanggal mana pun pada grafik mingguan atau kalender bulanan untuk meninjau, mengedit, atau menghapus catatan minum pada hari tersebut.
 
 ### 3. 📊 Statistics (Analisis & Statistik — `analisis.html`)
-- **4 Kartu Ringkasan Utama:** *Total Intake*, *Daily Average*, *Success Rate*, dan *Days Tracked*.
-- **Overview Kebiasaan Hidrasi (8 Metrik):** *Current Streak*, *Success Rate*, *Days Tracked*, *Average Interval*, *Average Drink Size*, *Largest Drink*, *First Drink*, dan *Last Drink*.
-- **Beverage Breakdown:** Grafik *Doughnut* (Chart.js) dan daftar persentase distribusi jenis minuman yang dikonsumsi.
-- **Container Usage:** Tabel statistik frekuensi dan persentase penggunaan masing-masing wadah minum (*Container*, *Volume*, *Uses*).
+- **4 Kartu Metrik Utama:** Kartu ringkasan *Total Intake*, *Daily Average*, *Success Rate*, dan *Days Tracked* dengan aksen warna indikator status.
+- **Overview Kebiasaan Hidrasi (8 Metrik Pola):** Analisis kebiasaan mendalam mencakup *Current Streak*, *Success Rate*, *Days Tracked*, *Average Interval*, *Average Drink Size*, *Largest Drink*, *First Drink*, dan *Last Drink*.
+- **Beverage Breakdown:** Grafik *Doughnut* (Chart.js) dengan ringkasan total volume di tengah grafik serta rincian persentase dan volume per jenis minuman yang dikonsumsi.
+- **Container Usage:** Tabel ringkasan statistik frekuensi dan total volume penggunaan masing-masing jenis takaran wadah minum (*Container*, *Volume*, *Uses*).
 
 ### 4. ⚙️ Settings (Pengaturan & Profil — `pengaturan.html`)
+- **Desain Responsif Dual-Arsitektur:**
+  - **Desktop (> 1024px):** Layout grid terpadu yang menampilkan profil, target harian, tema, dan manajemen data secara selaras dengan top header 72px.
+  - **Mobile & Tablet (≤ 1024px):** Desain adaptif berbasis **Material 3 Expressive UI** dengan kartu hero profil, avatar dinamis, dan sub-view navigasi bertingkat.
+- **Appearance (Tema Tampilan 3-Pill):** Kontrol segmented 3 pilihan (**⚙ System**, **☼ Light**, **☾ Dark**) yang fleksibel, otomatis sinkron dengan preferensi perangkat, dan memenuhi standar kontras WCAG AA.
 - **Profile & Daily Goals:**
-  - Kartu profil terpadu yang menampilkan sapaan waktu otomatis, nama pengguna, serta 3 metrik cepat (*Today's Entries*, *Days Tracked*, *Today's Goal*).
-  - Pengaturan **Personal** (*Nama Pengguna* & *Gender*: *Male*, *Female*, *Prefer not to say*).
-  - Pengaturan **Daily Goals** (*Daily Water Goal* dengan pilihan cepat `1.5 L`–`3 L` & *Activity Level*: *Sedentary* hingga *Very Active*).
-- **Appearance (Tema Tampilan):** Pilihan mode **System** (mengikuti tema perangkat), **Light** (mode terang), dan **Dark** (mode gelap kontras tinggi berstandar WCAG AA).
-- **Data Management:**
-  - **Export as CSV:** Unduh seluruh riwayat catatan minum ke dalam file `.csv` untuk dibuka di Microsoft Excel atau Google Sheets.
-  - **Delete Data:** Opsi *Delete entries before date* (hapus catatan sebelum tanggal tertentu), *Delete local data only* (hapus riwayat tanpa menghapus profil), dan *Delete everything* (reset penuh ke pengaturan awal).
-- **About & Contributors:** Informasi versi aplikasi, teknologi yang digunakan, dan daftar tim pengembang.
+  - Kartu profil dengan avatar inisial dinamis, sapaan waktu, dan metrik kilat (*Today's Entries*, *Days Tracked*, *Today's Goal*).
+  - Pengaturan personal (Nama Panggilan & Gender).
+  - Penyesuaian target air harian (*Daily Water Goal*) dengan opsi cepat `1.5 L`–`3 L` serta faktor pengali tingkat aktivitas harian (*Sedentary* hingga *Very Active*).
+- **Data Management & Backup:**
+  - **Export as CSV:** Unduh seluruh rekaman riwayat konsumsi air ke dalam format `.csv` untuk dibuka di Microsoft Excel atau Google Sheets.
+  - **Pilihan Penghapusan Data:** Opsi *Delete entries before date* (hapus catatan sebelum tanggal tertentu), *Delete local data only* (hapus log riwayat tanpa mereset profil), dan *Delete everything* (reset pabrik penuh).
+- **About & Contributors:** Informasi versi aplikasi, arsitektur teknologi, dan profil tim pengembang.
 
 ### 5. 🌊 Welcome & Onboarding Setup (`welcome.html`)
-- **Interactive Multi-Step Setup:** Tampilan wizard 8 langkah interaktif yang otomatis muncul saat pertama kali membuka aplikasi atau setelah pengguna melakukan *Delete everything (Reset Pabrik)* di halaman pengaturan:
-  1. **Welcome Screen:** Pengenalan fitur personalisasi dan sambutan.
-  2. **Tell Us About Yourself:** Pemilihan gender (*Male*, *Female*, *Prefer not to say*).
+- **Interactive Multi-Step Wizard:** Alur setup 8 langkah interaktif bagi pengguna baru atau setelah melakukan reset pabrik:
+  1. **Welcome Screen:** Sambutan dan perkenalan fitur personalisasi hidrasi.
+  2. **Tell Us About Yourself:** Pemilihan identitas gender (*Male*, *Female*, *Prefer not to say*).
   3. **Age Group:** Penentuan kelompok usia (*18–30*, *31–50*, *51–60*, *60+ years*).
-  4. **Activity Level:** Penyesuaian tingkat aktivitas harian (*Sedentary*, *Light*, *Moderate*, *Active*).
-  5. **Schedule (Wake & Sleep Time):** Waktu bangun & tidur dengan kalkulator otomatis durasi jam aktif (*Awake duration*).
-  6. **Complete Your Profile:** Pendaftaran nama panggilan dengan avatar inisial dinamis dan counter karakter.
-  7. **Personalized Goal Review:** Algoritma kalkulasi rekomendasi target air harian (*Daily Water Goal*) dan interval pengingat (*Reminder Interval*).
-  8. **You're All Set!:** Layar konfirmasi selebrasi dengan tombol *Start hydrating* untuk menyimpan data ke `localStorage` dan langsung dialihkan ke Dashboard.
+  4. **Activity Level:** Penyesuaian intensitas kegiatan harian (*Sedentary*, *Light*, *Moderate*, *Active*).
+  5. **Schedule (Wake & Sleep Time):** Waktu bangun dan tidur dengan kalkulator otomatis durasi jam aktif harian (*Awake duration*).
+  6. **Complete Your Profile:** Pendaftaran nama panggilan pengguna dengan avatar inisial dinamis dan counter karakter.
+  7. **Personalized Goal Review:** Algoritma rekomendasi target air harian (*Daily Water Goal*) dan interval pengingat minum (*Reminder Interval*) yang dihitung secara presisi.
+  8. **You're All Set!:** Layar perayaan dengan tombol *Start hydrating* untuk menyimpan konfigurasi ke `localStorage` dan langsung dialihkan ke Dashboard utama.
+
+### 6. 📱 Desain UI/UX & Responsivitas Antarmuka
+- **Desktop Continuous Header Line:** Garis pembatas horizontal kontinu selebar layar pada ketinggian `y = 72px` yang menyatu presisi antara logo sidebar dan top header di seluruh halaman.
+- **Interactive Profile Chip:** Tombol profil di sudut kanan atas header desktop yang menampilkan avatar, nama, peran pengguna, dan pintasan langsung ke menu pengaturan.
+- **Bottom Navigation Bar (Mobile):** Akses cepat 4 menu utama (*Home*, *History*, *Statistics*, *Settings*) yang tersemat rapi di bagian bawah layar perangkat seluler.
+- **Proteksi Anti-Layout Shift:** Optimasi viewport mobile dengan penguncian scrollbar internal agar transisi antar-halaman bebas dari kedipan (*flicker*) atau lonjakan address bar browser.
 
 ---
 
@@ -121,6 +132,7 @@ hydrotrack/
 ├── analisis.html       # Halaman statistik (Overview 8 Metrik, Beverage Breakdown, Container Usage)
 ├── pengaturan.html     # Halaman pengaturan (Profile, Appearance, Data Management, About)
 ├── welcome.html        # Halaman onboarding & wizard pendaftaran profil baru
+├── AGENTS.md           # Pedoman, batasan teknis & protokol kerja AI Coding Assistant
 ├── css/
 │   ├── style.css       # Variabel CSS global (Light & Dark Mode), reset, sidebar, bottom-nav
 │   ├── components.css  # Styling komponen kartu, botol, tabel, grafik, modal, dan form

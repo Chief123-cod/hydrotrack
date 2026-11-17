@@ -615,6 +615,14 @@ img {
   color: var(--color-primary);
 }
 
+.top-header__greeting span#greetingTime {
+  color: var(--color-text-primary);
+}
+
+.top-header__greeting span#headerUserName {
+  color: var(--color-primary);
+}
+
 .top-header__subtitle {
   display: none !important;
 }

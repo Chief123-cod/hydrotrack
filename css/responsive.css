@@ -225,8 +225,9 @@
 
   .top-header__greeting {
     font-size: 20px !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     color: var(--color-text-primary);
+    letter-spacing: -0.3px !important;
     line-height: 1.25 !important;
     margin: 0 !important;
   }
@@ -536,7 +537,10 @@
   }
 
   .top-header__greeting {
-    font-size: 18px;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.25 !important;
   }
 
   .top-header__subtitle {
@@ -617,8 +621,10 @@
   }
 
   .history-top-header .top-header__greeting {
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.25 !important;
   }
 
   .history-top-header .top-header__subtitle {
@@ -924,8 +930,9 @@
 
   .stats-top-header .top-header__greeting {
     font-size: 20px !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     color: var(--color-text-primary);
+    letter-spacing: -0.3px !important;
     line-height: 1.25 !important;
     margin: 0 !important;
   }
@@ -1098,8 +1105,12 @@
 
   /* Settings Mobile Specific (Material 3 Expressive) */
   .m3-page-title {
-    font-size: 28px;
-    margin: 4px 0 18px 2px;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: var(--color-text-primary) !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.25 !important;
+    margin: 0 0 14px 2px !important;
   }
 
   .m3-profile-hero-card {
