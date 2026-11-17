@@ -230,9 +230,9 @@
                             <div class="m3-profile-col">
                                 <!-- Section Label: Personal -->
                                 <h3 class="m3-section-heading">Personal</h3>
-                                <div class="m3-accordion-card m3-accordion-card--single" id="accordionGender">
-                                    <button type="button" class="m3-accordion-header"
-                                        data-toggle-accordion="accordionGender">
+                                <div class="m3-segmented-list">
+                                    <!-- Gender (Pop-up Trigger) -->
+                                    <button type="button" class="m3-nav-card m3-nav-card--single" id="btnOpenGenderModal">
                                         <div class="m3-nav-card__icon">
                                             <i class="ri-user-3-fill"></i>
                                         </div>
@@ -240,36 +240,8 @@
                                             <span class="m3-nav-card__title">Gender</span>
                                             <span class="m3-nav-card__sub" id="genderCurrentLabel">Male</span>
                                         </div>
-                                        <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
+                                        <i class="ri-arrow-right-s-line m3-nav-card__arrow"></i>
                                     </button>
-                                    <div class="m3-accordion-body">
-                                        <div class="m3-radio-list" id="genderPicker">
-                                            <label class="m3-radio-item">
-                                                <input type="radio" name="gender" value="male">
-                                                <span class="m3-radio-item__box">
-                                                    <i class="ri-men-line"></i>
-                                                    <span>Male</span>
-                                                    <i class="ri-check-line m3-radio-check"></i>
-                                                </span>
-                                            </label>
-                                            <label class="m3-radio-item">
-                                                <input type="radio" name="gender" value="female">
-                                                <span class="m3-radio-item__box">
-                                                    <i class="ri-women-line"></i>
-                                                    <span>Female</span>
-                                                    <i class="ri-check-line m3-radio-check"></i>
-                                                </span>
-                                            </label>
-                                            <label class="m3-radio-item">
-                                                <input type="radio" name="gender" value="prefer-not-to-say" checked>
-                                                <span class="m3-radio-item__box">
-                                                    <i class="ri-user-shared-line"></i>
-                                                    <span>Prefer not to say</span>
-                                                    <i class="ri-check-line m3-radio-check"></i>
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -277,114 +249,33 @@
                                 <!-- Section Label: Daily Goals -->
                                 <h3 class="m3-section-heading">Daily Goals</h3>
                                 <div class="m3-segmented-list">
-                                    <!-- 1. Daily Water Goal -->
-                                    <div class="m3-accordion-card m3-nav-card--top" id="accordionGoal">
-                                        <button type="button" class="m3-accordion-header"
-                                            data-toggle-accordion="accordionGoal">
-                                            <div class="m3-nav-card__icon">
-                                                <i class="ri-drop-fill"></i>
-                                            </div>
-                                            <div class="m3-nav-card__info">
-                                                <span class="m3-nav-card__title">Daily Water Goal</span>
-                                                <span class="m3-nav-card__sub" id="dailyGoalCurrentLabel">2.000
-                                                    ml</span>
-                                            </div>
-                                            <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
-                                        </button>
-                                        <div class="m3-accordion-body">
-                                            <div class="m3-goal-editor">
-                                                <div class="m3-goal-input-row">
-                                                    <input type="number" id="inputDailyGoal" class="m3-input"
-                                                        placeholder="2000" min="500" max="6000" step="50" required>
-                                                    <span class="m3-goal-unit">ml</span>
-                                                    <button type="submit" class="m3-btn-chip m3-btn-chip--primary"
-                                                        id="btnSaveProfile">Simpan</button>
-                                                </div>
-                                                <div class="m3-goal-presets">
-                                                    <button type="button" class="m3-preset-pill"
-                                                        data-goal-preset="1500">1.5 L</button>
-                                                    <button type="button" class="m3-preset-pill"
-                                                        data-goal-preset="2000">2 L</button>
-                                                    <button type="button" class="m3-preset-pill"
-                                                        data-goal-preset="2500">2.5 L</button>
-                                                    <button type="button" class="m3-preset-pill"
-                                                        data-goal-preset="3000">3 L</button>
-                                                </div>
-                                                <p class="m3-goal-hint">
-                                                    <i class="ri-information-line"></i>
-                                                    <span>Standar kebutuhan hidrasi sehat berkisar <strong>2.000 ml –
-                                                            3.000 ml</strong> per hari sesuai aktivitas fisik
-                                                        Anda.</span>
-                                                </p>
-                                            </div>
+                                    <!-- 1. Daily Water Goal (Pop-up Trigger) -->
+                                    <button type="button" class="m3-nav-card m3-nav-card--top" id="btnOpenGoalModal">
+                                        <div class="m3-nav-card__icon">
+                                            <i class="ri-drop-fill"></i>
                                         </div>
-                                    </div>
+                                        <div class="m3-nav-card__info">
+                                            <span class="m3-nav-card__title">Daily Water Goal</span>
+                                            <span class="m3-nav-card__sub" id="dailyGoalCurrentLabel">2.000 ml</span>
+                                        </div>
+                                        <i class="ri-arrow-right-s-line m3-nav-card__arrow"></i>
+                                    </button>
 
-                                    <!-- 2. Activity Level -->
-                                    <div class="m3-accordion-card m3-nav-card--bottom" id="accordionActivity">
-                                        <button type="button" class="m3-accordion-header"
-                                            data-toggle-accordion="accordionActivity">
-                                            <div class="m3-nav-card__icon">
-                                                <svg class="m3-dumbbell-svg" viewBox="0 0 24 24" width="22" height="22"
-                                                    fill="currentColor">
-                                                    <path
-                                                        d="M5.64 3.51L3.51 5.64l1.42 1.41L3.51 8.46l2.13 2.13 1.41-1.42 6.36 6.36-1.42 1.41 2.13 2.13 1.41-1.42 1.41 1.42 2.13-2.13-1.42-1.41 1.42-1.41-2.13-2.13-1.41 1.42-6.36-6.36 1.42-1.41L8.46 3.51 7.05 4.93 5.64 3.51z" />
-                                                </svg>
-                                            </div>
-                                            <div class="m3-nav-card__info">
-                                                <span class="m3-nav-card__title">Activity Level</span>
-                                                <span class="m3-nav-card__sub" id="activityCurrentLabel">Moderate
-                                                    Activity</span>
-                                            </div>
-                                            <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
-                                        </button>
-                                        <div class="m3-accordion-body">
-                                            <select id="selectActivity" class="hidden" aria-hidden="true">
-                                                <option value="sedentary">Sedentary</option>
-                                                <option value="light">Light Activity</option>
-                                                <option value="moderate" selected>Moderate Activity</option>
-                                                <option value="active">Active</option>
-                                                <option value="very_active">Very Active</option>
-                                            </select>
-                                            <div class="m3-radio-list" id="activityPickerList">
-                                                <label class="m3-radio-item">
-                                                    <input type="radio" name="activity_radio" value="sedentary">
-                                                    <span class="m3-radio-item__box">
-                                                        <span>1. Sedentary</span>
-                                                        <i class="ri-check-line m3-radio-check"></i>
-                                                    </span>
-                                                </label>
-                                                <label class="m3-radio-item">
-                                                    <input type="radio" name="activity_radio" value="light">
-                                                    <span class="m3-radio-item__box">
-                                                        <span>2. Light Activity</span>
-                                                        <i class="ri-check-line m3-radio-check"></i>
-                                                    </span>
-                                                </label>
-                                                <label class="m3-radio-item">
-                                                    <input type="radio" name="activity_radio" value="moderate" checked>
-                                                    <span class="m3-radio-item__box">
-                                                        <span>3. Moderate Activity</span>
-                                                        <i class="ri-check-line m3-radio-check"></i>
-                                                    </span>
-                                                </label>
-                                                <label class="m3-radio-item">
-                                                    <input type="radio" name="activity_radio" value="active">
-                                                    <span class="m3-radio-item__box">
-                                                        <span>4. Active</span>
-                                                        <i class="ri-check-line m3-radio-check"></i>
-                                                    </span>
-                                                </label>
-                                                <label class="m3-radio-item">
-                                                    <input type="radio" name="activity_radio" value="very_active">
-                                                    <span class="m3-radio-item__box">
-                                                        <span>5. Very Active</span>
-                                                        <i class="ri-check-line m3-radio-check"></i>
-                                                    </span>
-                                                </label>
-                                            </div>
+                                    <!-- 2. Activity Level (Pop-up Trigger) -->
+                                    <button type="button" class="m3-nav-card m3-nav-card--bottom" id="btnOpenActivityModal">
+                                        <div class="m3-nav-card__icon">
+                                            <svg class="m3-dumbbell-svg" viewBox="0 0 24 24" width="22" height="22"
+                                                fill="currentColor">
+                                                <path
+                                                    d="M5.64 3.51L3.51 5.64l1.42 1.41L3.51 8.46l2.13 2.13 1.41-1.42 6.36 6.36-1.42 1.41 2.13 2.13 1.41-1.42 1.41 1.42 2.13-2.13-1.42-1.41 1.42-1.41-2.13-2.13-1.41 1.42-6.36-6.36 1.42-1.41L8.46 3.51 7.05 4.93 5.64 3.51z" />
+                                            </svg>
                                         </div>
-                                    </div>
+                                        <div class="m3-nav-card__info">
+                                            <span class="m3-nav-card__title">Activity Level</span>
+                                            <span class="m3-nav-card__sub" id="activityCurrentLabel">Moderate Activity</span>
+                                        </div>
+                                        <i class="ri-arrow-right-s-line m3-nav-card__arrow"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -649,6 +540,203 @@
 
     <!-- ========== TOAST NOTIFICATION ========== -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========== MODAL DAILY WATER GOAL ========== -->
+    <div class="modal-overlay" id="goalModalOverlay">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="m3-nav-card__icon" style="margin: 0; width: 42px; height: 42px; border-radius: 12px; background: rgba(46, 134, 222, 0.1); display: flex; align-items: center; justify-content: center; color: #2E86DE;">
+                        <i class="ri-drop-fill" style="font-size: 22px;"></i>
+                    </div>
+                    <h3 class="container-modal__title">Daily Water Goal</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseGoalModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <form id="goalModalForm" novalidate>
+                <div class="m3-goal-editor" style="padding: 0;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 8px;">Target Air Harian</label>
+                    <div class="m3-goal-input-row" style="margin-bottom: 16px;">
+                        <input type="number" id="inputDailyGoalModal" class="m3-input" placeholder="2000" min="500" max="6000" step="50" required>
+                        <span class="m3-goal-unit">ml</span>
+                    </div>
+
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 8px;">Pilihan Cepat (Presets)</label>
+                    <div class="m3-goal-presets" style="margin-bottom: 16px;">
+                        <button type="button" class="m3-preset-pill" data-modal-goal-preset="1500">1.5 L</button>
+                        <button type="button" class="m3-preset-pill" data-modal-goal-preset="2000">2 L</button>
+                        <button type="button" class="m3-preset-pill" data-modal-goal-preset="2500">2.5 L</button>
+                        <button type="button" class="m3-preset-pill" data-modal-goal-preset="3000">3 L</button>
+                    </div>
+
+                    <p class="m3-goal-hint" style="margin-bottom: 24px;">
+                        <i class="ri-information-line"></i>
+                        <span>Standar kebutuhan hidrasi sehat berkisar <strong>2.000 ml – 3.000 ml</strong> per hari sesuai aktivitas fisik Anda.</span>
+                    </p>
+
+                    <div class="container-modal__actions">
+                        <button type="button" class="btn-modal-cancel" id="btnCancelGoalModal">Batal</button>
+                        <button type="submit" class="btn-modal-save" id="btnSubmitGoalModal">Simpan Target</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL ACTIVITY LEVEL ========== -->
+    <div class="modal-overlay" id="activityModalOverlay">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="m3-nav-card__icon" style="margin: 0; width: 42px; height: 42px; border-radius: 12px; background: rgba(46, 134, 222, 0.1); display: flex; align-items: center; justify-content: center; color: #2E86DE;">
+                        <svg class="m3-dumbbell-svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path d="M5.64 3.51L3.51 5.64l1.42 1.41L3.51 8.46l2.13 2.13 1.41-1.42 6.36 6.36-1.42 1.41 2.13 2.13 1.41-1.42 1.41 1.42 2.13-2.13-1.42-1.41 1.42-1.41-2.13-2.13-1.41 1.42-6.36-6.36 1.42-1.41L8.46 3.51 7.05 4.93 5.64 3.51z" />
+                        </svg>
+                    </div>
+                    <h3 class="container-modal__title">Activity Level</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseActivityModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <form id="activityModalForm">
+                <div class="m3-radio-list" id="activityModalPickerList" style="margin-bottom: 24px;">
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_activity_radio" value="sedentary">
+                        <span class="m3-radio-item__box">
+                            <span>1. Sedentary</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_activity_radio" value="light">
+                        <span class="m3-radio-item__box">
+                            <span>2. Light Activity</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_activity_radio" value="moderate" checked>
+                        <span class="m3-radio-item__box">
+                            <span>3. Moderate Activity</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_activity_radio" value="active">
+                        <span class="m3-radio-item__box">
+                            <span>4. Active</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_activity_radio" value="very_active">
+                        <span class="m3-radio-item__box">
+                            <span>5. Very Active</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelActivityModal">Batal</button>
+                    <button type="submit" class="btn-modal-save" id="btnSubmitActivityModal">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL EDIT NAME ========== -->
+    <div class="modal-overlay" id="editNameModalOverlay">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="m3-nav-card__icon" style="margin: 0; width: 42px; height: 42px; border-radius: 12px; background: rgba(46, 134, 222, 0.1); display: flex; align-items: center; justify-content: center; color: #2E86DE;">
+                        <i class="ri-user-3-fill" style="font-size: 22px;"></i>
+                    </div>
+                    <h3 class="container-modal__title">Ubah Nama Profil</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseEditNameModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <form id="editNameModalForm" novalidate>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 8px;">Nama Lengkap / Panggilan</label>
+                    <input type="text" id="inputModalUserName" class="m3-input" placeholder="Masukkan nama Anda" maxlength="30" required style="width: 100%; height: 48px; font-size: 15px;">
+                </div>
+
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelEditNameModal">Batal</button>
+                    <button type="submit" class="btn-modal-save" id="btnSubmitEditNameModal">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL GENDER ========== -->
+    <div class="modal-overlay" id="genderModalOverlay">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="m3-nav-card__icon" style="margin: 0; width: 42px; height: 42px; border-radius: 12px; background: rgba(46, 134, 222, 0.1); display: flex; align-items: center; justify-content: center; color: #2E86DE;">
+                        <i class="ri-women-line" style="font-size: 22px;"></i>
+                    </div>
+                    <h3 class="container-modal__title">Gender</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseGenderModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <form id="genderModalForm">
+                <div class="m3-radio-list" id="genderModalPickerList" style="margin-bottom: 24px;">
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_gender_radio" value="male">
+                        <span class="m3-radio-item__box">
+                            <i class="ri-men-line"></i>
+                            <span>Male</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_gender_radio" value="female">
+                        <span class="m3-radio-item__box">
+                            <i class="ri-women-line"></i>
+                            <span>Female</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                    <label class="m3-radio-item">
+                        <input type="radio" name="modal_gender_radio" value="prefer-not-to-say">
+                        <span class="m3-radio-item__box">
+                            <i class="ri-user-shared-line"></i>
+                            <span>Prefer not to say</span>
+                            <i class="ri-check-line m3-radio-check"></i>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelGenderModal">Batal</button>
+                    <button type="submit" class="btn-modal-save" id="btnSubmitGenderModal">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- ========== MODAL KONFIRMASI ========== -->
     <div class="modal-overlay" id="modalOverlay">

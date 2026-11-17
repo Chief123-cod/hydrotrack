@@ -1392,13 +1392,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnApplyName = document.getElementById('btnApplyName');
     const userNameInput = document.getElementById('inputUserName');
 
-    if (btnToggleEditName && inlineNameEditor) {
-      btnToggleEditName.addEventListener('click', () => {
-        inlineNameEditor.classList.toggle('hidden');
-        if (!inlineNameEditor.classList.contains('hidden') && userNameInput) {
-          userNameInput.focus();
-          userNameInput.select();
+    /* ==================== EDIT PROFILE NAME MODAL ==================== */
+    const editNameModalOverlay = document.getElementById('editNameModalOverlay');
+    const btnCloseEditNameModal = document.getElementById('btnCloseEditNameModal');
+    const btnCancelEditNameModal = document.getElementById('btnCancelEditNameModal');
+    const editNameModalForm = document.getElementById('editNameModalForm');
+    const inputModalUserName = document.getElementById('inputModalUserName');
+
+    function openEditNameModal() {
+      if (!editNameModalOverlay) return;
+      const current = Storage.getSettings();
+      if (inputModalUserName) {
+        inputModalUserName.value = (current.userName || 'Faith').trim() || 'Faith';
+      }
+      editNameModalOverlay.classList.add('active');
+      setTimeout(() => {
+        if (inputModalUserName) {
+          inputModalUserName.focus();
+          inputModalUserName.select();
         }
+      }, 120);
+    }
+
+    function closeEditNameModal() {
+      if (editNameModalOverlay) editNameModalOverlay.classList.remove('active');
+    }
+
+    if (btnToggleEditName) {
+      btnToggleEditName.addEventListener('click', (e) => {
+        e.preventDefault();
+        openEditNameModal();
+      });
+    }
+
+    if (btnCloseEditNameModal) btnCloseEditNameModal.addEventListener('click', closeEditNameModal);
+    if (btnCancelEditNameModal) btnCancelEditNameModal.addEventListener('click', closeEditNameModal);
+
+    if (editNameModalOverlay) {
+      editNameModalOverlay.addEventListener('click', (e) => {
+        if (e.target === editNameModalOverlay) closeEditNameModal();
+      });
+    }
+
+    if (editNameModalForm) {
+      editNameModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newName = inputModalUserName ? inputModalUserName.value.trim() : '';
+        if (!newName) {
+          UI.showToast('Nama pengguna tidak boleh kosong!', 'warning');
+          return;
+        }
+
+        Storage.saveSettings({ userName: newName });
+        UI.updateUserInfo();
+        UI.renderSettings();
+        closeEditNameModal();
+        UI.showToast('Nama profil berhasil diperbarui! ✨', 'success');
       });
     }
 
@@ -1454,6 +1503,162 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+
+    /* ==================== DAILY WATER GOAL MODAL ==================== */
+    const goalModalOverlay = document.getElementById('goalModalOverlay');
+    const btnOpenGoalModal = document.getElementById('btnOpenGoalModal');
+    const btnCloseGoalModal = document.getElementById('btnCloseGoalModal');
+    const btnCancelGoalModal = document.getElementById('btnCancelGoalModal');
+    const goalModalForm = document.getElementById('goalModalForm');
+    const inputDailyGoalModal = document.getElementById('inputDailyGoalModal');
+
+    function openGoalModal() {
+      if (!goalModalOverlay) return;
+      const current = Storage.getSettings();
+      const currentGoal = current.dailyGoal || 2000;
+      if (inputDailyGoalModal) inputDailyGoalModal.value = currentGoal;
+
+      document.querySelectorAll('[data-modal-goal-preset]').forEach(btn => {
+        const pVal = parseInt(btn.getAttribute('data-modal-goal-preset'));
+        btn.classList.toggle('active', pVal === currentGoal);
+      });
+
+      goalModalOverlay.classList.add('active');
+      setTimeout(() => {
+        if (inputDailyGoalModal) inputDailyGoalModal.focus();
+      }, 120);
+    }
+
+    function closeGoalModal() {
+      if (goalModalOverlay) goalModalOverlay.classList.remove('active');
+    }
+
+    if (btnOpenGoalModal) btnOpenGoalModal.addEventListener('click', openGoalModal);
+    if (btnCloseGoalModal) btnCloseGoalModal.addEventListener('click', closeGoalModal);
+    if (btnCancelGoalModal) btnCancelGoalModal.addEventListener('click', closeGoalModal);
+
+    if (goalModalOverlay) {
+      goalModalOverlay.addEventListener('click', (e) => {
+        if (e.target === goalModalOverlay) closeGoalModal();
+      });
+    }
+
+    document.querySelectorAll('[data-modal-goal-preset]').forEach(presetBtn => {
+      presetBtn.addEventListener('click', () => {
+        const val = parseInt(presetBtn.getAttribute('data-modal-goal-preset'));
+        if (val && inputDailyGoalModal) {
+          inputDailyGoalModal.value = val;
+          document.querySelectorAll('[data-modal-goal-preset]').forEach(b => b.classList.remove('active'));
+          presetBtn.classList.add('active');
+        }
+      });
+    });
+
+    if (goalModalForm) {
+      goalModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = parseInt(inputDailyGoalModal?.value);
+        if (isNaN(val) || val < 500 || val > 6000) {
+          UI.showToast('Target air harian harus antara 500 dan 6.000 ml!', 'warning');
+          return;
+        }
+
+        Storage.saveSettings({ dailyGoal: val });
+        UI.renderSettings();
+        UI.updateUserInfo();
+        if (UI.refreshDashboard) UI.refreshDashboard();
+        closeGoalModal();
+        UI.showToast(`Target harian ${val.toLocaleString('id-ID')} ml berhasil disimpan! ✨`, 'success');
+      });
+    }
+
+    /* ==================== ACTIVITY LEVEL MODAL ==================== */
+    const activityModalOverlay = document.getElementById('activityModalOverlay');
+    const btnOpenActivityModal = document.getElementById('btnOpenActivityModal');
+    const btnCloseActivityModal = document.getElementById('btnCloseActivityModal');
+    const btnCancelActivityModal = document.getElementById('btnCancelActivityModal');
+    const activityModalForm = document.getElementById('activityModalForm');
+
+    function openActivityModal() {
+      if (!activityModalOverlay) return;
+      const current = Storage.getSettings();
+      const currentActivity = current.activityLevel || 'moderate';
+      document.querySelectorAll('input[name="modal_activity_radio"]').forEach(radio => {
+        radio.checked = (radio.value === currentActivity);
+      });
+      activityModalOverlay.classList.add('active');
+    }
+
+    function closeActivityModal() {
+      if (activityModalOverlay) activityModalOverlay.classList.remove('active');
+    }
+
+    if (btnOpenActivityModal) btnOpenActivityModal.addEventListener('click', openActivityModal);
+    if (btnCloseActivityModal) btnCloseActivityModal.addEventListener('click', closeActivityModal);
+    if (btnCancelActivityModal) btnCancelActivityModal.addEventListener('click', closeActivityModal);
+
+    if (activityModalOverlay) {
+      activityModalOverlay.addEventListener('click', (e) => {
+        if (e.target === activityModalOverlay) closeActivityModal();
+      });
+    }
+
+    if (activityModalForm) {
+      activityModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedRadio = document.querySelector('input[name="modal_activity_radio"]:checked');
+        const activityVal = selectedRadio ? selectedRadio.value : 'moderate';
+
+        Storage.saveSettings({ activityLevel: activityVal });
+        UI.renderSettings();
+        closeActivityModal();
+        UI.showToast('Tingkat aktivitas berhasil diperbarui! ✨', 'success');
+      });
+    }
+
+    /* ==================== GENDER MODAL ==================== */
+    const genderModalOverlay = document.getElementById('genderModalOverlay');
+    const btnOpenGenderModal = document.getElementById('btnOpenGenderModal');
+    const btnCloseGenderModal = document.getElementById('btnCloseGenderModal');
+    const btnCancelGenderModal = document.getElementById('btnCancelGenderModal');
+    const genderModalForm = document.getElementById('genderModalForm');
+
+    function openGenderModal() {
+      if (!genderModalOverlay) return;
+      const current = Storage.getSettings();
+      const currentGender = current.gender || 'prefer-not-to-say';
+      document.querySelectorAll('input[name="modal_gender_radio"]').forEach(radio => {
+        radio.checked = (radio.value === currentGender);
+      });
+      genderModalOverlay.classList.add('active');
+    }
+
+    function closeGenderModal() {
+      if (genderModalOverlay) genderModalOverlay.classList.remove('active');
+    }
+
+    if (btnOpenGenderModal) btnOpenGenderModal.addEventListener('click', openGenderModal);
+    if (btnCloseGenderModal) btnCloseGenderModal.addEventListener('click', closeGenderModal);
+    if (btnCancelGenderModal) btnCancelGenderModal.addEventListener('click', closeGenderModal);
+
+    if (genderModalOverlay) {
+      genderModalOverlay.addEventListener('click', (e) => {
+        if (e.target === genderModalOverlay) closeGenderModal();
+      });
+    }
+
+    if (genderModalForm) {
+      genderModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedRadio = document.querySelector('input[name="modal_gender_radio"]:checked');
+        const genderVal = selectedRadio ? selectedRadio.value : 'prefer-not-to-say';
+
+        Storage.saveSettings({ gender: genderVal });
+        UI.renderSettings();
+        closeGenderModal();
+        UI.showToast('Gender berhasil disimpan! ✨', 'success');
+      });
+    }
 
     // 1. Profile Form Submit (Personal: Gender, Name & Daily Goals: Goal, Activity)
     const profileForm = document.getElementById('settingsProfileForm');

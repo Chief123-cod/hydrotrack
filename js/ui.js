@@ -1061,6 +1061,9 @@ const UI = (() => {
     const nameInput = document.getElementById('inputUserName');
     if (nameInput) nameInput.value = userName;
 
+    const modalNameInput = document.getElementById('inputModalUserName');
+    if (modalNameInput) modalNameInput.value = userName;
+
     const gender = settings.gender || 'prefer-not-to-say';
     const genderLabels = {
       'male': 'Male',
@@ -1075,9 +1078,27 @@ const UI = (() => {
       radio.checked = (radio.value === gender);
     });
 
+    const modalGenderRadios = document.querySelectorAll('input[name="modal_gender_radio"]');
+    modalGenderRadios.forEach(radio => {
+      radio.checked = (radio.value === gender);
+    });
+
     // 4. Daily Goals: Water Goal & Activity Level
     const goalInput = document.getElementById('inputDailyGoal');
     if (goalInput) goalInput.value = dailyGoalVal;
+
+    const goalModalInput = document.getElementById('inputDailyGoalModal');
+    if (goalModalInput) goalModalInput.value = dailyGoalVal;
+
+    const modalPresets = document.querySelectorAll('[data-modal-goal-preset]');
+    modalPresets.forEach(btn => {
+      const pVal = parseInt(btn.getAttribute('data-modal-goal-preset'));
+      if (pVal === dailyGoalVal) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
 
     const dailyGoalLabelEl = document.getElementById('dailyGoalCurrentLabel');
     if (dailyGoalLabelEl) {
@@ -1102,6 +1123,11 @@ const UI = (() => {
 
     const activityRadios = document.querySelectorAll('input[name="activity_radio"]');
     activityRadios.forEach(radio => {
+      radio.checked = (radio.value === activity);
+    });
+
+    const modalActivityRadios = document.querySelectorAll('input[name="modal_activity_radio"]');
+    modalActivityRadios.forEach(radio => {
       radio.checked = (radio.value === activity);
     });
 

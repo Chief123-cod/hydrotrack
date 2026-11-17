@@ -300,6 +300,28 @@
     width: 100%;
   }
 
+  /* M3 Profile Daily Goals Segmented Stack (Mobile) */
+  .m3-profile-col:last-child .m3-segmented-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+  }
+
+  .m3-profile-col:last-child .m3-nav-card {
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .m3-profile-col:last-child .m3-nav-card--top {
+    border-top-left-radius: 18px !important;
+    border-top-right-radius: 18px !important;
+  }
+
+  .m3-profile-col:last-child .m3-nav-card--bottom {
+    border-bottom-left-radius: 18px !important;
+    border-bottom-right-radius: 18px !important;
+  }
+
   .form-input--date {
     width: 100%;
   }
