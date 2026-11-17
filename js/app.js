@@ -91,6 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (item.classList.contains('active')) {
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        const mainEl = document.querySelector('.main-content');
+        if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   });
