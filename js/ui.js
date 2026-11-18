@@ -693,7 +693,7 @@ const UI = (() => {
     const totalVolume = logs.reduce((sum, log) => sum + log.amount, 0);
 
     // Count unique days for average daily calculation
-    const uniqueDays = new Set(logs.map(log => log.date || (new Date(log.timestamp).toISOString().split('T')[0]))).size;
+    const uniqueDays = new Set(logs.map(log => log.date || (typeof Storage !== 'undefined' && Storage.formatDateKey ? Storage.formatDateKey(log.timestamp) : ''))).size;
     const avgDaily = uniqueDays > 0 ? Math.round(totalVolume / uniqueDays) : 0;
 
     const totalLogsEl = document.getElementById('summaryTotalLogs');

@@ -94,13 +94,20 @@ const Storage = (() => {
     }
   }
 
-  /* --- Helper: Get today's date string (YYYY-MM-DD) --- */
+  /* --- Helper: Format any Date or timestamp to local date string (YYYY-MM-DD) --- */
+  function formatDateKey(d) {
+    if (!d) return '';
+    const date = d instanceof Date ? d : new Date(d);
+    if (isNaN(date.getTime())) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  /* --- Helper: Get today's date string (YYYY-MM-DD) in user's local time --- */
   function _todayStr() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return formatDateKey(new Date());
   }
 
   /* ==================== LOGS CRUD ==================== */
@@ -121,7 +128,7 @@ const Storage = (() => {
     return 'icon-bottle-lg';
   }
 
-  // CREATE — Add a new drink log
+  // CREATE — Add a new drink log (selalu menggunakan tanggal lokal pengguna, bukan UTC)
   function addLog(amount, type = 'water', note = '', timestamp = null, containerIcon = null) {
     const logs = getAllLogs();
     const now = timestamp ? new Date(timestamp) : new Date();
@@ -132,7 +139,7 @@ const Storage = (() => {
       amount: parseInt(amount),
       type: type,
       timestamp: now.toISOString(),
-      date: now.toISOString().split('T')[0],
+      date: formatDateKey(now),
       note: note.trim(),
       containerIcon: resolvedIcon
     };
@@ -142,9 +149,23 @@ const Storage = (() => {
     return newLog;
   }
 
-  // READ — Get all logs
+  // READ — Get all logs (dengan auto-healing koreksi tanggal UTC ke tanggal lokal)
   function getAllLogs() {
-    return _parse(KEYS.logs, []);
+    const logs = _parse(KEYS.logs, []);
+    let modified = false;
+    logs.forEach(log => {
+      if (log.timestamp) {
+        const correctDate = formatDateKey(log.timestamp);
+        if (log.date !== correctDate) {
+          log.date = correctDate;
+          modified = true;
+        }
+      }
+    });
+    if (modified) {
+      _save(KEYS.logs, logs);
+    }
+    return logs;
   }
 
   // READ — Get logs for today
@@ -231,7 +252,7 @@ const Storage = (() => {
     if (updates.timestamp !== undefined) {
       const newDate = new Date(updates.timestamp);
       logs[index].timestamp = newDate.toISOString();
-      logs[index].date = newDate.toISOString().split('T')[0];
+      logs[index].date = formatDateKey(newDate);
     }
 
     _save(KEYS.logs, logs);
@@ -379,7 +400,7 @@ const Storage = (() => {
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateKey(date);
       const dayLogs = getLogsByDate(dateStr);
       const total = dayLogs.reduce((sum, log) => sum + log.amount, 0);
 
@@ -678,7 +699,7 @@ const Storage = (() => {
           amount: [100, 250, 250, 250, 500, 600][Math.floor(Math.random() * 6)],
           type: types[Math.floor(Math.random() * types.length)],
           timestamp: logDate.toISOString(),
-          date: logDate.toISOString().split('T')[0],
+          date: formatDateKey(logDate),
           note: ''
         });
       }
@@ -760,13 +781,6 @@ const Storage = (() => {
   }
 
   /* ==================== HISTORY ADVANCED QUERIES ==================== */
-
-  function formatDateKey(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
 
   // 1. Weekly History Data
   function getWeeklyHistory(weekOffset = 0) {

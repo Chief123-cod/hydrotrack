@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#1A1D2E">
   <title>Home | HydroTrack</title>
 
@@ -155,122 +156,122 @@
 
         <!-- Quick Add Buttons (Menu Kategori Minuman + Ukuran Cup) -->
         <div class="card quick-log-card">
-        <!-- Beverage Category Tabs (Pills Sedang Sesuai Referensi) -->
-        <div class="beverage-tabs-wrapper">
-          <div class="beverage-tabs" id="beverageTabs">
-            <button type="button" class="beverage-tab active" data-type="water">
-              <i class="ri-drop-fill"></i>
-              <span>Water</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="coffee">
-              <i class="ri-cup-line"></i>
-              <span>Coffee</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="energy">
-              <i class="ri-flashlight-line"></i>
-              <span>Energy Drink</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="juice">
-              <i class="ri-goblet-fill"></i>
-              <span>Fruit Juice</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="milk">
-              <i class="ri-goblet-line"></i>
-              <span>Milk</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="qrs">
-              <i class="ri-heart-pulse-line"></i>
-              <span>QRS</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="soda">
-              <i class="ri-drinks-2-line"></i>
-              <span>Soft drink</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="sports">
-              <i class="ri-water-flash-line"></i>
-              <span>Sports Drink</span>
-            </button>
-            <button type="button" class="beverage-tab" data-type="tea">
-              <i class="ri-leaf-line"></i>
-              <span>Tea</span>
+          <!-- Beverage Category Tabs (Pills Sedang Sesuai Referensi) -->
+          <div class="beverage-tabs-wrapper">
+            <div class="beverage-tabs" id="beverageTabs">
+              <button type="button" class="beverage-tab active" data-type="water">
+                <i class="ri-drop-fill"></i>
+                <span>Water</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="coffee">
+                <i class="ri-cup-line"></i>
+                <span>Coffee</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="energy">
+                <i class="ri-flashlight-line"></i>
+                <span>Energy Drink</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="juice">
+                <i class="ri-goblet-fill"></i>
+                <span>Fruit Juice</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="milk">
+                <i class="ri-goblet-line"></i>
+                <span>Milk</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="qrs">
+                <i class="ri-heart-pulse-line"></i>
+                <span>QRS</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="soda">
+                <i class="ri-drinks-2-line"></i>
+                <span>Soft drink</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="sports">
+                <i class="ri-water-flash-line"></i>
+                <span>Sports Drink</span>
+              </button>
+              <button type="button" class="beverage-tab" data-type="tea">
+                <i class="ri-leaf-line"></i>
+                <span>Tea</span>
+              </button>
+            </div>
+          </div>
+          <div class="quick-log__buttons" id="quickLogButtons">
+            <!-- Container buttons rendered dynamically by renderAllContainers() in app.js -->
+            <button class="quick-btn quick-btn--add" id="btnAddContainer" type="button" title="Add Container">
+              <i class="ri-add-line" style="font-size: 26px;"></i>
+              <span>Add</span>
+              <small>Custom</small>
             </button>
           </div>
         </div>
-        <div class="quick-log__buttons" id="quickLogButtons">
-          <!-- Container buttons rendered dynamically by renderAllContainers() in app.js -->
-          <button class="quick-btn quick-btn--add" id="btnAddContainer" type="button" title="Add Container">
-            <i class="ri-add-line" style="font-size: 26px;"></i>
-            <span>Add</span>
-            <small>Custom</small>
-          </button>
-        </div>
-      </div>
 
-      <!-- Main Dashboard Grid: Bottle + Today's Drink Log -->
-      <div class="dashboard-grid">
+        <!-- Main Dashboard Grid: Bottle + Today's Drink Log -->
+        <div class="dashboard-grid">
 
-        <!-- Water Bottle Visualization -->
-        <div class="card bottle-card">
-          <h3 class="card__title">Level Hidrasi</h3>
-          <div class="bottle-container">
-            <div class="bottle">
-              <div class="bottle__cap"></div>
-              <div class="bottle__neck"></div>
-              <div class="bottle__body">
-                <div class="bottle__fill" id="bottleFill">
-                  <div class="bottle__wave"></div>
+          <!-- Water Bottle Visualization -->
+          <div class="card bottle-card">
+            <h3 class="card__title">Level Hidrasi</h3>
+            <div class="bottle-container">
+              <div class="bottle">
+                <div class="bottle__cap"></div>
+                <div class="bottle__neck"></div>
+                <div class="bottle__body">
+                  <div class="bottle__fill" id="bottleFill">
+                    <div class="bottle__wave"></div>
+                  </div>
+                  <span class="bottle__percentage" id="bottlePercentage">0%</span>
                 </div>
-                <span class="bottle__percentage" id="bottlePercentage">0%</span>
+              </div>
+              <p class="bottle__status" id="bottleStatus">Ayo mulai minum air! 💧</p>
+            </div>
+          </div>
+
+          <!-- Drink Log Today -->
+          <div class="card drink-log-card">
+            <div class="drink-log__header">
+              <div>
+                <h3 class="card__title">Recent Entries</h3>
+              </div>
+              <span class="drink-log__count" id="drinkLogCount">0 catatan</span>
+            </div>
+            <div class="drink-log__list" id="drinkLogList">
+              <div class="drink-log__empty" id="drinkLogEmpty">
+                <i class="ri-drop-line"></i>
+                <p>Belum ada catatan hari ini. Mulai catat konsumsi airmu!</p>
               </div>
             </div>
-            <p class="bottle__status" id="bottleStatus">Ayo mulai minum air! 💧</p>
           </div>
+
         </div>
 
-        <!-- Drink Log Today -->
-        <div class="card drink-log-card">
-          <div class="drink-log__header">
-            <div>
-              <h3 class="card__title">Recent Entries</h3>
+        <!-- Hydration Tips -->
+        <div class="tips-section">
+          <h3 class="card__title tips-section__title">Hydration Tips</h3>
+          <div class="tips-grid">
+            <div class="tip-card">
+              <div class="tip-card__icon"><i class="ri-alarm-line"></i></div>
+              <h4>Minum Rutin</h4>
+              <p>Biasakan minum air setiap 1-2 jam sekali meskipun tidak merasa haus.</p>
             </div>
-            <span class="drink-log__count" id="drinkLogCount">0 catatan</span>
-          </div>
-          <div class="drink-log__list" id="drinkLogList">
-            <div class="drink-log__empty" id="drinkLogEmpty">
-              <i class="ri-drop-line"></i>
-              <p>Belum ada catatan hari ini. Mulai catat konsumsi airmu!</p>
+            <div class="tip-card">
+              <div class="tip-card__icon"><i class="ri-sun-foggy-line"></i></div>
+              <h4>Mulai dari Pagi</h4>
+              <p>Minum segelas air putih segera setelah bangun tidur untuk mengaktifkan metabolisme.</p>
+            </div>
+            <div class="tip-card">
+              <div class="tip-card__icon"><i class="ri-restaurant-line"></i></div>
+              <h4>Sebelum Makan</h4>
+              <p>Minum air 30 menit sebelum makan untuk membantu pencernaan dan mengontrol nafsu makan.</p>
+            </div>
+            <div class="tip-card">
+              <div class="tip-card__icon"><i class="ri-run-line"></i></div>
+              <h4>Saat Aktivitas</h4>
+              <p>Tingkatkan asupan air saat berolahraga atau aktivitas fisik berat.</p>
             </div>
           </div>
         </div>
-
-      </div>
-
-      <!-- Hydration Tips -->
-      <div class="tips-section">
-        <h3 class="card__title tips-section__title">Hydration Tips 💡</h3>
-        <div class="tips-grid">
-          <div class="tip-card">
-            <div class="tip-card__icon"><i class="ri-alarm-line"></i></div>
-            <h4>Minum Rutin</h4>
-            <p>Biasakan minum air setiap 1-2 jam sekali meskipun tidak merasa haus.</p>
-          </div>
-          <div class="tip-card">
-            <div class="tip-card__icon"><i class="ri-sun-foggy-line"></i></div>
-            <h4>Mulai dari Pagi</h4>
-            <p>Minum segelas air putih segera setelah bangun tidur untuk mengaktifkan metabolisme.</p>
-          </div>
-          <div class="tip-card">
-            <div class="tip-card__icon"><i class="ri-restaurant-line"></i></div>
-            <h4>Sebelum Makan</h4>
-            <p>Minum air 30 menit sebelum makan untuk membantu pencernaan dan mengontrol nafsu makan.</p>
-          </div>
-          <div class="tip-card">
-            <div class="tip-card__icon"><i class="ri-run-line"></i></div>
-            <h4>Saat Aktivitas</h4>
-            <p>Tingkatkan asupan air saat berolahraga atau aktivitas fisik berat.</p>
-          </div>
-        </div>
-      </div>
 
       </div> <!-- /.dashboard-page-container -->
     </section>
