@@ -18,7 +18,7 @@ const UI = (() => {
     updateGreeting();
   }
 
-  // Update greeting dynamically based on hour of day
+  // Update greeting dynamically based on hour of day (Morning, Afternoon, Evening)
   function updateGreeting() {
     const greetingEl = document.getElementById('greetingTime');
     if (!greetingEl) return;
@@ -26,14 +26,12 @@ const UI = (() => {
     const hour = new Date().getHours();
     let greeting = 'Good Evening';
 
-    if (hour >= 4 && hour < 11) {
+    if (hour >= 4 && hour < 12) {
       greeting = 'Good Morning';
-    } else if (hour >= 11 && hour < 15) {
+    } else if (hour >= 12 && hour < 18) {
       greeting = 'Good Afternoon';
-    } else if (hour >= 15 && hour < 19) {
-      greeting = 'Good Evening';
     } else {
-      greeting = 'Good Night';
+      greeting = 'Good Evening';
     }
 
     greetingEl.textContent = greeting;
