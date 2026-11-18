@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#1A1D2E">
     <title>History | HydroTrack</title>
 
@@ -201,7 +201,8 @@
                     </div>
 
                     <!-- Recent Entries on History (Muncul rincian minum saat hari dipilih) -->
-                    <div class="history-recent-entries" id="historyRecentEntries">
+                    <div class="history-recent-entries mobile-collapsed" id="historyRecentEntries">
+                        <h3 class="history-mobile-date-title" id="historyMobileDateTitle">18 Nov 2026</h3>
                         <div class="history-recent-header">
                             <div class="history-recent-header__info">
                                 <i class="ri-list-check"></i>
@@ -252,6 +253,69 @@
             <span class="bottom-nav__label">Settings</span>
         </a>
     </nav>
+
+    <!-- ========== FLOATING ACTION BUTTON (HISTORY MOBILE: + Add Past Entry) ========== -->
+    <div class="fab-backdrop" id="historyFabBackdrop"></div>
+    <div class="fab-container history-fab-container" id="historyFabContainer">
+        <div class="fab-menu" id="historyFabMenu">
+            <button type="button" class="fab-item" id="fabAddPastEntry" title="+ Add Past Entry">
+                <span class="fab-item__label">+ Add Past Entry</span>
+            </button>
+        </div>
+
+        <button type="button" class="fab-main-btn" id="historyFabMainBtn" aria-label="Buka Menu Tambah Riwayat" aria-expanded="false">
+            <i class="ri-add-line" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <!-- ========== MODAL ADD PAST ENTRY (Add Custom Amount) ========== -->
+    <div class="modal-overlay" id="pastEntryModalOverlay">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <h3 class="container-modal__title" id="pastEntryModalTitle">Add Custom Amount</h3>
+                <div class="container-preview-badge" id="pastEntryPreviewBadge">
+                    <i class="ri-drop-fill" style="font-size: 24px;" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <form id="formPastEntry">
+                <!-- Field 1: Beverage Type -->
+                <div class="container-input-group">
+                    <div class="select-input-wrapper">
+                        <span class="select-input-icon" id="pastEntryBeverageIcon">
+                            <i class="ri-drop-fill" aria-hidden="true"></i>
+                        </span>
+                        <select id="pastEntryBeverageSelect" class="container-input container-select">
+                            <option value="water">Water</option>
+                            <option value="coffee">Coffee</option>
+                            <option value="energy">Energy Drink</option>
+                            <option value="juice">Fruit Juice</option>
+                            <option value="milk">Milk</option>
+                            <option value="qrs">QRS</option>
+                            <option value="soda">Soft drink</option>
+                            <option value="sports">Sports Drink</option>
+                            <option value="tea">Tea</option>
+                        </select>
+                        <i class="ri-arrow-down-s-line select-chevron" aria-hidden="true"></i>
+                    </div>
+                    <label class="container-label" for="pastEntryBeverageSelect">Beverage Type</label>
+                </div>
+
+                <!-- Field 2: Amount (ml) -->
+                <div class="container-input-group">
+                    <input type="number" id="pastEntryAmountInput" class="container-input" placeholder=" " min="10" max="5000" value="250" required>
+                    <label class="container-label" for="pastEntryAmountInput">Amount (ml)</label>
+                </div>
+
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelPastEntry">Cancel</button>
+                    <button type="submit" class="btn-modal-save" id="btnSubmitPastEntry">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- ========== TOAST NOTIFICATION ========== -->
     <div class="toast-container" id="toastContainer"></div>

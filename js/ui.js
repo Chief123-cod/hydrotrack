@@ -180,13 +180,27 @@ const UI = (() => {
     return 'icon-bottle-lg';
   }
 
+  // Helper to get container/beverage display title for a log entry
+  function getLogDisplayTitle(log) {
+    const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
+    if (Storage.getAllContainers && log) {
+      const containers = Storage.getAllContainers();
+      const matched = containers.find(c => c.amount === log.amount && (!log.containerIcon || c.icon === log.containerIcon))
+        || containers.find(c => c.amount === log.amount);
+      if (matched && matched.name) {
+        return log.type === 'water' ? matched.name : `${matched.name} (${drinkType.label})`;
+      }
+    }
+    return drinkType.label;
+  }
+
   // Create a single drink log list item
   function createLogItem(log) {
-    const drinkType = Storage.DRINK_TYPES[log.type] || Storage.DRINK_TYPES.water;
+    const displayTitle = getLogDisplayTitle(log);
     const time = new Date(log.timestamp).toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit'
-    });
+    }).replace('.', ':');
 
     const containerIcon = getLogContainerIcon(log);
     const isCustom = containerIcon.startsWith('icon-');
@@ -203,12 +217,12 @@ const UI = (() => {
         ${iconHtml}
       </div>
       <div class="drink-log__item-info">
-        <span class="drink-log__item-type">${drinkType.label}</span>
+        <span class="drink-log__item-type">${escapeHtml(displayTitle)}</span>
         <span class="drink-log__item-time">${time}</span>
         ${log.note ? `<span class="drink-log__item-note">${escapeHtml(log.note)}</span>` : ''}
       </div>
       <div class="drink-log__item-meta">
-        <span class="drink-log__item-amount">${log.amount} ml</span>
+        <span class="drink-log__item-amount">${formatVolumeDisplay(log.amount)}</span>
       </div>
       <div class="drink-log__item-actions">
         <button class="btn-edit" data-id="${log.id}" title="Edit">
@@ -420,7 +434,8 @@ const UI = (() => {
       if (day.isToday) col.classList.add('is-today');
 
       const pct = dailyGoal > 0 ? Math.min(Math.round((day.total / dailyGoal) * 100), 100) : 0;
-      const heightStyle = day.goalMet ? '100%' : (day.total > 0 ? `${Math.max(pct, 14)}%` : '6px');
+      const visualPct = day.total > 0 ? Math.min(100, Math.round(36 + (pct * 0.64))) : 0;
+      const heightStyle = day.goalMet ? '100%' : (day.total > 0 ? `${visualPct}%` : '6px');
 
       let fillHtml = '';
       if (day.total === 0) {
@@ -436,7 +451,9 @@ const UI = (() => {
         `;
       } else {
         fillHtml = `
-          <div class="weekly-bar-fill" style="height: ${heightStyle};" title="${day.dayName}: ${formatVolumeDisplay(day.total)}"></div>
+          <div class="weekly-bar-fill has-intake" style="height: ${heightStyle};" title="${day.dayName}: ${formatVolumeDisplay(day.total)}">
+            <span class="bar-amount-lbl">${formatVolumeDisplay(day.total)}</span>
+          </div>
         `;
       }
 
@@ -638,6 +655,16 @@ const UI = (() => {
       });
     }
 
+    const mobileDateTitleEl = document.getElementById('historyMobileDateTitle');
+    if (mobileDateTitleEl && dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      mobileDateTitleEl.textContent = d.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
     // Apply drink type filter
     if (filterDrink && filterDrink !== 'all') {
       logs = logs.filter(l => l.type === filterDrink);
@@ -675,7 +702,21 @@ const UI = (() => {
     }
 
     logs.forEach(log => {
-      listEl.appendChild(createLogItem(log));
+      const swipeWrap = document.createElement('div');
+      swipeWrap.className = 'history-swipe-item';
+      swipeWrap.dataset.id = log.id;
+      swipeWrap.innerHTML = `
+        <div class="history-swipe-bg history-swipe-bg--edit" aria-hidden="true">
+          <i class="ri-pencil-line"></i>
+          <span>Edit</span>
+        </div>
+        <div class="history-swipe-bg history-swipe-bg--delete" aria-hidden="true">
+          <span>Delete</span>
+          <i class="ri-delete-bin-line"></i>
+        </div>
+      `;
+      swipeWrap.appendChild(createLogItem(log));
+      listEl.appendChild(swipeWrap);
     });
   }
 

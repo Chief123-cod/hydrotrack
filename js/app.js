@@ -192,7 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function onSelectHistoryDate(dateKey) {
+    const recentEntriesEl = document.getElementById('historyRecentEntries');
+    const isSameDate = historyState.selectedDate === dateKey;
     historyState.selectedDate = dateKey;
+
+    if (recentEntriesEl) {
+      if (recentEntriesEl.classList.contains('mobile-collapsed')) {
+        recentEntriesEl.classList.remove('mobile-collapsed');
+      } else if (isSameDate && window.innerWidth <= 768) {
+        recentEntriesEl.classList.add('mobile-collapsed');
+      }
+    }
+
     refreshHistory();
   }
 
@@ -1338,6 +1349,263 @@ document.addEventListener('DOMContentLoaded', () => {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.classList.remove('active');
       });
+    }
+  });
+
+  /* ==================== HISTORY MOBILE: SWIPE (EDIT/DELETE) & FAB (+ ADD PAST ENTRY) ==================== */
+  const historyDrinkLogListEl = document.getElementById('historyDrinkLogList');
+  if (historyDrinkLogListEl) {
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let swipeCurrentX = 0;
+    let activeSwipeRow = null;
+    let activeCardEl = null;
+    let isSwipingHorizontal = false;
+    let isPointerDown = false;
+
+    function startSwipe(clientX, clientY, target) {
+      const row = target.closest('.history-swipe-item');
+      if (!row || window.innerWidth > 768) return;
+      const card = row.querySelector('.drink-log__item');
+      if (!card) return;
+
+      swipeStartX = clientX;
+      swipeStartY = clientY;
+      swipeCurrentX = 0;
+      activeSwipeRow = row;
+      activeCardEl = card;
+      isSwipingHorizontal = false;
+      isPointerDown = true;
+      activeCardEl.style.transition = 'none';
+    }
+
+    function moveSwipe(clientX, clientY, e) {
+      if (!isPointerDown || !activeSwipeRow || !activeCardEl) return;
+      const dx = clientX - swipeStartX;
+      const dy = clientY - swipeStartY;
+
+      if (!isSwipingHorizontal) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          isSwipingHorizontal = true;
+        } else {
+          // Vertical scroll — cancel horizontal swipe
+          resetSwipe(false);
+          return;
+        }
+      }
+
+      if (e && e.cancelable) e.preventDefault();
+
+      // Clamp horizontal drag between -110px and +110px
+      swipeCurrentX = Math.max(-110, Math.min(110, dx));
+      activeCardEl.style.transform = `translateX(${swipeCurrentX}px)`;
+      activeSwipeRow.classList.toggle('swiping-left', swipeCurrentX < -10);
+      activeSwipeRow.classList.toggle('swiping-right', swipeCurrentX > 10);
+    }
+
+    function resetSwipe(triggerAction = true) {
+      if (!activeSwipeRow || !activeCardEl) return;
+      const logId = activeSwipeRow.dataset.id;
+      const finalDeltaX = swipeCurrentX;
+      const cardToReset = activeCardEl;
+      const rowToReset = activeSwipeRow;
+
+      cardToReset.style.transition = 'transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1)';
+      cardToReset.style.transform = 'translateX(0)';
+      setTimeout(() => {
+        rowToReset.classList.remove('swiping-left', 'swiping-right');
+      }, 200);
+
+      activeSwipeRow = null;
+      activeCardEl = null;
+      swipeCurrentX = 0;
+      isSwipingHorizontal = false;
+      isPointerDown = false;
+
+      if (triggerAction && logId && Math.abs(finalDeltaX) >= 55) {
+        const log = Storage.getLogById(logId);
+        if (!log) return;
+        if (finalDeltaX <= -55) {
+          // Swipe Left -> Delete Pop-up
+          openDeleteLogModal(log);
+        } else if (finalDeltaX >= 55) {
+          // Swipe Right -> Edit Pop-up
+          openEditLogModal(log);
+        }
+      }
+    }
+
+    // Touch events for mobile phone
+    historyDrinkLogListEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      startSwipe(e.touches[0].clientX, e.touches[0].clientY, e.target);
+    }, { passive: true });
+
+    historyDrinkLogListEl.addEventListener('touchmove', (e) => {
+      if (!isPointerDown || e.touches.length !== 1) return;
+      moveSwipe(e.touches[0].clientX, e.touches[0].clientY, e);
+    }, { passive: false });
+
+    historyDrinkLogListEl.addEventListener('touchend', () => {
+      resetSwipe(true);
+    });
+
+    historyDrinkLogListEl.addEventListener('touchcancel', () => {
+      resetSwipe(false);
+    });
+
+    // Mouse fallback for responsive testing
+    historyDrinkLogListEl.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      startSwipe(e.clientX, e.clientY, e.target);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPointerDown) return;
+      moveSwipe(e.clientX, e.clientY, e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isPointerDown) return;
+      resetSwipe(true);
+    });
+  }
+
+  // History FAB (+ Add Past Entry) & Modal (Add Custom Amount)
+  const historyFabContainer = document.getElementById('historyFabContainer');
+  const historyFabMainBtn = document.getElementById('historyFabMainBtn');
+  const historyFabBackdrop = document.getElementById('historyFabBackdrop');
+  const fabAddPastEntry = document.getElementById('fabAddPastEntry');
+  const pastEntryModalOverlay = document.getElementById('pastEntryModalOverlay');
+  const formPastEntry = document.getElementById('formPastEntry');
+  const pastEntryBeverageSelect = document.getElementById('pastEntryBeverageSelect');
+  const pastEntryBeverageIcon = document.getElementById('pastEntryBeverageIcon');
+  const pastEntryPreviewBadge = document.getElementById('pastEntryPreviewBadge');
+  const pastEntryAmountInput = document.getElementById('pastEntryAmountInput');
+  const btnCancelPastEntry = document.getElementById('btnCancelPastEntry');
+
+  function toggleHistoryFab(forceState) {
+    if (!historyFabContainer) return;
+    const shouldOpen = forceState !== undefined ? forceState : !historyFabContainer.classList.contains('active');
+    historyFabContainer.classList.toggle('active', shouldOpen);
+    if (historyFabBackdrop) historyFabBackdrop.classList.toggle('active', shouldOpen);
+    if (historyFabMainBtn) historyFabMainBtn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+  }
+
+  if (historyFabMainBtn) {
+    historyFabMainBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleHistoryFab();
+    });
+  }
+
+  if (historyFabBackdrop) {
+    historyFabBackdrop.addEventListener('click', () => toggleHistoryFab(false));
+  }
+
+  if (fabAddPastEntry) {
+    fabAddPastEntry.addEventListener('click', () => {
+      toggleHistoryFab(false);
+      // Populate custom beverages if any (getCustomBeverages returns an Object { id: { label, icon } })
+      if (pastEntryBeverageSelect && Storage.getCustomBeverages) {
+        const customBevs = Storage.getCustomBeverages() || {};
+        Object.entries(customBevs).forEach(([id, cb]) => {
+          if (cb && cb.label && !pastEntryBeverageSelect.querySelector(`option[value="${id}"]`)) {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = cb.label;
+            pastEntryBeverageSelect.appendChild(opt);
+          }
+        });
+        pastEntryBeverageSelect.value = 'water';
+      }
+      if (pastEntryBeverageIcon) {
+        pastEntryBeverageIcon.innerHTML = '<i class="ri-drop-fill" aria-hidden="true"></i>';
+      }
+      if (pastEntryPreviewBadge) {
+        pastEntryPreviewBadge.innerHTML = '<i class="ri-drop-fill" style="font-size: 24px;" aria-hidden="true"></i>';
+      }
+      if (pastEntryAmountInput) {
+        pastEntryAmountInput.value = '250';
+      }
+      if (pastEntryModalOverlay) {
+        pastEntryModalOverlay.classList.add('active');
+        setTimeout(() => { if (pastEntryAmountInput) pastEntryAmountInput.focus(); }, 100);
+      }
+    });
+  }
+
+  if (pastEntryBeverageSelect) {
+    pastEntryBeverageSelect.addEventListener('change', () => {
+      const val = pastEntryBeverageSelect.value;
+      const bev = Storage.DRINK_TYPES[val] || Storage.DRINK_TYPES.water;
+      if (pastEntryBeverageIcon && bev) {
+        pastEntryBeverageIcon.innerHTML = `<i class="${bev.icon}" aria-hidden="true"></i>`;
+      }
+      if (pastEntryPreviewBadge && bev) {
+        pastEntryPreviewBadge.innerHTML = `<i class="${bev.icon}" style="font-size: 24px;" aria-hidden="true"></i>`;
+      }
+    });
+  }
+
+  if (btnCancelPastEntry && pastEntryModalOverlay) {
+    btnCancelPastEntry.addEventListener('click', () => {
+      pastEntryModalOverlay.classList.remove('active');
+    });
+  }
+
+  if (pastEntryModalOverlay) {
+    pastEntryModalOverlay.addEventListener('click', (e) => {
+      if (e.target === pastEntryModalOverlay) {
+        pastEntryModalOverlay.classList.remove('active');
+      }
+    });
+  }
+
+  if (formPastEntry) {
+    formPastEntry.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const amount = parseInt(pastEntryAmountInput?.value) || 0;
+      const type = pastEntryBeverageSelect?.value || 'water';
+
+      if (!amount || amount <= 0) {
+        UI.showToast('Masukkan jumlah volume yang valid (ml)!', 'warning');
+        return;
+      }
+
+      const targetDateStr = historyState.selectedDate || Storage.formatDateKey(new Date());
+      const now = new Date();
+      const [yy, mm, dd] = targetDateStr.split('-').map(Number);
+      const entryDate = new Date(yy, mm - 1, dd, now.getHours(), now.getMinutes(), now.getSeconds());
+
+      const typeInfo = Storage.DRINK_TYPES[type] || Storage.DRINK_TYPES.water;
+      Storage.addLog(amount, type, '', entryDate.toISOString());
+
+      const recentEntriesEl = document.getElementById('historyRecentEntries');
+      if (recentEntriesEl) recentEntriesEl.classList.remove('mobile-collapsed');
+
+      refreshHistory();
+      UI.refreshDashboard();
+      if (pastEntryModalOverlay) pastEntryModalOverlay.classList.remove('active');
+      UI.showToast(`${amount} ml ${typeInfo.label} berhasil ditambahkan!`, 'success');
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (historyFabContainer && historyFabContainer.classList.contains('active')) {
+        toggleHistoryFab(false);
+      }
+      if (pastEntryModalOverlay && pastEntryModalOverlay.classList.contains('active')) {
+        pastEntryModalOverlay.classList.remove('active');
+      }
+      if (editLogModalOverlay && editLogModalOverlay.classList.contains('active')) {
+        editLogModalOverlay.classList.remove('active');
+      }
+      if (deleteLogModalOverlay && deleteLogModalOverlay.classList.contains('active')) {
+        deleteLogModalOverlay.classList.remove('active');
+      }
     }
   });
 
