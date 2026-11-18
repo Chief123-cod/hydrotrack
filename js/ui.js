@@ -905,18 +905,22 @@ const UI = (() => {
 
     const daysTrackedEl = document.getElementById('statsDaysTracked');
     if (daysTrackedEl) {
-      daysTrackedEl.textContent = `${data.daysTracked} Hari`;
+      daysTrackedEl.innerHTML = `${data.daysTracked}<span class="unit-desktop-only"> Hari</span>`;
     }
 
     // 2. Overview (8 Items)
     const streakEl = document.getElementById('overviewStreak');
-    if (streakEl) streakEl.textContent = `${data.currentStreak} Hari`;
+    if (streakEl) {
+      streakEl.innerHTML = `${data.currentStreak}<span class="unit-desktop-only"> Hari</span><span class="unit-mobile-only"> days</span>`;
+    }
 
     const ovSuccessEl = document.getElementById('overviewSuccessRate');
     if (ovSuccessEl) ovSuccessEl.textContent = `${data.successRate}%`;
 
     const ovDaysEl = document.getElementById('overviewDaysTracked');
-    if (ovDaysEl) ovDaysEl.textContent = `${data.daysTracked} Hari`;
+    if (ovDaysEl) {
+      ovDaysEl.innerHTML = `${data.daysTracked}<span class="unit-desktop-only"> Hari</span>`;
+    }
 
     const intervalEl = document.getElementById('overviewAvgInterval');
     if (intervalEl) intervalEl.textContent = data.avgIntervalStr;
@@ -928,27 +932,47 @@ const UI = (() => {
     if (largestEl) largestEl.textContent = formatVolumeDisplay(data.largestDrink);
 
     const firstEl = document.getElementById('overviewFirstDrink');
-    if (firstEl) firstEl.textContent = data.firstDrinkStr;
+    if (firstEl) firstEl.textContent = data.firstDrinkStr ? data.firstDrinkStr.replace('.', ':') : '-';
 
     const lastEl = document.getElementById('overviewLastDrink');
-    if (lastEl) lastEl.textContent = data.lastDrinkStr;
+    if (lastEl) lastEl.textContent = data.lastDrinkStr ? data.lastDrinkStr.replace('.', ':') : '-';
 
     // 3. Beverage Breakdown (Grafik & Dynamic List)
+    const statsBeverageCard = document.getElementById('statsBeverageCard');
+    const activeBeverages = data.beverageBreakdown.filter(b => b.amount > 0);
+    const hasBeverageData = data.totalIntake > 0 && activeBeverages.length > 0;
+    if (statsBeverageCard) {
+      statsBeverageCard.classList.toggle('is-empty-data', !hasBeverageData);
+    }
+
     const centerValEl = document.getElementById('beverageCenterVal');
     if (centerValEl) {
-      centerValEl.textContent = data.totalIntake >= 1000
+      const formattedVol = data.totalIntake >= 1000
         ? `${(data.totalIntake / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} L`
         : `${data.totalIntake} ml`;
+      centerValEl.innerHTML = `${formattedVol}<span class="unit-mobile-only"> effective</span>`;
     }
 
     if (typeof ChartModule !== 'undefined' && ChartModule.renderBeverageBreakdown) {
       ChartModule.renderBeverageBreakdown('beverageBreakdownChart', data.beverageBreakdown, data.totalIntake);
     }
 
+    const bevMobilePillsEl = document.getElementById('beverageMobilePills');
+    if (bevMobilePillsEl) {
+      bevMobilePillsEl.innerHTML = '';
+      if (hasBeverageData) {
+        activeBeverages.forEach(b => {
+          const pill = document.createElement('span');
+          pill.className = 'beverage-mobile-pill';
+          pill.innerHTML = `<span>${escapeHtml(b.label)}</span> <strong>${b.percentage}%</strong>`;
+          bevMobilePillsEl.appendChild(pill);
+        });
+      }
+    }
+
     const bevListEl = document.getElementById('beverageBreakdownList');
     if (bevListEl) {
       bevListEl.innerHTML = '';
-      const activeBeverages = data.beverageBreakdown.filter(b => b.amount > 0);
 
       if (activeBeverages.length === 0) {
         bevListEl.innerHTML = `
@@ -991,13 +1015,46 @@ const UI = (() => {
     }
 
     // 4. Container Usage (Table: container, volume dan uses)
+    const statsContainerCard = document.getElementById('statsContainerCard');
+    const containerMobileGrid = document.getElementById('containerMobileGrid');
     const containerTbody = document.getElementById('containerUsageTableBody');
     const containerTableContainer = document.getElementById('containerTableContainer');
     const containerUsageEmpty = document.getElementById('containerUsageEmpty');
 
+    const hasContainers = Array.isArray(data.containerUsage) && data.containerUsage.length > 0;
+    if (statsContainerCard) {
+      statsContainerCard.classList.toggle('is-empty-data', !hasContainers);
+    }
+
+    if (containerMobileGrid) {
+      if (!hasContainers) {
+        containerMobileGrid.innerHTML = '';
+      } else {
+        let gridHtml = `
+          <div class="container-pill-header">Container</div>
+          <div class="container-pill-header container-pill-header--accent">Volume</div>
+          <div class="container-pill-header container-pill-header--accent">Uses</div>
+        `;
+        data.containerUsage.forEach(c => {
+          const isSvg = c.icon && c.icon.startsWith('icon-');
+          const iconHtml = isSvg
+            ? `<i class="custom-icon ${c.icon}"></i>`
+            : `<i class="${c.icon || 'ri-cup-line'}"></i>`;
+          gridHtml += `
+            <div class="container-pill-cell container-pill-cell--name">
+              <span class="container-pill-icon">${iconHtml}</span>
+              <span>${escapeHtml(c.name)}</span>
+            </div>
+            <div class="container-pill-cell container-pill-cell--meta">${formatVolumeDisplay(c.amount)}</div>
+            <div class="container-pill-cell container-pill-cell--meta">${c.uses}</div>
+          `;
+        });
+        containerMobileGrid.innerHTML = gridHtml;
+      }
+    }
+
     if (containerTbody) {
       containerTbody.innerHTML = '';
-      const hasContainers = Array.isArray(data.containerUsage) && data.containerUsage.length > 0;
 
       if (!hasContainers) {
         if (containerTableContainer) containerTableContainer.classList.add('hidden');

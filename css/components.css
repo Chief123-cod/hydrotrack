@@ -2267,6 +2267,13 @@
   margin-top: 16px;
 }
 
+.unit-mobile-only,
+.beverage-center-drop-icon,
+.beverage-mobile-pills,
+.container-mobile-grid {
+  display: none;
+}
+
 .beverage-chart-wrapper {
   position: relative;
   width: 100%;

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#1A1D2E">
     <title>Statistics | HydroTrack</title>
 
@@ -265,7 +265,7 @@
                 </div>
 
                 <!-- 3. Beverage Breakdown Card (Grafik & Breakdown List) -->
-                <div class="card stats-beverage-card">
+                <div class="card stats-beverage-card" id="statsBeverageCard">
                     <div class="card__header">
                         <div class="card__header-info">
                             <h3 class="card__title">
@@ -275,14 +275,17 @@
                         </div>
                     </div>
 
-                    <div class="beverage-breakdown-body">
+                    <div class="beverage-breakdown-body" id="beverageBreakdownBody">
                         <div class="beverage-chart-wrapper">
                             <canvas id="beverageBreakdownChart"></canvas>
                             <div class="beverage-chart-center" id="beverageChartCenter">
+                                <i class="ri-drop-fill beverage-center-drop-icon" aria-hidden="true"></i>
                                 <span class="beverage-chart-center__val" id="beverageCenterVal">0 L</span>
                                 <span class="beverage-chart-center__lbl">Total Minum</span>
                             </div>
                         </div>
+
+                        <div class="beverage-mobile-pills" id="beverageMobilePills"></div>
 
                         <div class="beverage-breakdown-list" id="beverageBreakdownList">
                             <!-- Populated dynamically via JS -->
@@ -293,7 +296,7 @@
             </div>
 
             <!-- 4. Container Usage Card (Table: Container, Volume, Uses) -->
-            <div class="card stats-container-card">
+            <div class="card stats-container-card" id="statsContainerCard">
                 <div class="card__header">
                     <div class="card__header-info">
                         <h3 class="card__title">
@@ -302,6 +305,8 @@
                         <p class="card__subtitle">Frekuensi dan volume penggunaan takaran minum</p>
                     </div>
                 </div>
+
+                <div class="container-mobile-grid" id="containerMobileGrid"></div>
 
                 <div class="table-container" id="containerTableContainer">
                     <table class="data-table container-usage-table" id="containerUsageTable">

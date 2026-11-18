@@ -874,8 +874,8 @@
   }
 }
 
-/* ---------- Mobile (max-width: 640px) ---------- */
-@media (max-width: 640px) {
+/* ---------- Mobile (max-width: 768px) ---------- */
+@media (max-width: 768px) {
   .desktop-only-header,
   .top-header.desktop-only-header {
     display: none !important;
@@ -1863,158 +1863,459 @@
     box-sizing: border-box;
   }
 
+  .unit-desktop-only {
+    display: none !important;
+  }
+
+  .unit-mobile-only {
+    display: inline !important;
+  }
+
+  /* 1. Statistics Top Cards (1 Full-Width Hero + 3 Columns Below, No Icons) */
   .stats-cards-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 24px !important;
   }
 
   .stats-card {
-    padding: 12px 10px;
-    gap: 8px;
-    border-radius: var(--radius-lg);
+    padding: 20px 8px !important;
+    border-radius: 22px !important;
     min-width: 0;
     box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    background: #DBEAFE !important;
+    border: 1px solid #BFDBFE !important;
+    box-shadow: none !important;
   }
 
-  .stats-card__icon {
-    width: 36px;
-    height: 36px;
-    font-size: 17px;
-    border-radius: 10px;
-    flex-shrink: 0;
+  [data-theme="dark"] .stats-card,
+  [data-theme="system"] .stats-card {
+    background: #233862 !important;
+    border: 1px solid rgba(96, 165, 250, 0.18) !important;
+    box-shadow: none !important;
+  }
+
+  .stats-card.stats-card--primary,
+  [data-theme="dark"] .stats-card.stats-card--primary,
+  [data-theme="system"] .stats-card.stats-card--primary {
+    grid-column: 1 / -1 !important;
+    padding: 26px 18px !important;
+    border-radius: 26px !important;
+  }
+
+  .stats-card.stats-card--primary {
+    background: #DCFCE7 !important;
+    border: 1px solid #A7F3D0 !important;
+  }
+
+  [data-theme="dark"] .stats-card.stats-card--primary,
+  [data-theme="system"] .stats-card.stats-card--primary {
+    background: #064E3B !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  }
+
+  .stats-card__icon,
+  .stats-card__sub {
+    display: none !important;
   }
 
   .stats-card__content {
     min-width: 0;
-    overflow: hidden;
-    flex: 1;
-  }
-
-  .stats-card__label {
-    font-size: 10.5px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 4px !important;
   }
 
   .stats-card__value {
-    font-size: 16.5px;
-    font-weight: 800;
-    line-height: 1.2;
+    order: 1;
+    font-size: 25px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    color: #1E3A8A !important;
   }
 
-  .stats-card__sub {
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  [data-theme="dark"] .stats-card__value,
+  [data-theme="system"] .stats-card__value {
+    color: #D8E6FF !important;
   }
 
+  .stats-card--primary .stats-card__value {
+    font-size: 46px !important;
+    line-height: 1.05 !important;
+    letter-spacing: -1px !important;
+    color: #065F46 !important;
+  }
+
+  [data-theme="dark"] .stats-card--primary .stats-card__value,
+  [data-theme="system"] .stats-card--primary .stats-card__value {
+    color: #6EE7B7 !important;
+  }
+
+  .stats-card__label {
+    order: 2;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    white-space: normal !important;
+    color: #1E40AF !important;
+  }
+
+  [data-theme="dark"] .stats-card__label,
+  [data-theme="system"] .stats-card__label {
+    color: #B4C8FF !important;
+  }
+
+  .stats-card--primary .stats-card__label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #047857 !important;
+  }
+
+  [data-theme="dark"] .stats-card--primary .stats-card__label,
+  [data-theme="system"] .stats-card--primary .stats-card__label {
+    color: #A7F3D0 !important;
+  }
+
+  /* 2. Overview, Beverage Breakdown & Container Usage (Cardless Sections) */
   .stats-main-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 22px !important;
   }
 
   .stats-overview-card,
   .stats-beverage-card,
-  .stats-container-card {
-    padding: 16px 14px;
-    border-radius: var(--radius-lg);
+  .stats-container-card,
+  [data-theme="dark"] .stats-overview-card,
+  [data-theme="dark"] .stats-beverage-card,
+  [data-theme="dark"] .stats-container-card,
+  [data-theme="system"] .stats-overview-card,
+  [data-theme="system"] .stats-beverage-card,
+  [data-theme="system"] .stats-container-card {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
     width: 100%;
     box-sizing: border-box;
   }
 
-  .stats-overview-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 12px;
+  .stats-overview-card .card__header,
+  .stats-beverage-card .card__header,
+  .stats-container-card .card__header {
+    padding: 0 !important;
+    margin-bottom: 10px !important;
+    border: none !important;
   }
 
-  .stats-overview-item {
-    padding: 9px 10px;
-    gap: 8px;
-    border-radius: 10px;
+  .stats-overview-card .card__title i,
+  .stats-beverage-card .card__title i,
+  .stats-container-card .card__title i,
+  .stats-overview-card .card__subtitle,
+  .stats-beverage-card .card__subtitle,
+  .stats-container-card .card__subtitle {
+    display: none !important;
+  }
+
+  .stats-overview-card .card__title,
+  .stats-beverage-card .card__title,
+  .stats-container-card .card__title {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--color-primary-dark) !important;
+    padding-left: 4px;
+  }
+
+  [data-theme="dark"] .stats-overview-card .card__title,
+  [data-theme="dark"] .stats-beverage-card .card__title,
+  [data-theme="dark"] .stats-container-card .card__title,
+  [data-theme="system"] .stats-overview-card .card__title,
+  [data-theme="system"] .stats-beverage-card .card__title,
+  [data-theme="system"] .stats-container-card .card__title {
+    color: #93C5FD !important;
+  }
+
+  /* Overview 8 Full-Width Pill Rows */
+  .stats-overview-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    margin-top: 0 !important;
+  }
+
+  .stats-overview-item,
+  [data-theme="dark"] .stats-overview-item,
+  [data-theme="system"] .stats-overview-item {
+    padding: 15px 18px !important;
+    gap: 14px !important;
+    border-radius: 18px !important;
     min-width: 0;
     box-sizing: border-box;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-border) !important;
+    box-shadow: var(--shadow-sm) !important;
   }
 
-  .overview-item__icon {
-    width: 32px;
-    height: 32px;
-    font-size: 15px;
-    border-radius: 8px;
+  [data-theme="dark"] .stats-overview-item,
+  [data-theme="system"] .stats-overview-item {
+    background: #1C2230 !important;
+    border: 1px solid #262E42 !important;
+    box-shadow: none !important;
+  }
+
+  .overview-item__icon,
+  [data-theme="dark"] .overview-item__icon,
+  [data-theme="dark"] .overview-item__icon.icon--streak,
+  [data-theme="dark"] .overview-item__icon.icon--success,
+  [data-theme="dark"] .overview-item__icon.icon--tracked,
+  [data-theme="dark"] .overview-item__icon.icon--interval,
+  [data-theme="dark"] .overview-item__icon.icon--size,
+  [data-theme="dark"] .overview-item__icon.icon--largest,
+  [data-theme="dark"] .overview-item__icon.icon--first,
+  [data-theme="dark"] .overview-item__icon.icon--last {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 20px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--color-text-primary) !important;
     flex-shrink: 0;
+  }
+
+  [data-theme="dark"] .overview-item__icon,
+  [data-theme="dark"] .overview-item__icon.icon--streak,
+  [data-theme="dark"] .overview-item__icon.icon--success,
+  [data-theme="dark"] .overview-item__icon.icon--tracked,
+  [data-theme="dark"] .overview-item__icon.icon--interval,
+  [data-theme="dark"] .overview-item__icon.icon--size,
+  [data-theme="dark"] .overview-item__icon.icon--largest,
+  [data-theme="dark"] .overview-item__icon.icon--first,
+  [data-theme="dark"] .overview-item__icon.icon--last {
+    color: #E2E8F0 !important;
   }
 
   .overview-item__body {
     min-width: 0;
-    overflow: hidden;
     flex: 1;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
   }
 
   .overview-item__label {
-    font-size: 9.5px;
-    font-weight: 700;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: var(--color-text-primary) !important;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .overview-item__value {
-    font-size: 13.5px;
-    font-weight: 700;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: var(--color-text-primary) !important;
+    white-space: nowrap;
+  }
+
+  /* 3. Beverage Breakdown Mobile (Empty Space when 0 ml vs Donut + Pill when > 0 ml) */
+  .stats-beverage-card.is-empty-data .beverage-breakdown-body {
+    visibility: hidden !important;
+    height: 240px !important;
+    min-height: 240px !important;
+    max-height: 240px !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
   }
 
   .beverage-breakdown-body {
-    margin-top: 12px;
-    gap: 12px;
+    margin-top: 8px !important;
+    gap: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
 
   .beverage-chart-wrapper {
-    height: 150px;
+    height: 250px !important;
+    width: 250px !important;
+    max-width: 100%;
+    margin: 0 auto !important;
+  }
+
+  .beverage-center-drop-icon {
+    display: block !important;
+    font-size: 38px !important;
+    color: var(--color-primary) !important;
+    margin-bottom: 6px !important;
+    line-height: 1;
+  }
+
+  [data-theme="dark"] .beverage-center-drop-icon,
+  [data-theme="system"] .beverage-center-drop-icon {
+    color: #7DD3FC !important;
   }
 
   .beverage-chart-center__val {
-    font-size: 16px;
+    font-size: 19px !important;
+    font-weight: 600 !important;
+    color: var(--color-primary-dark) !important;
   }
 
-  .beverage-item-row {
-    font-size: 12px;
+  [data-theme="dark"] .beverage-chart-center__val,
+  [data-theme="system"] .beverage-chart-center__val {
+    color: #BAE6FD !important;
+  }
+
+  .beverage-chart-center__lbl,
+  .beverage-breakdown-list {
+    display: none !important;
+  }
+
+  .beverage-mobile-pills {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100%;
+  }
+
+  .beverage-mobile-pill {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
-    padding: 7px 10px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: #E0F2FE;
+    color: #0369A1;
   }
 
-  .beverage-item-main {
-    width: 85px;
-    font-size: 12px;
+  [data-theme="dark"] .beverage-mobile-pill,
+  [data-theme="system"] .beverage-mobile-pill {
+    background: rgba(14, 116, 144, 0.35);
+    color: #BAE6FD;
   }
 
-  .stats-container-card {
+  /* 4. Container Usage Mobile (Empty Space when 0 ml vs 3-Column Pill Grid when > 0 ml) */
+  #containerTableContainer,
+  #containerUsageEmpty {
+    display: none !important;
+  }
+
+  .stats-container-card.is-empty-data .container-mobile-grid {
+    display: none !important;
+  }
+
+  .container-mobile-grid {
+    display: grid !important;
+    grid-template-columns: 1.7fr 1fr 0.85fr;
+    gap: 6px;
     width: 100%;
-    margin-bottom: 0;
+    margin-top: 4px;
   }
 
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 8px 0 0 0;
+  .container-pill-header {
+    padding: 14px 10px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #DBEAFE;
+    color: #1E3A8A;
   }
 
-  .container-usage-table {
-    width: 100%;
-    min-width: 100%;
+  [data-theme="dark"] .container-pill-header,
+  [data-theme="system"] .container-pill-header {
+    background: #C7D2FE;
+    color: #1E293B;
   }
 
-  .container-usage-table th,
-  .container-usage-table td {
-    padding: 9px 10px;
-    font-size: 12px;
-    text-align: left;
+  .container-pill-header--accent {
+    background: #F3E8FF;
+    color: #4C1D95;
+  }
+
+  [data-theme="dark"] .container-pill-header--accent,
+  [data-theme="system"] .container-pill-header--accent {
+    background: #E9D5FF;
+    color: #2E1065;
+  }
+
+  .container-pill-cell {
+    padding: 16px 10px;
+    border-radius: 22px;
+    font-size: 14.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+  }
+
+  [data-theme="dark"] .container-pill-cell,
+  [data-theme="system"] .container-pill-cell {
+    background: #1C2230;
+    color: #F8FAFC;
+    border: 1px solid #283144;
+  }
+
+  .container-pill-cell--name {
+    justify-content: flex-start;
+    gap: 10px;
+    padding-left: 16px;
+  }
+
+  .container-pill-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .container-pill-icon .custom-icon {
+    width: 18px;
+    height: 18px;
+    background-color: currentColor;
+  }
+
+  .container-pill-cell--meta {
+    background: #FAF5FF;
+    color: #4C1D95;
+    border-color: #E9D5FF;
+  }
+
+  [data-theme="dark"] .container-pill-cell--meta,
+  [data-theme="system"] .container-pill-cell--meta {
+    background: #3B2846;
+    color: #F3E8FF;
+    border-color: #4C3359;
   }
 
   /* Settings Mobile Specific (Material 3 Expressive) */
