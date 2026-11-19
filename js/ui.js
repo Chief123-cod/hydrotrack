@@ -6,7 +6,7 @@ const UI = (() => {
 
   /* ==================== DASHBOARD RENDERING ==================== */
 
-  // Update user name in header and sidebar
+  // Update user name and avatar photo in header and sidebar
   function updateUserInfo() {
     const settings = Storage.getSettings();
     const headerUser = document.getElementById('headerUserName');
@@ -15,6 +15,17 @@ const UI = (() => {
     if (sidebarUser) sidebarUser.textContent = settings.userName;
     const topHeaderUser = document.getElementById('topHeaderUserName');
     if (topHeaderUser) topHeaderUser.textContent = settings.userName;
+
+    const topHeaderAvatars = document.querySelectorAll('.top-header__avatar');
+    const hasPhoto = typeof settings.profilePhoto === 'string' && settings.profilePhoto.startsWith('data:image/');
+    topHeaderAvatars.forEach(avatarEl => {
+      if (hasPhoto) {
+        avatarEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Profile" class="avatar-photo-img">`;
+      } else {
+        avatarEl.innerHTML = '<i class="ri-user-3-fill"></i>';
+      }
+    });
+
     updateGreeting();
   }
 
@@ -1111,12 +1122,25 @@ const UI = (() => {
     const userName = (settings.userName || 'Faith').trim() || 'Faith';
     const initial = userName.charAt(0).toUpperCase();
 
-    // 1. Main Menu & Profile Header Avatar Initial & Name
+    // 1. Main Menu & Profile Header Avatar Initial/Photo & Name
+    const hasPhoto = typeof settings.profilePhoto === 'string' && settings.profilePhoto.startsWith('data:image/');
     const menuInitialEl = document.getElementById('menuProfileInitial');
-    if (menuInitialEl) menuInitialEl.textContent = initial;
+    if (menuInitialEl) {
+      if (hasPhoto) {
+        menuInitialEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Profile" class="avatar-photo-img">`;
+      } else {
+        menuInitialEl.textContent = initial;
+      }
+    }
 
     const profileInitialEl = document.getElementById('profileInitial');
-    if (profileInitialEl) profileInitialEl.textContent = initial;
+    if (profileInitialEl) {
+      if (hasPhoto) {
+        profileInitialEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Profile" class="avatar-photo-img">`;
+      } else {
+        profileInitialEl.textContent = initial;
+      }
+    }
 
     const menuNameEl = document.getElementById('menuProfileName');
     if (menuNameEl) menuNameEl.textContent = userName;

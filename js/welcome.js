@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     activityLevel: 'moderate',
     wakeTime: '07:00',
     sleepTime: '23:00',
-    userName: 'Tat',
+    userName: '',
+    profilePhoto: '',
     calculatedGoalMl: 3000,
     calculatedGoalLiters: '3 L',
     reminderIntervalMin: 96
@@ -23,8 +24,108 @@ document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const topbar = document.getElementById('welcomeTopbar');
   const btnBack = document.getElementById('btnStepBack');
-  const waveFill = document.getElementById('waveFillWrapper');
   const waveTrack = document.getElementById('waveProgressTrack');
+  const waveSvg = document.getElementById('waveProgressSvg');
+  const waveBgPath = document.getElementById('waveBgPath');
+  const waveFillPath = document.getElementById('waveFillPath');
+
+  /* ==================== PROGRESS BAR ENGINE (Lurus -> Gelombang Sedang) ==================== */
+  const waveAnimState = {
+    currentRatio: 1 / TOTAL_FORM_STEPS,
+    targetRatio: 1 / TOTAL_FORM_STEPS,
+    currentAmp: 0, // Step awal (Step 2) selalu lurus (amplitude = 0)
+    targetAmp: 0,
+    rafId: null
+  };
+
+  function drawWaveProgress(ratio, amp) {
+    if (!waveTrack || !waveSvg || !waveBgPath || !waveFillPath) return;
+    const width = waveTrack.clientWidth || 300;
+    const height = 18;
+    const cy = height / 2;
+    const pad = 3;
+    const xStart = pad;
+    const xMax = Math.max(pad + 10, width - pad);
+    const usableWidth = xMax - xStart;
+    const xEnd = xStart + usableWidth * Math.max(0.02, Math.min(1, ratio));
+
+    waveSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    // 1. Garis aktif (lurus jika amp hampir 0, bergelombang sedang jika amp > 0)
+    if (amp < 0.05) {
+      waveFillPath.setAttribute('d', `M ${xStart.toFixed(2)},${cy} L ${xEnd.toFixed(2)},${cy}`);
+    } else {
+      const wavelength = 30; // Panjang gelombang sedang & rapi
+      const stepPx = 2;
+      let d = '';
+      for (let x = xStart; x <= xEnd; x += stepPx) {
+        const y = cy + Math.sin(((x - xStart) / wavelength) * Math.PI * 2) * amp;
+        d += (x === xStart ? `M ${x.toFixed(2)},${y.toFixed(2)}` : ` L ${x.toFixed(2)},${y.toFixed(2)}`);
+      }
+      // Pastikan ujung kanan tepat berhenti di xEnd agar rounded cap rapi
+      const endY = cy + Math.sin(((xEnd - xStart) / wavelength) * Math.PI * 2) * amp;
+      d += ` L ${xEnd.toFixed(2)},${endY.toFixed(2)}`;
+      waveFillPath.setAttribute('d', d);
+    }
+
+    // 2. Garis sisa di sebelah kanan (selalu lurus rapi dengan jarak gap 10px)
+    const gap = 10;
+    const bgStart = xEnd + gap;
+    if (bgStart < xMax - 2) {
+      waveBgPath.setAttribute('d', `M ${bgStart.toFixed(2)},${cy} L ${xMax.toFixed(2)},${cy}`);
+    } else {
+      waveBgPath.setAttribute('d', '');
+    }
+  }
+
+  function animateWaveProgress(targetRatio, targetAmp, instant = false) {
+    waveAnimState.targetRatio = targetRatio;
+    waveAnimState.targetAmp = targetAmp;
+
+    if (waveAnimState.rafId) {
+      cancelAnimationFrame(waveAnimState.rafId);
+      waveAnimState.rafId = null;
+    }
+
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (instant || prefersReduced) {
+      waveAnimState.currentRatio = targetRatio;
+      waveAnimState.currentAmp = targetAmp;
+      drawWaveProgress(targetRatio, targetAmp);
+      return;
+    }
+
+    const startRatio = waveAnimState.currentRatio;
+    const startAmp = waveAnimState.currentAmp;
+    const duration = 360;
+    const startTime = performance.now();
+
+    function frame(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / duration);
+      // Cubic ease-out
+      const ease = 1 - Math.pow(1 - t, 3);
+
+      waveAnimState.currentRatio = startRatio + (targetRatio - startRatio) * ease;
+      waveAnimState.currentAmp = startAmp + (targetAmp - startAmp) * ease;
+      drawWaveProgress(waveAnimState.currentRatio, waveAnimState.currentAmp);
+
+      if (t < 1) {
+        waveAnimState.rafId = requestAnimationFrame(frame);
+      } else {
+        waveAnimState.rafId = null;
+      }
+    }
+
+    waveAnimState.rafId = requestAnimationFrame(frame);
+  }
+
+  // Redraw neatly on window resize
+  window.addEventListener('resize', () => {
+    if (currentStep >= 2 && currentStep <= 7) {
+      drawWaveProgress(waveAnimState.currentRatio, waveAnimState.currentAmp);
+    }
+  });
 
   // Input & Visual Elements
   const inputWake = document.getElementById('inputWakeTime');
@@ -33,8 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const awakeBarFill = document.getElementById('awakeBarFill');
 
   const inputName = document.getElementById('inputUserName');
+  const inputNameBox = inputName ? inputName.closest('.welcome-input-box') : null;
+  const nameErrorMsg = document.getElementById('nameErrorMsg');
   const charCounter = document.getElementById('charCountLabel');
+  const avatarCircle = document.getElementById('avatarCircle');
+  const avatarImagePreview = document.getElementById('avatarImagePreview');
   const avatarLetter = document.getElementById('avatarLetter');
+  const btnChangeAvatar = document.getElementById('btnChangeAvatar');
+  const inputAvatarPhoto = document.getElementById('inputAvatarPhoto');
 
   // Step 7 Review Elements
   const summaryGoalVal = document.getElementById('summaryDailyGoalVal');
@@ -68,14 +175,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Topbar & Wave Progress Visibility
     if (step >= 2 && step <= 7) {
+      const wasHidden = topbar.style.display === 'none';
       topbar.style.display = 'flex';
       topbar.setAttribute('aria-hidden', 'false');
 
       // Calculate progress percentage for steps 2 to 7 (1 of 6 up to 6 of 6)
       const formStepIndex = step - 1; // 1 to 6
-      const pct = (formStepIndex / TOTAL_FORM_STEPS) * 100;
-      waveFill.style.width = `${pct}%`;
+      const ratio = formStepIndex / TOTAL_FORM_STEPS;
+      // Langkah pertama form (Step 2) garis lurus (amp = 0), setelah klik Next (Step 3+) bergelombang sedang (amp = 2.5)
+      const targetAmp = formStepIndex === 1 ? 0 : 2.5;
+
       waveTrack.setAttribute('aria-valuenow', formStepIndex);
+      requestAnimationFrame(() => {
+        animateWaveProgress(ratio, targetAmp, wasHidden);
+      });
     } else {
       topbar.style.display = 'none';
       topbar.setAttribute('aria-hidden', 'true');
@@ -162,21 +275,134 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAwakeDuration();
   }
 
-  /* ==================== NAME INPUT & AVATAR INITIAL ==================== */
+  /* ==================== NAME INPUT & AVATAR PHOTO ==================== */
+
+  function updateAvatarDisplay() {
+    if (onboardingData.profilePhoto && avatarImagePreview) {
+      avatarImagePreview.src = onboardingData.profilePhoto;
+      avatarImagePreview.classList.remove('hidden');
+      if (avatarLetter) avatarLetter.classList.add('hidden');
+      if (btnChangeAvatar) {
+        btnChangeAvatar.innerHTML = '<i class="ri-camera-line"></i> Change Photo';
+      }
+      return;
+    }
+
+    if (avatarImagePreview) {
+      avatarImagePreview.classList.add('hidden');
+    }
+    if (avatarLetter) {
+      avatarLetter.classList.remove('hidden');
+      const val = inputName ? inputName.value.trim() : '';
+      if (val) {
+        avatarLetter.textContent = val.charAt(0).toUpperCase();
+      } else {
+        avatarLetter.innerHTML = '<i class="ri-user-3-line" aria-hidden="true"></i>';
+      }
+    }
+  }
+
+  function processAvatarFile(file) {
+    if (!file || !file.type || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const rawDataUrl = event.target?.result;
+      if (typeof rawDataUrl !== 'string') return;
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const size = 256;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            onboardingData.profilePhoto = rawDataUrl;
+            updateAvatarDisplay();
+            return;
+          }
+
+          // Center-crop square so avatar never stretches
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+
+          onboardingData.profilePhoto = canvas.toDataURL('image/jpeg', 0.85);
+          updateAvatarDisplay();
+        } catch (err) {
+          console.error('Failed to compress profile photo:', err);
+        }
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function openAvatarPicker() {
+    if (inputAvatarPhoto) {
+      inputAvatarPhoto.click();
+    }
+  }
+
+  if (btnChangeAvatar) {
+    btnChangeAvatar.addEventListener('click', openAvatarPicker);
+  }
+
+  if (avatarCircle) {
+    avatarCircle.addEventListener('click', openAvatarPicker);
+    avatarCircle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openAvatarPicker();
+      }
+    });
+  }
+
+  if (inputAvatarPhoto) {
+    inputAvatarPhoto.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        processAvatarFile(file);
+      }
+      // Reset so picking the same photo again triggers change
+      inputAvatarPhoto.value = '';
+    });
+  }
 
   if (inputName) {
+    // Ensure input always starts empty on fresh onboarding
+    inputName.value = '';
+    if (charCounter) {
+      charCounter.textContent = '0/15 characters';
+    }
+    updateAvatarDisplay();
+
     inputName.addEventListener('input', () => {
       const val = inputName.value.trim();
-      onboardingData.userName = val || 'User';
+      onboardingData.userName = val;
 
       // Update character counter
       if (charCounter) {
         charCounter.textContent = `${inputName.value.length}/15 characters`;
       }
 
-      // Update avatar letter
-      if (avatarLetter) {
-        avatarLetter.textContent = val ? val.charAt(0).toUpperCase() : 'U';
+      // Clear validation error while typing
+      if (val) {
+        inputNameBox?.classList.remove('is-error');
+        nameErrorMsg?.classList.remove('visible');
+      }
+
+      // Sync avatar initial if no photo uploaded
+      updateAvatarDisplay();
+    });
+
+    inputName.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('btnNextStep6')?.click();
       }
     });
   }
@@ -307,9 +533,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnNextStep6')?.addEventListener('click', () => {
     const nameVal = inputName.value.trim();
     if (!nameVal) {
+      inputNameBox?.classList.add('is-error');
+      nameErrorMsg?.classList.add('visible');
       inputName.focus();
       return;
     }
+    inputNameBox?.classList.remove('is-error');
+    nameErrorMsg?.classList.remove('visible');
     onboardingData.userName = nameVal;
     goToStep(7);
   });
@@ -331,7 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       // Save full profile and hydration settings to localStorage
       const settingsPayload = {
-        userName: onboardingData.userName || 'Faith',
+        userName: onboardingData.userName || 'User',
+        profilePhoto: onboardingData.profilePhoto || '',
         dailyGoal: onboardingData.calculatedGoalMl || 2000,
         gender: onboardingData.gender || 'male',
         ageGroup: onboardingData.ageGroup || '31-50',

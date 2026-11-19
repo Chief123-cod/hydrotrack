@@ -34,20 +34,12 @@
       <!-- Liquid Wave Progress Indicator -->
       <div class="welcome-wave-progress" id="waveProgressTrack" role="progressbar" aria-valuenow="1" aria-valuemin="1"
         aria-valuemax="6" aria-label="Langkah pendaftaran">
-        <div class="welcome-wave-progress__track">
-          <!-- Background Wave (Unfilled) -->
-          <svg class="welcome-wave-svg welcome-wave-svg--bg" viewBox="0 0 400 20" preserveAspectRatio="none">
-            <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10 T250,10 T300,10 T350,10 T400,10" fill="none"
-              stroke="rgba(255,255,255,0.12)" stroke-width="4" stroke-linecap="round" />
-          </svg>
-          <!-- Active Wave (Filled) with dynamic width mask -->
-          <div class="welcome-wave-progress__fill-wrapper" id="waveFillWrapper" style="width: 16.6%;">
-            <svg class="welcome-wave-svg welcome-wave-svg--fill" viewBox="0 0 400 20" preserveAspectRatio="none">
-              <path d="M0,10 Q25,0 50,10 T100,10 T150,10 T200,10 T250,10 T300,10 T350,10 T400,10" fill="none"
-                stroke="#A8C7FA" stroke-width="4.5" stroke-linecap="round" />
-            </svg>
-          </div>
-        </div>
+        <svg class="welcome-wave-svg" id="waveProgressSvg" aria-hidden="true">
+          <!-- Unfilled Straight Track (Right Side) -->
+          <path id="waveBgPath" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="4" stroke-linecap="round" />
+          <!-- Active Progress Fill (Straight on Step 2, Moderate Wave on Next) -->
+          <path id="waveFillPath" fill="none" stroke="#A8C7FA" stroke-width="4" stroke-linecap="round" />
+        </svg>
       </div>
     </header>
 
@@ -388,8 +380,10 @@
         <div class="welcome-profile-setup">
           <!-- Avatar Preview Circle -->
           <div class="welcome-profile-avatar" id="avatarPreviewContainer">
-            <div class="welcome-avatar-circle" id="avatarCircle">
-              <span class="welcome-avatar-letter" id="avatarLetter">T</span>
+            <input type="file" id="inputAvatarPhoto" accept="image/*" class="sr-only">
+            <div class="welcome-avatar-circle" id="avatarCircle" role="button" tabindex="0" aria-label="Pilih foto profil">
+              <img id="avatarImagePreview" class="welcome-avatar-img hidden" alt="Profile photo">
+              <span class="welcome-avatar-letter" id="avatarLetter"><i class="ri-user-3-line" aria-hidden="true"></i></span>
             </div>
             <button type="button" class="welcome-avatar-btn" id="btnChangeAvatar" aria-label="Pilih foto profil">
               <i class="ri-camera-line"></i> Add Photo
@@ -401,11 +395,12 @@
             <p class="welcome-input-label">What should we call you?</p>
             <div class="welcome-input-box">
               <label for="inputUserName" class="welcome-input-box__floating-label">Your name</label>
-              <input type="text" id="inputUserName" class="welcome-input-box__input" placeholder="e.g. Tat, Faith"
-                maxlength="15" value="Tat" required autocomplete="name">
+              <input type="text" id="inputUserName" class="welcome-input-box__input" placeholder="Enter your name"
+                maxlength="15" value="" required autocomplete="off">
             </div>
             <div class="welcome-input-helper">
-              <span id="charCountLabel" class="welcome-char-counter">3/15 characters</span>
+              <span id="charCountLabel" class="welcome-char-counter">0/15 characters</span>
+              <span id="nameErrorMsg" class="welcome-input-error" role="alert">Please enter your name</span>
             </div>
           </div>
         </div>

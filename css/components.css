@@ -2959,6 +2959,7 @@
   font-weight: 600;
   flex-shrink: 0;
   user-select: none;
+  overflow: hidden;
 }
 
 .m3-avatar-circle--lg {
