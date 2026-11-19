@@ -4465,14 +4465,14 @@
    ============================================================ */
 
 /* ==================== MODERN HISTORY DASHBOARD (Weekly / Monthly / Yearly) ==================== */
-/* Pada mobile (<= 768px), body dan container tetap terkunci agar pas di layar HP */
+/* Pada mobile (<= 768px), izinkan scroll dokumen alami agar pull-to-refresh di HP bekerja */
 @media (max-width: 768px) {
   body.page-history,
   body:has(.main-content--history) {
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: 100%;
-    min-height: 100%;
+    overflow-x: clip;
+    overflow-y: visible;
+    height: auto;
+    min-height: 100dvh;
   }
 }
 

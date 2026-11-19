@@ -51,16 +51,28 @@
 /* ---------- Tablet (max-width: 768px) ---------- */
 @media (max-width: 768px) {
 
-  /* Kunci viewport html & body agar Address Bar Chrome Mobile tidak ikut naik saat scroll */
-  html,
-  body {
-    position: fixed;
-    inset: 0;
+  /* Izinkan scroll dokumen alami agar gestur pull-to-refresh bawaan Chrome Mobile aktif */
+  html {
+    position: static;
     width: 100%;
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
+    height: auto !important;
+    min-height: 100%;
+    max-height: none !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+    overscroll-behavior: auto !important;
+  }
+
+  body {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+    overscroll-behavior: auto !important;
   }
 
   /* Sembunyikan sidebar kiri dan tombol hamburger pada mobile (Gantikan dengan Bottom Nav) */
@@ -83,13 +95,11 @@
     width: 100%;
     max-width: 100vw;
     min-width: 0;
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: clip !important;
     box-sizing: border-box;
     padding: var(--spacing-md);
     padding-top: calc(60px + var(--spacing-md));
@@ -102,13 +112,11 @@
     width: 100%;
     max-width: 100vw;
     min-width: 0;
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: clip !important;
     box-sizing: border-box;
     padding: calc(56px + 14px) 14px calc(100px + env(safe-area-inset-bottom, 0px)) 14px !important;
     display: flex;
@@ -136,13 +144,11 @@
     width: 100%;
     max-width: 100vw;
     min-width: 0;
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: clip !important;
     box-sizing: border-box;
     padding: calc(56px + 14px) 14px calc(84px + env(safe-area-inset-bottom, 0px)) 14px !important;
     display: block !important;
@@ -883,9 +889,9 @@
 
   .main-content,
   .main-content--settings {
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
     padding: var(--spacing-sm);
     padding-top: calc(60px + var(--spacing-sm));
     padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
@@ -993,13 +999,11 @@
     width: 100%;
     max-width: 100vw;
     min-width: 0;
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: clip !important;
     box-sizing: border-box;
     padding: calc(56px + 12px) 12px calc(82px + env(safe-area-inset-bottom, 0px)) 12px !important;
     display: block !important;
