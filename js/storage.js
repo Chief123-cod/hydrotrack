@@ -30,7 +30,7 @@ const Storage = (() => {
 
   // Default Settings
   const DEFAULT_SETTINGS = {
-    userName: 'Faith',
+    userName: 'Pengguna',
     dailyGoal: 2000,
     weight: 60,
     activityLevel: 'moderate',
@@ -41,15 +41,15 @@ const Storage = (() => {
 
   // Drink Type Labels & Icons
   const DRINK_TYPES = {
-    water: { label: 'Water', icon: 'ri-drop-fill' },
-    coffee: { label: 'Coffee', icon: 'ri-cup-line' },
-    energy: { label: 'Energy Drink', icon: 'ri-flashlight-line' },
-    juice: { label: 'Fruit Juice', icon: 'ri-goblet-fill' },
-    milk: { label: 'Milk', icon: 'ri-goblet-line' },
-    qrs: { label: 'QRS', icon: 'ri-heart-pulse-line' },
-    soda: { label: 'Soft Drink', icon: 'ri-drinks-2-line' },
-    sports: { label: 'Sports Drink', icon: 'ri-water-flash-line' },
-    tea: { label: 'Tea', icon: 'ri-leaf-line' },
+    water: { label: 'Air Putih', icon: 'ri-drop-fill' },
+    coffee: { label: 'Kopi', icon: 'ri-cup-line' },
+    energy: { label: 'Minuman Energi', icon: 'ri-flashlight-line' },
+    juice: { label: 'Jus Buah', icon: 'ri-goblet-fill' },
+    milk: { label: 'Susu', icon: 'ri-goblet-line' },
+    qrs: { label: 'Oralit', icon: 'ri-heart-pulse-line' },
+    soda: { label: 'Minuman Soda', icon: 'ri-drinks-2-line' },
+    sports: { label: 'Minuman Isotonik', icon: 'ri-water-flash-line' },
+    tea: { label: 'Teh', icon: 'ri-leaf-line' },
     coconut: { label: 'Air Kelapa', icon: 'ri-plant-line' }
   };
 
@@ -724,14 +724,24 @@ const Storage = (() => {
   const CONTAINERS_KEY = 'hydrotrack_containers';
 
   const DEFAULT_CONTAINERS = [
-    { id: 'cup-coffee', name: 'Coffee Cup', amount: 100, icon: 'icon-coffee' },
-    { id: 'cup-tea', name: 'Tea Cup', amount: 150, icon: 'icon-cup-40' },
-    { id: 'cup-small', name: 'Small Cup', amount: 175, icon: 'icon-cup-50' },
-    { id: 'cup-medium', name: 'Medium Glass', amount: 200, icon: 'icon-glass-60' },
-    { id: 'cup-large', name: 'Large Glass', amount: 300, icon: 'icon-glass-75' },
-    { id: 'cup-bottle', name: 'Water Bottle', amount: 500, icon: 'icon-bottle' },
-    { id: 'cup-bottle-lg', name: 'Large Bottle', amount: 1000, icon: 'icon-bottle-lg' }
+    { id: 'cup-coffee', name: 'Cangkir Kopi', amount: 100, icon: 'icon-coffee' },
+    { id: 'cup-tea', name: 'Cangkir Teh', amount: 150, icon: 'icon-cup-40' },
+    { id: 'cup-small', name: 'Gelas Kecil', amount: 175, icon: 'icon-cup-50' },
+    { id: 'cup-medium', name: 'Gelas Sedang', amount: 200, icon: 'icon-glass-60' },
+    { id: 'cup-large', name: 'Gelas Besar', amount: 300, icon: 'icon-glass-75' },
+    { id: 'cup-bottle', name: 'Botol Minum', amount: 500, icon: 'icon-bottle' },
+    { id: 'cup-bottle-lg', name: 'Botol Besar', amount: 1000, icon: 'icon-bottle-lg' }
   ];
+
+  const LEGACY_CONTAINER_NAME_MAP = {
+    'cup-coffee': { en: 'Coffee Cup', id: 'Cangkir Kopi' },
+    'cup-tea': { en: 'Tea Cup', id: 'Cangkir Teh' },
+    'cup-small': { en: 'Small Cup', id: 'Gelas Kecil' },
+    'cup-medium': { en: 'Medium Glass', id: 'Gelas Sedang' },
+    'cup-large': { en: 'Large Glass', id: 'Gelas Besar' },
+    'cup-bottle': { en: 'Water Bottle', id: 'Botol Minum' },
+    'cup-bottle-lg': { en: 'Large Bottle', id: 'Botol Besar' }
+  };
 
   function getAllContainers() {
     const stored = localStorage.getItem(CONTAINERS_KEY);
@@ -741,7 +751,19 @@ const Storage = (() => {
       _save(CONTAINERS_KEY, initial);
       return initial;
     }
-    return _parse(CONTAINERS_KEY, DEFAULT_CONTAINERS);
+    const parsed = _parse(CONTAINERS_KEY, DEFAULT_CONTAINERS);
+    let migrated = false;
+    parsed.forEach(c => {
+      const mapItem = LEGACY_CONTAINER_NAME_MAP[c.id];
+      if (mapItem && c.name === mapItem.en) {
+        c.name = mapItem.id;
+        migrated = true;
+      }
+    });
+    if (migrated) {
+      _save(CONTAINERS_KEY, parsed);
+    }
+    return parsed;
   }
 
   function getCustomContainers() {
@@ -833,9 +855,9 @@ const Storage = (() => {
 
     let periodLabel = '';
     if (weekOffset === 0) {
-      periodLabel = 'This Week';
+      periodLabel = 'Minggu Ini';
     } else if (weekOffset === -1) {
-      periodLabel = 'Last Week';
+      periodLabel = 'Minggu Lalu';
     } else {
       const startStr = startOfWeek.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
       const endStr = endOfWeek.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -908,9 +930,9 @@ const Storage = (() => {
 
     let periodLabel = '';
     if (monthOffset === 0) {
-      periodLabel = 'This Month';
+      periodLabel = 'Bulan Ini';
     } else if (monthOffset === -1) {
-      periodLabel = 'Last Month';
+      periodLabel = 'Bulan Lalu';
     } else {
       periodLabel = targetDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
     }
@@ -990,9 +1012,9 @@ const Storage = (() => {
 
     let periodLabel = '';
     if (yearOffset === 0) {
-      periodLabel = 'This Year';
+      periodLabel = 'Tahun Ini';
     } else if (yearOffset === -1) {
-      periodLabel = 'Last Year';
+      periodLabel = 'Tahun Lalu';
     } else {
       periodLabel = `${year}`;
     }

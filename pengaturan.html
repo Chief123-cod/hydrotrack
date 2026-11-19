@@ -6,7 +6,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#1A1D2E">
-    <title>Settings | HydroTrack</title>
+    <title>Pengaturan | HydroTrack</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +40,7 @@
 
     <!-- ========== SIDEBAR NAVIGATION ========== -->
     <aside class="sidebar" id="sidebar">
-        <a href="index.html" class="sidebar__logo" title="HydroTrack Home">
+        <a href="index.html" class="sidebar__logo" title="Beranda HydroTrack">
             <i class="ri-drop-fill"></i>
             <span>HYDROTRACK</span>
         </a>
@@ -50,25 +50,25 @@
                 <li>
                     <a href="index.html" class="nav-link" data-view="dashboard">
                         <i class="ri-home-3-line"></i>
-                        <span>Home</span>
+                        <span>Beranda</span>
                     </a>
                 </li>
                 <li>
                     <a href="riwayat.html" class="nav-link" data-view="history">
                         <i class="ri-history-line"></i>
-                        <span>History</span>
+                        <span>Riwayat</span>
                     </a>
                 </li>
                 <li>
                     <a href="analisis.html" class="nav-link" data-view="analytics">
                         <i class="ri-bar-chart-2-line"></i>
-                        <span>Statistics</span>
+                        <span>Statistik</span>
                     </a>
                 </li>
                 <li>
                     <a href="pengaturan.html" class="nav-link active" data-view="settings">
                         <i class="ri-settings-4-line"></i>
-                        <span>Settings</span>
+                        <span>Pengaturan</span>
                     </a>
                 </li>
             </ul>
@@ -79,10 +79,10 @@
 
     <!-- ========== MOBILE HEADER ========== -->
     <header class="mobile-header" id="mobileHeader">
-        <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Toggle menu">
+        <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Buka menu">
             <i class="ri-menu-line"></i>
         </button>
-        <a href="index.html" class="mobile-header__logo" title="HydroTrack Home">
+        <a href="index.html" class="mobile-header__logo" title="Beranda HydroTrack">
             <i class="ri-drop-fill"></i>
             <span>HYDROTRACK</span>
         </a>
@@ -98,7 +98,7 @@
         <!-- Top Header Bar (Desktop Only > 1024px) -->
         <header class="top-header settings-top-header desktop-only-header">
             <div class="top-header__left">
-                <h1 class="top-header__greeting">Settings</h1>
+                <h1 class="top-header__greeting">Pengaturan</h1>
             </div>
             <div class="top-header__right">
                 <div class="top-header__date" id="headerDate"></div>
@@ -107,8 +107,8 @@
                         <i class="ri-user-3-fill"></i>
                     </div>
                     <div class="top-header__user-info">
-                        <span class="top-header__user-name" id="topHeaderUserName">User</span>
-                        <span class="top-header__user-role">Hydration Tracker</span>
+                        <span class="top-header__user-name" id="topHeaderUserName">Pengguna</span>
+                        <span class="top-header__user-role">Pelacak Hidrasi</span>
                     </div>
                     <i class="ri-arrow-right-s-line top-header__arrow"></i>
                 </a>
@@ -123,18 +123,18 @@
                      MAIN SETTINGS MENU (Mobile & Tablet <= 1024px — Gambar 1)
                      ========================================== -->
                 <div class="m3-settings-view active" id="settingsMainMenu">
-                    <h1 class="m3-page-title">Settings</h1>
+                    <h1 class="m3-page-title">Pengaturan</h1>
 
                     <!-- 1. Standalone Profile Pill Card -->
                     <button type="button" class="m3-nav-card m3-nav-card--profile" data-open-subview="subview-profile">
-                        <div class="m3-avatar-circle" id="menuProfileInitial">F</div>
+                        <div class="m3-avatar-circle" id="menuProfileInitial">P</div>
                         <div class="m3-nav-card__info">
-                            <span class="m3-nav-card__title">Profile</span>
-                            <span class="m3-nav-card__sub" id="menuProfileName">Faith</span>
+                            <span class="m3-nav-card__title">Profil</span>
+                            <span class="m3-nav-card__sub" id="menuProfileName">Pengguna</span>
                         </div>
                     </button>
 
-                    <!-- 2. Segmented Group: Appearance, Data Management, About -->
+                    <!-- 2. Segmented Group: Tampilan, Kelola Data, Tentang -->
                     <div class="m3-segmented-list">
                         <!-- Appearance -->
                         <button type="button" class="m3-nav-card m3-nav-card--top"
@@ -143,9 +143,8 @@
                                 <i class="ri-palette-fill"></i>
                             </div>
                             <div class="m3-nav-card__info">
-                                <span class="m3-nav-card__title">Appearance</span>
-                                <span class="m3-nav-card__sub" id="menuAppearanceSub">System, Light and Dark
-                                    theme</span>
+                                <span class="m3-nav-card__title">Tampilan</span>
+                                <span class="m3-nav-card__sub" id="menuAppearanceSub">Tema Sistem, Terang, dan Gelap</span>
                             </div>
                         </button>
 
@@ -155,8 +154,8 @@
                                 <i class="ri-save-3-fill"></i>
                             </div>
                             <div class="m3-nav-card__info">
-                                <span class="m3-nav-card__title">Data Management</span>
-                                <span class="m3-nav-card__sub">Export as CSV and delete your data</span>
+                                <span class="m3-nav-card__title">Kelola Data</span>
+                                <span class="m3-nav-card__sub">Ekspor ke CSV dan hapus data Anda</span>
                             </div>
                         </button>
 
@@ -166,31 +165,31 @@
                                 <i class="ri-information-fill"></i>
                             </div>
                             <div class="m3-nav-card__info">
-                                <span class="m3-nav-card__title">About</span>
-                                <span class="m3-nav-card__sub">Tentang project ini dan contributors</span>
+                                <span class="m3-nav-card__title">Tentang</span>
+                                <span class="m3-nav-card__sub">Tentang proyek ini dan kontributor</span>
                             </div>
                         </button>
                     </div>
                 </div>
 
                 <!-- ==========================================
-                     SUB-VIEW 1: PROFILE (Gambar 2)
+                     SUB-VIEW 1: PROFIL (Gambar 2)
                      ========================================== -->
                 <div class="m3-settings-view" id="subview-profile">
-                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Pengaturan">
                         <i class="ri-arrow-left-line"></i>
                     </button>
-                    <h1 class="m3-page-title">Profile</h1>
+                    <h1 class="m3-page-title">Profil</h1>
 
                     <form id="settingsProfileForm" novalidate>
                         <!-- Unified Hero Card (Avatar + Greeting + Name + 3 Stats Inside) -->
                         <div class="m3-profile-hero-card">
                             <div class="m3-profile-hero__top">
-                                <div class="m3-avatar-circle m3-avatar-circle--lg" id="profileInitial">F</div>
+                                <div class="m3-avatar-circle m3-avatar-circle--lg" id="profileInitial">P</div>
                                 <div class="m3-profile-hero__text">
-                                    <span class="m3-profile-greeting" id="profileGreeting">Good morning,</span>
+                                    <span class="m3-profile-greeting" id="profileGreeting">Selamat Pagi,</span>
                                     <div class="m3-profile-name-wrap">
-                                        <h2 class="m3-profile-name" id="profileNameDisplay">Faith</h2>
+                                        <h2 class="m3-profile-name" id="profileNameDisplay">Pengguna</h2>
                                         <button type="button" class="m3-name-edit-btn" id="btnToggleEditName"
                                             title="Ubah Nama">
                                             <i class="ri-Edit-2-line ri-pencil-line"></i>
@@ -211,25 +210,25 @@
                             <div class="m3-profile-hero__stats">
                                 <div class="m3-hero-stat">
                                     <span class="m3-hero-stat__val" id="profileTodayEntries">0</span>
-                                    <span class="m3-hero-stat__lbl">Today's Entries</span>
+                                    <span class="m3-hero-stat__lbl">Catatan Hari Ini</span>
                                 </div>
                                 <div class="m3-hero-stat-divider"></div>
                                 <div class="m3-hero-stat">
                                     <span class="m3-hero-stat__val" id="profileDaysTracked">0</span>
-                                    <span class="m3-hero-stat__lbl">Days Tracked</span>
+                                    <span class="m3-hero-stat__lbl">Hari Tercatat</span>
                                 </div>
                                 <div class="m3-hero-stat-divider"></div>
                                 <div class="m3-hero-stat">
                                     <span class="m3-hero-stat__val" id="profileTodayGoal">0%</span>
-                                    <span class="m3-hero-stat__lbl">Today's Goal</span>
+                                    <span class="m3-hero-stat__lbl">Target Hari Ini</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="m3-profile-sections-grid">
                             <div class="m3-profile-col">
-                                <!-- Section Label: Personal -->
-                                <h3 class="m3-section-heading">Personal</h3>
+                                <!-- Section Label: Pribadi -->
+                                <h3 class="m3-section-heading">Pribadi</h3>
                                 <div class="m3-segmented-list">
                                     <!-- Gender (Pop-up Trigger) -->
                                     <button type="button" class="m3-nav-card m3-nav-card--single" id="btnOpenGenderModal">
@@ -237,8 +236,8 @@
                                             <i class="ri-user-3-fill"></i>
                                         </div>
                                         <div class="m3-nav-card__info">
-                                            <span class="m3-nav-card__title">Gender</span>
-                                            <span class="m3-nav-card__sub" id="genderCurrentLabel">Male</span>
+                                            <span class="m3-nav-card__title">Jenis Kelamin</span>
+                                            <span class="m3-nav-card__sub" id="genderCurrentLabel">Laki-laki</span>
                                         </div>
                                         <i class="ri-arrow-right-s-line m3-nav-card__arrow"></i>
                                     </button>
@@ -246,8 +245,8 @@
                             </div>
 
                             <div class="m3-profile-col">
-                                <!-- Section Label: Daily Goals -->
-                                <h3 class="m3-section-heading">Daily Goals</h3>
+                                <!-- Section Label: Target Harian -->
+                                <h3 class="m3-section-heading">Target Harian</h3>
                                 <div class="m3-segmented-list">
                                     <!-- 1. Daily Water Goal (Pop-up Trigger) -->
                                     <button type="button" class="m3-nav-card m3-nav-card--top" id="btnOpenGoalModal">
@@ -255,7 +254,7 @@
                                             <i class="ri-drop-fill"></i>
                                         </div>
                                         <div class="m3-nav-card__info">
-                                            <span class="m3-nav-card__title">Daily Water Goal</span>
+                                            <span class="m3-nav-card__title">Target Air Harian</span>
                                             <span class="m3-nav-card__sub" id="dailyGoalCurrentLabel">2.000 ml</span>
                                         </div>
                                         <i class="ri-arrow-right-s-line m3-nav-card__arrow"></i>
@@ -271,8 +270,8 @@
                                             </svg>
                                         </div>
                                         <div class="m3-nav-card__info">
-                                            <span class="m3-nav-card__title">Activity Level</span>
-                                            <span class="m3-nav-card__sub" id="activityCurrentLabel">Moderate Activity</span>
+                                            <span class="m3-nav-card__title">Tingkat Aktivitas</span>
+                                            <span class="m3-nav-card__sub" id="activityCurrentLabel">Aktivitas Sedang</span>
                                         </div>
                                         <i class="ri-arrow-right-s-line m3-nav-card__arrow"></i>
                                     </button>
@@ -283,15 +282,15 @@
                 </div>
 
                 <!-- ==========================================
-                     SUB-VIEW 2: APPEARANCE
+                     SUB-VIEW 2: TAMPILAN
                      ========================================== -->
                 <div class="m3-settings-view" id="subview-appearance">
-                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Pengaturan">
                         <i class="ri-arrow-left-line"></i>
                     </button>
-                    <h1 class="m3-page-title">Appearance</h1>
+                    <h1 class="m3-page-title">Tampilan</h1>
 
-                    <h3 class="m3-section-heading">Theme</h3>
+                    <h3 class="m3-section-heading">Tema</h3>
                     <div class="theme-cards-grid" id="themePicker">
                         <!-- 1. System Theme -->
                         <button type="button" class="theme-card theme-card--system active" data-theme-value="system">
@@ -308,7 +307,7 @@
                             <div class="theme-card__body">
                                 <div class="theme-card__icon"><i class="ri-settings-3-fill"></i></div>
                                 <div class="theme-card__content">
-                                    <span class="theme-card__title">System</span>
+                                    <span class="theme-card__title">Sistem</span>
                                     <span class="theme-card__desc">Otomatis ikuti tema perangkat</span>
                                 </div>
                                 <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
@@ -324,7 +323,7 @@
                             <div class="theme-card__body">
                                 <div class="theme-card__icon"><i class="ri-sun-line"></i></div>
                                 <div class="theme-card__content">
-                                    <span class="theme-card__title">Light</span>
+                                    <span class="theme-card__title">Terang</span>
                                     <span class="theme-card__desc">Mode terang bersih & tajam</span>
                                 </div>
                                 <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
@@ -340,7 +339,7 @@
                             <div class="theme-card__body">
                                 <div class="theme-card__icon"><i class="ri-moon-line"></i></div>
                                 <div class="theme-card__content">
-                                    <span class="theme-card__title">Dark</span>
+                                    <span class="theme-card__title">Gelap</span>
                                     <span class="theme-card__desc">Mode gelap pekat & kontras jelas</span>
                                 </div>
                                 <div class="theme-card__check"><i class="ri-checkbox-circle-fill"></i></div>
@@ -350,22 +349,22 @@
                 </div>
 
                 <!-- ==========================================
-                     SUB-VIEW 3: DATA MANAGEMENT
+                     SUB-VIEW 3: KELOLA DATA
                      ========================================== -->
                 <div class="m3-settings-view" id="subview-data">
-                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Pengaturan">
                         <i class="ri-arrow-left-line"></i>
                     </button>
-                    <h1 class="m3-page-title">Data Management</h1>
+                    <h1 class="m3-page-title">Kelola Data</h1>
 
                     <!-- Export -->
-                    <h3 class="m3-section-heading">Export</h3>
+                    <h3 class="m3-section-heading">Ekspor</h3>
                     <button type="button" class="m3-nav-card m3-nav-card--single" id="btnExportCSV">
                         <div class="m3-nav-card__icon">
                             <i class="ri-file-excel-2-fill"></i>
                         </div>
                         <div class="m3-nav-card__info">
-                            <span class="m3-nav-card__title">Export as CSV</span>
+                            <span class="m3-nav-card__title">Ekspor ke CSV</span>
                             <span class="m3-nav-card__sub">Unduh seluruh catatan riwayat konsumsi air ke file
                                 spreadsheet (.csv)</span>
                         </div>
@@ -373,7 +372,7 @@
                     </button>
 
                     <!-- Delete Data -->
-                    <h3 class="m3-section-heading">Delete Data</h3>
+                    <h3 class="m3-section-heading">Hapus Data</h3>
                     <div class="m3-segmented-list">
                         <!-- 1. Delete entries before date -->
                         <div class="m3-accordion-card m3-nav-card--top" id="accordionDeleteBefore">
@@ -383,7 +382,7 @@
                                     <i class="ri-calendar-close-fill"></i>
                                 </div>
                                 <div class="m3-nav-card__info">
-                                    <span class="m3-nav-card__title">Delete entries before date</span>
+                                    <span class="m3-nav-card__title">Hapus catatan sebelum tanggal</span>
                                     <span class="m3-nav-card__sub">Hapus semua riwayat catatan sebelum tanggal
                                         tertentu</span>
                                 </div>
@@ -404,7 +403,7 @@
                                 <i class="ri-device-fill"></i>
                             </div>
                             <div class="m3-nav-card__info">
-                                <span class="m3-nav-card__title">Delete local data only</span>
+                                <span class="m3-nav-card__title">Hapus riwayat lokal saja</span>
                                 <span class="m3-nav-card__sub">Hapus seluruh riwayat entri tanpa menghapus profil dan
                                     target Anda</span>
                             </div>
@@ -417,7 +416,7 @@
                                 <i class="ri-delete-bin-2-fill"></i>
                             </div>
                             <div class="m3-nav-card__info">
-                                <span class="m3-nav-card__title">Delete everything</span>
+                                <span class="m3-nav-card__title">Hapus semua data</span>
                                 <span class="m3-nav-card__sub">Reset seluruh data aplikasi kembali ke kondisi awal
                                     pabrik</span>
                             </div>
@@ -426,13 +425,13 @@
                 </div>
 
                 <!-- ==========================================
-                     SUB-VIEW 4: ABOUT
+                     SUB-VIEW 4: TENTANG
                      ========================================== -->
                 <div class="m3-settings-view" id="subview-about">
-                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Settings">
+                    <button type="button" class="m3-back-btn" data-back-main aria-label="Kembali ke Pengaturan">
                         <i class="ri-arrow-left-line"></i>
                     </button>
-                    <h1 class="m3-page-title">About</h1>
+                    <h1 class="m3-page-title">Tentang</h1>
 
                     <!-- Project Info Card -->
                     <div class="m3-profile-hero-card m3-about-hero-card">
@@ -445,7 +444,7 @@
                                     <span>HydroTrack</span>
                                     <span class="about-version">v1.0.0</span>
                                 </div>
-                                <span class="m3-nav-card__sub">Daily Water Intake Tracker</span>
+                                <span class="m3-nav-card__sub">Pelacak Asupan Air Harian</span>
                             </div>
                         </div>
                         <p class="m3-about-desc">
@@ -455,7 +454,7 @@
                         </p>
                         <div class="about-badges">
                             <span class="badge-tech"><i class="ri-html5-line"></i> HTML5</span>
-                            <span class="badge-tech"><i class="ri-css3-line"></i> CSS3 Pure</span>
+                            <span class="badge-tech"><i class="ri-css3-line"></i> CSS3 Murni</span>
                             <span class="badge-tech"><i class="ri-javascript-line"></i> Vanilla JS (ES6+)</span>
                             <span class="badge-tech"><i class="ri-bar-chart-fill"></i> Chart.js</span>
                             <span class="badge-tech"><i class="ri-remixicon-line"></i> Remix Icon</span>
@@ -463,7 +462,7 @@
                     </div>
 
                     <!-- Contributors -->
-                    <h3 class="m3-section-heading">Contributors</h3>
+                    <h3 class="m3-section-heading">Kontributor</h3>
                     <div class="m3-segmented-list m3-contributors-list">
                         <!-- 1. Pontoh, Faith -->
                         <div class="m3-nav-card m3-nav-card--top m3-contributor-row">
@@ -471,7 +470,7 @@
                             <div class="m3-nav-card__info">
                                 <span class="m3-nav-card__title">Pontoh, Faith</span>
                             </div>
-                            <span class="contributor-badge">Lead</span>
+                            <span class="contributor-badge">Ketua</span>
                         </div>
 
                         <!-- 2. Jose Angelo Raphael Ratumbanua -->
@@ -481,7 +480,7 @@
                                 <span class="m3-nav-card__title">Jose Angelo Raphael Ratumbanua</span>
 
                             </div>
-                            <span class="contributor-badge">Contributor</span>
+                            <span class="contributor-badge">Kontributor</span>
                         </div>
 
                         <!-- 3. Camelia Anggreita Tumimomor -->
@@ -491,7 +490,7 @@
                                 <span class="m3-nav-card__title">Camelia Anggreita Tumimomor</span>
 
                             </div>
-                            <span class="contributor-badge">Contributor</span>
+                            <span class="contributor-badge">Kontributor</span>
                         </div>
 
                         <!-- 4. Seril Sevanya Wanta -->
@@ -501,7 +500,7 @@
                                 <span class="m3-nav-card__title">Seril Sevanya Wanta</span>
 
                             </div>
-                            <span class="contributor-badge">Contributor</span>
+                            <span class="contributor-badge">Kontributor</span>
                         </div>
                     </div>
                 </div>
@@ -516,25 +515,25 @@
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-home-3-line"></i>
             </div>
-            <span class="bottom-nav__label">Home</span>
+            <span class="bottom-nav__label">Beranda</span>
         </a>
         <a href="riwayat.html" class="bottom-nav__item">
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-history-line"></i>
             </div>
-            <span class="bottom-nav__label">History</span>
+            <span class="bottom-nav__label">Riwayat</span>
         </a>
         <a href="analisis.html" class="bottom-nav__item">
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-bar-chart-2-line"></i>
             </div>
-            <span class="bottom-nav__label">Statistics</span>
+            <span class="bottom-nav__label">Statistik</span>
         </a>
         <a href="pengaturan.html" class="bottom-nav__item active">
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-settings-4-line"></i>
             </div>
-            <span class="bottom-nav__label">Settings</span>
+            <span class="bottom-nav__label">Pengaturan</span>
         </a>
     </nav>
 
@@ -551,7 +550,7 @@
                     <div class="m3-nav-card__icon" style="margin: 0; width: 42px; height: 42px; border-radius: 12px; background: rgba(46, 134, 222, 0.1); display: flex; align-items: center; justify-content: center; color: #2E86DE;">
                         <i class="ri-drop-fill" style="font-size: 22px;"></i>
                     </div>
-                    <h3 class="container-modal__title">Daily Water Goal</h3>
+                    <h3 class="container-modal__title">Target Air Harian</h3>
                 </div>
                 <button type="button" class="modal__close" id="btnCloseGoalModal" aria-label="Tutup modal">
                     <i class="ri-close-line"></i>
@@ -566,7 +565,7 @@
                         <span class="m3-goal-unit">ml</span>
                     </div>
 
-                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 8px;">Pilihan Cepat (Presets)</label>
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 8px;">Pilihan Cepat</label>
                     <div class="m3-goal-presets" style="margin-bottom: 16px;">
                         <button type="button" class="m3-preset-pill" data-modal-goal-preset="1500">1.5 L</button>
                         <button type="button" class="m3-preset-pill" data-modal-goal-preset="2000">2 L</button>
@@ -600,7 +599,7 @@
                             <path d="M5.64 3.51L3.51 5.64l1.42 1.41L3.51 8.46l2.13 2.13 1.41-1.42 6.36 6.36-1.42 1.41 2.13 2.13 1.41-1.42 1.41 1.42 2.13-2.13-1.42-1.41 1.42-1.41-2.13-2.13-1.41 1.42-6.36-6.36 1.42-1.41L8.46 3.51 7.05 4.93 5.64 3.51z" />
                         </svg>
                     </div>
-                    <h3 class="container-modal__title">Activity Level</h3>
+                    <h3 class="container-modal__title">Tingkat Aktivitas</h3>
                 </div>
                 <button type="button" class="modal__close" id="btnCloseActivityModal" aria-label="Tutup modal">
                     <i class="ri-close-line"></i>
@@ -612,35 +611,35 @@
                     <label class="m3-radio-item">
                         <input type="radio" name="modal_activity_radio" value="sedentary">
                         <span class="m3-radio-item__box">
-                            <span>1. Sedentary</span>
+                            <span>1. Kurang Aktif</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
                     <label class="m3-radio-item">
                         <input type="radio" name="modal_activity_radio" value="light">
                         <span class="m3-radio-item__box">
-                            <span>2. Light Activity</span>
+                            <span>2. Aktivitas Ringan</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
                     <label class="m3-radio-item">
                         <input type="radio" name="modal_activity_radio" value="moderate" checked>
                         <span class="m3-radio-item__box">
-                            <span>3. Moderate Activity</span>
+                            <span>3. Aktivitas Sedang</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
                     <label class="m3-radio-item">
                         <input type="radio" name="modal_activity_radio" value="active">
                         <span class="m3-radio-item__box">
-                            <span>4. Active</span>
+                            <span>4. Aktif</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
                     <label class="m3-radio-item">
                         <input type="radio" name="modal_activity_radio" value="very_active">
                         <span class="m3-radio-item__box">
-                            <span>5. Very Active</span>
+                            <span>5. Sangat Aktif</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
@@ -695,7 +694,7 @@
                     <div class="m3-nav-card__icon" style="margin: 0; width: 42px; height: 42px; border-radius: 12px; background: rgba(46, 134, 222, 0.1); display: flex; align-items: center; justify-content: center; color: #2E86DE;">
                         <i class="ri-women-line" style="font-size: 22px;"></i>
                     </div>
-                    <h3 class="container-modal__title">Gender</h3>
+                    <h3 class="container-modal__title">Jenis Kelamin</h3>
                 </div>
                 <button type="button" class="modal__close" id="btnCloseGenderModal" aria-label="Tutup modal">
                     <i class="ri-close-line"></i>
@@ -708,7 +707,7 @@
                         <input type="radio" name="modal_gender_radio" value="male">
                         <span class="m3-radio-item__box">
                             <i class="ri-men-line"></i>
-                            <span>Male</span>
+                            <span>Laki-laki</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
@@ -716,7 +715,7 @@
                         <input type="radio" name="modal_gender_radio" value="female">
                         <span class="m3-radio-item__box">
                             <i class="ri-women-line"></i>
-                            <span>Female</span>
+                            <span>Perempuan</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>
@@ -724,7 +723,7 @@
                         <input type="radio" name="modal_gender_radio" value="prefer-not-to-say">
                         <span class="m3-radio-item__box">
                             <i class="ri-user-shared-line"></i>
-                            <span>Prefer not to say</span>
+                            <span>Memilih tidak menyebutkan</span>
                             <i class="ri-check-line m3-radio-check"></i>
                         </span>
                     </label>

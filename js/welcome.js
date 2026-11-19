@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hours = Math.floor(awakeDiffMinutes / 60);
     const mins = awakeDiffMinutes % 60;
 
-    awakeLabel.textContent = `Awake for ${hours}h ${mins}m`;
+    awakeLabel.textContent = `Aktif selama ${hours} jam ${mins} menit`;
 
     // Percentage of 24h
     const awakePct = Math.min(100, Math.max(10, (awakeDiffMinutes / 1440) * 100));
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarImagePreview.classList.remove('hidden');
       if (avatarLetter) avatarLetter.classList.add('hidden');
       if (btnChangeAvatar) {
-        btnChangeAvatar.innerHTML = '<i class="ri-camera-line"></i> Change Photo';
+        btnChangeAvatar.innerHTML = '<i class="ri-camera-line"></i> Ganti Foto';
       }
       return;
     }
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ensure input always starts empty on fresh onboarding
     inputName.value = '';
     if (charCounter) {
-      charCounter.textContent = '0/15 characters';
+      charCounter.textContent = '0/15 karakter';
     }
     updateAvatarDisplay();
 
@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Update character counter
       if (charCounter) {
-        charCounter.textContent = `${inputName.value.length}/15 characters`;
+        charCounter.textContent = `${inputName.value.length}/15 karakter`;
       }
 
       // Clear validation error while typing
@@ -461,45 +461,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateReviewUI() {
     summaryGoalVal.textContent = onboardingData.calculatedGoalLiters;
-    summaryIntervalVal.textContent = `${onboardingData.reminderIntervalMin} minutes`;
+    summaryIntervalVal.textContent = `${onboardingData.reminderIntervalMin} menit`;
 
     // Activity Level Display
     const activityNames = {
-      sedentary: 'Sedentary',
-      light: 'Light Activity',
-      moderate: 'Moderate Activity',
-      active: 'Active'
+      sedentary: 'Kurang Aktif',
+      light: 'Aktivitas Ringan',
+      moderate: 'Aktivitas Sedang',
+      active: 'Aktif'
     };
-    summaryActivityVal.textContent = activityNames[onboardingData.activityLevel] || 'Moderate Activity';
+    summaryActivityVal.textContent = activityNames[onboardingData.activityLevel] || 'Aktivitas Sedang';
 
     // Tags
     const genderNames = {
-      male: 'Male',
-      female: 'Female',
-      'prefer-not-to-say': 'Prefer not to say'
+      male: 'Laki-laki',
+      female: 'Perempuan',
+      'prefer-not-to-say': 'Memilih tidak menyebutkan'
     };
-    tagGender.textContent = genderNames[onboardingData.gender] || 'Male';
+    tagGender.textContent = genderNames[onboardingData.gender] || 'Laki-laki';
 
     const ageNames = {
-      '18-30': '18–30 years',
-      '31-50': '31–50 years',
-      '51-60': '51–60 years',
-      '60+': '60+ years'
+      '18-30': '18–30 tahun',
+      '31-50': '31–50 tahun',
+      '51-60': '51–60 tahun',
+      '60+': '60+ tahun'
     };
-    tagAge.textContent = ageNames[onboardingData.ageGroup] || '31–50 years';
+    tagAge.textContent = ageNames[onboardingData.ageGroup] || '31–50 tahun';
   }
 
   function updateFinalUI() {
     finalDailyGoalDisplay.textContent = onboardingData.calculatedGoalLiters;
-    finalPillInterval.textContent = `${onboardingData.reminderIntervalMin} min`;
+    finalPillInterval.textContent = `${onboardingData.reminderIntervalMin} mnt`;
 
     const activityNames = {
-      sedentary: 'Sedentary',
-      light: 'Light Activity',
-      moderate: 'Moderate Activity',
-      active: 'Active'
+      sedentary: 'Kurang Aktif',
+      light: 'Aktivitas Ringan',
+      moderate: 'Aktivitas Sedang',
+      active: 'Aktif'
     };
-    finalPillActivity.textContent = activityNames[onboardingData.activityLevel] || 'Moderate Activity';
+    finalPillActivity.textContent = activityNames[onboardingData.activityLevel] || 'Aktivitas Sedang';
   }
 
   /* ==================== BUTTON EVENT LISTENERS ==================== */
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       // Save full profile and hydration settings to localStorage
       const settingsPayload = {
-        userName: onboardingData.userName || 'User',
+        userName: onboardingData.userName || 'Pengguna',
         profilePhoto: onboardingData.profilePhoto || '',
         dailyGoal: onboardingData.calculatedGoalMl || 2000,
         gender: onboardingData.gender || 'male',

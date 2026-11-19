@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#1A1D2E">
-    <title>Statistics | HydroTrack</title>
+    <title>Statistik | HydroTrack</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +42,7 @@
 
     <!-- ========== SIDEBAR NAVIGATION ========== -->
     <aside class="sidebar" id="sidebar">
-        <a href="index.html" class="sidebar__logo" title="HydroTrack Home">
+        <a href="index.html" class="sidebar__logo" title="Beranda HydroTrack">
             <i class="ri-drop-fill"></i>
             <span>HYDROTRACK</span>
         </a>
@@ -52,25 +52,25 @@
                 <li>
                     <a href="index.html" class="nav-link" data-view="dashboard">
                         <i class="ri-home-3-line"></i>
-                        <span>Home</span>
+                        <span>Beranda</span>
                     </a>
                 </li>
                 <li>
                     <a href="riwayat.html" class="nav-link" data-view="history">
                         <i class="ri-history-line"></i>
-                        <span>History</span>
+                        <span>Riwayat</span>
                     </a>
                 </li>
                 <li>
                     <a href="analisis.html" class="nav-link active" data-view="analytics">
                         <i class="ri-bar-chart-2-line"></i>
-                        <span>Statistics</span>
+                        <span>Statistik</span>
                     </a>
                 </li>
                 <li>
                     <a href="pengaturan.html" class="nav-link" data-view="settings">
                         <i class="ri-settings-4-line"></i>
-                        <span>Settings</span>
+                        <span>Pengaturan</span>
                     </a>
                 </li>
             </ul>
@@ -81,10 +81,10 @@
 
     <!-- ========== MOBILE HEADER ========== -->
     <header class="mobile-header" id="mobileHeader">
-        <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Toggle menu">
+        <button class="mobile-header__toggle" id="sidebarToggle" aria-label="Buka menu">
             <i class="ri-menu-line"></i>
         </button>
-        <a href="index.html" class="mobile-header__logo" title="HydroTrack Home">
+        <a href="index.html" class="mobile-header__logo" title="Beranda HydroTrack">
             <i class="ri-drop-fill"></i>
             <span>HYDROTRACK</span>
         </a>
@@ -100,7 +100,7 @@
         <!-- Top Header Bar -->
         <header class="top-header stats-top-header">
             <div class="top-header__left">
-                <h1 class="top-header__greeting">Statistics</h1>
+                <h1 class="top-header__greeting">Statistik</h1>
             </div>
             <div class="top-header__right">
                 <div class="top-header__date" id="headerDate"></div>
@@ -109,8 +109,8 @@
                         <i class="ri-user-3-fill"></i>
                     </div>
                     <div class="top-header__user-info">
-                        <span class="top-header__user-name" id="topHeaderUserName">User</span>
-                        <span class="top-header__user-role">Hydration Tracker</span>
+                        <span class="top-header__user-name" id="topHeaderUserName">Pengguna</span>
+                        <span class="top-header__user-role">Pelacak Hidrasi</span>
                     </div>
                     <i class="ri-arrow-right-s-line top-header__arrow"></i>
                 </a>
@@ -120,14 +120,14 @@
         <!-- ===== VIEW: STATISTICS ===== -->
         <section class="view view--active" id="view-analytics">
 
-            <!-- 1. Card Bentuk Sedang: Total Intake, Daily Average, Success Rate, Days Tracked -->
+            <!-- 1. Card Bentuk Sedang: Total Asupan, Rata-rata Harian, Tingkat Sukses, Hari Tercatat -->
             <div class="stats-cards-row">
                 <div class="stats-card stats-card--primary">
                     <div class="stats-card__icon">
                         <i class="ri-water-flash-fill"></i>
                     </div>
                     <div class="stats-card__content">
-                        <span class="stats-card__label">Total Intake</span>
+                        <span class="stats-card__label">Total Asupan</span>
                         <span class="stats-card__value" id="statsTotalIntake">0 ml</span>
                         <span class="stats-card__sub" id="statsTotalIntakeSub">Total asupan tercatat</span>
                     </div>
@@ -138,7 +138,7 @@
                         <i class="ri-pulse-line"></i>
                     </div>
                     <div class="stats-card__content">
-                        <span class="stats-card__label">Daily Average</span>
+                        <span class="stats-card__label">Rata-rata Harian</span>
                         <span class="stats-card__value" id="statsDailyAvg">0 ml</span>
                         <span class="stats-card__sub">Rata-rata per hari</span>
                     </div>
@@ -149,7 +149,7 @@
                         <i class="ri-checkbox-circle-fill"></i>
                     </div>
                     <div class="stats-card__content">
-                        <span class="stats-card__label">Success Rate</span>
+                        <span class="stats-card__label">Tingkat Sukses</span>
                         <span class="stats-card__value" id="statsSuccessRate">0%</span>
                         <span class="stats-card__sub" id="statsGoalsMetSub">0 / 0 Hari target</span>
                     </div>
@@ -160,14 +160,14 @@
                         <i class="ri-calendar-check-fill"></i>
                     </div>
                     <div class="stats-card__content">
-                        <span class="stats-card__label">Days Tracked</span>
+                        <span class="stats-card__label">Hari Tercatat</span>
                         <span class="stats-card__value" id="statsDaysTracked">0 Hari</span>
                         <span class="stats-card__sub">Hari aktif mencatat</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Two-Column Grid: 2. Overview & 3. Beverage Breakdown -->
+            <!-- Two-Column Grid: 2. Ringkasan & 3. Rincian Minuman -->
             <div class="stats-main-grid">
 
                 <!-- 2. Overview Card (8 Items) -->
@@ -175,7 +175,7 @@
                     <div class="card__header">
                         <div class="card__header-info">
                             <h3 class="card__title">
-                                <i class="ri-dashboard-line"></i> Overview
+                                <i class="ri-dashboard-line"></i> Ringkasan
                             </h3>
                             <p class="card__subtitle">Metrik dan pola kebiasaan hidrasimu</p>
                         </div>
@@ -187,7 +187,7 @@
                                 <i class="ri-fire-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Current Streak</span>
+                                <span class="overview-item__label">Rentetan Hari</span>
                                 <span class="overview-item__value" id="overviewStreak">0 Hari</span>
                             </div>
                         </div>
@@ -197,7 +197,7 @@
                                 <i class="ri-trophy-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Success Rate</span>
+                                <span class="overview-item__label">Tingkat Sukses</span>
                                 <span class="overview-item__value" id="overviewSuccessRate">0%</span>
                             </div>
                         </div>
@@ -207,7 +207,7 @@
                                 <i class="ri-calendar-check-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Days Tracked</span>
+                                <span class="overview-item__label">Hari Tercatat</span>
                                 <span class="overview-item__value" id="overviewDaysTracked">0 Hari</span>
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                                 <i class="ri-timer-2-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Average Interval</span>
+                                <span class="overview-item__label">Rata-rata Jeda</span>
                                 <span class="overview-item__value" id="overviewAvgInterval">-</span>
                             </div>
                         </div>
@@ -227,7 +227,7 @@
                                 <i class="ri-cup-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Average Drink Size</span>
+                                <span class="overview-item__label">Rata-rata Takaran</span>
                                 <span class="overview-item__value" id="overviewAvgDrinkSize">0 ml</span>
                             </div>
                         </div>
@@ -237,7 +237,7 @@
                                 <i class="ri-goblet-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Largest Drink</span>
+                                <span class="overview-item__label">Minuman Terbesar</span>
                                 <span class="overview-item__value" id="overviewLargestDrink">0 ml</span>
                             </div>
                         </div>
@@ -247,7 +247,7 @@
                                 <i class="ri-sun-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">First Drink</span>
+                                <span class="overview-item__label">Minuman Pertama</span>
                                 <span class="overview-item__value" id="overviewFirstDrink">-</span>
                             </div>
                         </div>
@@ -257,7 +257,7 @@
                                 <i class="ri-moon-fill"></i>
                             </div>
                             <div class="overview-item__body">
-                                <span class="overview-item__label">Last Drink</span>
+                                <span class="overview-item__label">Minuman Terakhir</span>
                                 <span class="overview-item__value" id="overviewLastDrink">-</span>
                             </div>
                         </div>
@@ -269,7 +269,7 @@
                     <div class="card__header">
                         <div class="card__header-info">
                             <h3 class="card__title">
-                                <i class="ri-pie-chart-2-line"></i> Beverage Breakdown
+                                <i class="ri-pie-chart-2-line"></i> Rincian Minuman
                             </h3>
                             <p class="card__subtitle">Komposisi asupan berdasarkan jenis minuman</p>
                         </div>
@@ -295,12 +295,12 @@
 
             </div>
 
-            <!-- 4. Container Usage Card (Table: Container, Volume, Uses) -->
+            <!-- 4. Container Usage Card (Table: Wadah, Volume, Pemakaian) -->
             <div class="card stats-container-card" id="statsContainerCard">
                 <div class="card__header">
                     <div class="card__header-info">
                         <h3 class="card__title">
-                            <i class="ri-flask-line"></i> Container Usage
+                            <i class="ri-flask-line"></i> Penggunaan Wadah
                         </h3>
                         <p class="card__subtitle">Frekuensi dan volume penggunaan takaran minum</p>
                     </div>
@@ -312,9 +312,9 @@
                     <table class="data-table container-usage-table" id="containerUsageTable">
                         <thead>
                             <tr>
-                                <th>Container</th>
+                                <th>Wadah</th>
                                 <th>Volume</th>
-                                <th>Uses</th>
+                                <th>Pemakaian</th>
                             </tr>
                         </thead>
                         <tbody id="containerUsageTableBody">
@@ -325,7 +325,7 @@
 
                 <div class="container-empty-state hidden" id="containerUsageEmpty">
                     <i class="ri-inbox-line"></i>
-                    <p>Belum ada riwayat penggunaan wadah minuman.<br>Catat minuman di halaman Home untuk melihat statistik wadah di sini.</p>
+                    <p>Belum ada riwayat penggunaan wadah minuman.<br>Catat minuman di halaman Beranda untuk melihat statistik wadah di sini.</p>
                 </div>
             </div>
 
@@ -338,25 +338,25 @@
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-home-3-line"></i>
             </div>
-            <span class="bottom-nav__label">Home</span>
+            <span class="bottom-nav__label">Beranda</span>
         </a>
         <a href="riwayat.html" class="bottom-nav__item">
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-history-line"></i>
             </div>
-            <span class="bottom-nav__label">History</span>
+            <span class="bottom-nav__label">Riwayat</span>
         </a>
         <a href="analisis.html" class="bottom-nav__item active">
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-bar-chart-2-line"></i>
             </div>
-            <span class="bottom-nav__label">Statistics</span>
+            <span class="bottom-nav__label">Statistik</span>
         </a>
         <a href="pengaturan.html" class="bottom-nav__item">
             <div class="bottom-nav__icon-wrapper">
                 <i class="ri-settings-4-line"></i>
             </div>
-            <span class="bottom-nav__label">Settings</span>
+            <span class="bottom-nav__label">Pengaturan</span>
         </a>
     </nav>
 

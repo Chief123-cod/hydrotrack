@@ -20,7 +20,7 @@ const UI = (() => {
     const hasPhoto = typeof settings.profilePhoto === 'string' && settings.profilePhoto.startsWith('data:image/');
     topHeaderAvatars.forEach(avatarEl => {
       if (hasPhoto) {
-        avatarEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Profile" class="avatar-photo-img">`;
+        avatarEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Foto profil" class="avatar-photo-img">`;
       } else {
         avatarEl.innerHTML = '<i class="ri-user-3-fill"></i>';
       }
@@ -29,20 +29,22 @@ const UI = (() => {
     updateGreeting();
   }
 
-  // Update greeting dynamically based on hour of day (Morning, Afternoon, Evening)
+  // Update greeting dynamically based on hour of day (Pagi, Siang, Sore, Malam)
   function updateGreeting() {
     const greetingEl = document.getElementById('greetingTime');
     if (!greetingEl) return;
 
     const hour = new Date().getHours();
-    let greeting = 'Good Evening';
+    let greeting = 'Selamat Malam';
 
-    if (hour >= 4 && hour < 12) {
-      greeting = 'Good Morning';
-    } else if (hour >= 12 && hour < 18) {
-      greeting = 'Good Afternoon';
+    if (hour >= 4 && hour < 11) {
+      greeting = 'Selamat Pagi';
+    } else if (hour >= 11 && hour < 15) {
+      greeting = 'Selamat Siang';
+    } else if (hour >= 15 && hour < 19) {
+      greeting = 'Selamat Sore';
     } else {
-      greeting = 'Good Evening';
+      greeting = 'Selamat Malam';
     }
 
     greetingEl.textContent = greeting;
@@ -603,28 +605,28 @@ const UI = (() => {
       if (l1) l1.textContent = 'Total';
 
       v2.textContent = formatVolumeDisplay(data.average);
-      if (l2) l2.textContent = 'Average';
+      if (l2) l2.textContent = 'Rata-rata';
 
       v3.textContent = data.bestDay ? formatVolumeDisplay(data.bestDay.total) : '0 ml';
-      if (l3) l3.textContent = 'Best Day';
+      if (l3) l3.textContent = 'Hari Terbaik';
     } else if (mode === 'monthly') {
       v1.textContent = `${data.daysTracked} Hari`;
-      if (l1) l1.textContent = 'Days Tracked';
+      if (l1) l1.textContent = 'Hari Tercatat';
 
       v2.textContent = `${data.goalsMet} Kali`;
-      if (l2) l2.textContent = 'Goals Met';
+      if (l2) l2.textContent = 'Target Tercapai';
 
       v3.textContent = `${data.successRate}%`;
-      if (l3) l3.textContent = 'Success Rate';
+      if (l3) l3.textContent = 'Tingkat Sukses';
     } else if (mode === 'yearly') {
       v1.textContent = `${data.daysTracked} Hari`;
-      if (l1) l1.textContent = 'Days Tracked';
+      if (l1) l1.textContent = 'Hari Tercatat';
 
       v2.textContent = `${data.goalsMet} Kali`;
-      if (l2) l2.textContent = 'Goals Met';
+      if (l2) l2.textContent = 'Target Tercapai';
 
       v3.textContent = formatVolumeDisplay(data.totalIntake);
-      if (l3) l3.textContent = 'Total Intake';
+      if (l3) l3.textContent = 'Total Asupan';
     }
   }
 
@@ -722,7 +724,7 @@ const UI = (() => {
           <span>Edit</span>
         </div>
         <div class="history-swipe-bg history-swipe-bg--delete" aria-hidden="true">
-          <span>Delete</span>
+          <span>Hapus</span>
           <i class="ri-delete-bin-line"></i>
         </div>
       `;
@@ -922,7 +924,7 @@ const UI = (() => {
     // 2. Overview (8 Items)
     const streakEl = document.getElementById('overviewStreak');
     if (streakEl) {
-      streakEl.innerHTML = `${data.currentStreak}<span class="unit-desktop-only"> Hari</span><span class="unit-mobile-only"> days</span>`;
+      streakEl.innerHTML = `${data.currentStreak}<span class="unit-desktop-only"> Hari</span><span class="unit-mobile-only"> hari</span>`;
     }
 
     const ovSuccessEl = document.getElementById('overviewSuccessRate');
@@ -961,7 +963,7 @@ const UI = (() => {
       const formattedVol = data.totalIntake >= 1000
         ? `${(data.totalIntake / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} L`
         : `${data.totalIntake} ml`;
-      centerValEl.innerHTML = `${formattedVol}<span class="unit-mobile-only"> effective</span>`;
+      centerValEl.innerHTML = `${formattedVol}<span class="unit-mobile-only"> efektif</span>`;
     }
 
     if (typeof ChartModule !== 'undefined' && ChartModule.renderBeverageBreakdown) {
@@ -989,7 +991,7 @@ const UI = (() => {
         bevListEl.innerHTML = `
           <div class="beverage-empty-hint">
             <i class="ri-drop-line"></i>
-            <p>Belum ada catatan minuman. Catat minuman di Home untuk melihat distribusinya!</p>
+            <p>Belum ada catatan minuman. Catat minuman di Beranda untuk melihat distribusinya!</p>
           </div>
         `;
       } else {
@@ -1042,9 +1044,9 @@ const UI = (() => {
         containerMobileGrid.innerHTML = '';
       } else {
         let gridHtml = `
-          <div class="container-pill-header">Container</div>
+          <div class="container-pill-header">Wadah</div>
           <div class="container-pill-header container-pill-header--accent">Volume</div>
-          <div class="container-pill-header container-pill-header--accent">Uses</div>
+          <div class="container-pill-header container-pill-header--accent">Pakai</div>
         `;
         data.containerUsage.forEach(c => {
           const isSvg = c.icon && c.icon.startsWith('icon-');
@@ -1119,7 +1121,7 @@ const UI = (() => {
 
   function renderSettings() {
     const settings = Storage.getSettings();
-    const userName = (settings.userName || 'Faith').trim() || 'Faith';
+    const userName = (settings.userName || 'Pengguna').trim() || 'Pengguna';
     const initial = userName.charAt(0).toUpperCase();
 
     // 1. Main Menu & Profile Header Avatar Initial/Photo & Name
@@ -1127,7 +1129,7 @@ const UI = (() => {
     const menuInitialEl = document.getElementById('menuProfileInitial');
     if (menuInitialEl) {
       if (hasPhoto) {
-        menuInitialEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Profile" class="avatar-photo-img">`;
+        menuInitialEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Foto profil" class="avatar-photo-img">`;
       } else {
         menuInitialEl.textContent = initial;
       }
@@ -1136,7 +1138,7 @@ const UI = (() => {
     const profileInitialEl = document.getElementById('profileInitial');
     if (profileInitialEl) {
       if (hasPhoto) {
-        profileInitialEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Profile" class="avatar-photo-img">`;
+        profileInitialEl.innerHTML = `<img src="${settings.profilePhoto}" alt="Foto profil" class="avatar-photo-img">`;
       } else {
         profileInitialEl.textContent = initial;
       }
@@ -1190,12 +1192,12 @@ const UI = (() => {
 
     const gender = settings.gender || 'prefer-not-to-say';
     const genderLabels = {
-      'male': 'Male',
-      'female': 'Female',
-      'prefer-not-to-say': 'Prefer not to say'
+      'male': 'Laki-laki',
+      'female': 'Perempuan',
+      'prefer-not-to-say': 'Memilih tidak menyebutkan'
     };
     const genderLabelEl = document.getElementById('genderCurrentLabel');
-    if (genderLabelEl) genderLabelEl.textContent = genderLabels[gender] || 'Prefer not to say';
+    if (genderLabelEl) genderLabelEl.textContent = genderLabels[gender] || 'Memilih tidak menyebutkan';
 
     const genderRadios = document.querySelectorAll('input[name="gender"]');
     genderRadios.forEach(radio => {
@@ -1233,14 +1235,14 @@ const UI = (() => {
 
     const activity = settings.activityLevel || 'moderate';
     const activityLabels = {
-      'sedentary': 'Sedentary',
-      'light': 'Light Activity',
-      'moderate': 'Moderate Activity',
-      'active': 'Active',
-      'very_active': 'Very Active'
+      'sedentary': 'Kurang Aktif',
+      'light': 'Aktivitas Ringan',
+      'moderate': 'Aktivitas Sedang',
+      'active': 'Aktif',
+      'very_active': 'Sangat Aktif'
     };
     const activityLabelEl = document.getElementById('activityCurrentLabel');
-    if (activityLabelEl) activityLabelEl.textContent = activityLabels[activity] || 'Moderate Activity';
+    if (activityLabelEl) activityLabelEl.textContent = activityLabels[activity] || 'Aktivitas Sedang';
 
     const activitySelect = document.getElementById('selectActivity');
     if (activitySelect) activitySelect.value = activity;

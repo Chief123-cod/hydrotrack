@@ -637,8 +637,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function openAddContainerModal() {
     editingContainerId = null;
     manualIconOverride = false;
-    if (containerModalTitle) containerModalTitle.textContent = 'Add Container';
-    if (btnSubmitContainer) btnSubmitContainer.textContent = 'Add Container';
+    if (containerModalTitle) containerModalTitle.textContent = 'Tambah Wadah';
+    if (btnSubmitContainer) btnSubmitContainer.textContent = 'Tambah Wadah';
     if (btnDeleteContainer) btnDeleteContainer.classList.add('d-none');
     if (formAddContainer) formAddContainer.reset();
     setContainerIcon('icon-glass-60');
@@ -656,8 +656,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editingContainerId = containerId;
     manualIconOverride = true;
-    if (containerModalTitle) containerModalTitle.textContent = 'Edit Container';
-    if (btnSubmitContainer) btnSubmitContainer.textContent = 'Save';
+    if (containerModalTitle) containerModalTitle.textContent = 'Edit Wadah';
+    if (btnSubmitContainer) btnSubmitContainer.textContent = 'Simpan';
     if (btnDeleteContainer) btnDeleteContainer.classList.remove('d-none');
 
     if (containerNameInput) containerNameInput.value = item.name;
@@ -684,7 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!editingContainerId) return;
       const list = Storage.getAllContainers ? Storage.getAllContainers() : [];
       const item = list.find(c => c.id === editingContainerId);
-      const containerName = item ? item.name : 'Container';
+      const containerName = item ? item.name : 'Wadah';
 
       Storage.deleteCustomContainer(editingContainerId);
       renderAllContainers();
@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (containerModal) containerModal.classList.remove('active');
       editingContainerId = null;
 
-      UI.showToast(`Container "${containerName}" berhasil dihapus! 🗑️`, 'info');
+      UI.showToast(`Wadah "${containerName}" berhasil dihapus! 🗑️`, 'info');
     });
   }
 
@@ -818,14 +818,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         containerModal.classList.remove('active');
         editingContainerId = null;
-        UI.showToast(`Container "${name}" (${vol} ml) berhasil diperbarui! ✨`, 'success');
+        UI.showToast(`Wadah "${name}" (${vol} ml) berhasil diperbarui! ✨`, 'success');
       } else {
         // MODE ADD: Create new container (appends to the right, shifting Add button sideways)
         Storage.addCustomContainer(name, vol, selectedIconClass);
         renderAllContainers();
 
         containerModal.classList.remove('active');
-        UI.showToast(`Container "${name}" (${vol} ml) berhasil ditambahkan! 🎉`, 'success');
+        UI.showToast(`Wadah "${name}" (${vol} ml) berhasil ditambahkan! 🎉`, 'success');
 
         // Smoothly scroll ONLY the quick-log row to reveal the new container and shifted + Add button
         const containerGrid = document.querySelector('.quick-log__buttons');
@@ -867,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!editLogModalOverlay || !log) return;
 
     if (editLogId) editLogId.value = log.id;
-    if (editLogModalTitle) editLogModalTitle.textContent = 'Edit Water Entry';
+    if (editLogModalTitle) editLogModalTitle.textContent = 'Edit Catatan Minum';
 
     // Populate Container Type dropdown
     const containers = Storage.getAllContainers ? Storage.getAllContainers() : [];
@@ -899,7 +899,7 @@ document.addEventListener('DOMContentLoaded', () => {
         customOpt.value = 'custom';
         customOpt.dataset.amount = log.amount;
         customOpt.dataset.icon = 'icon-glass-60';
-        customOpt.textContent = `Custom (${log.amount} ml)`;
+        customOpt.textContent = `Kustom (${log.amount} ml)`;
         customOpt.selected = true;
         editLogContainerSelect.appendChild(customOpt);
         if (editLogContainerIcon) {
@@ -1021,13 +1021,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const containers = Storage.getAllContainers ? Storage.getAllContainers() : [];
     const matched = containers.find(c => c.amount === log.amount);
-    const drinkLabel = Storage.DRINK_TYPES[log.type]?.label || 'Water';
+    const drinkLabel = Storage.DRINK_TYPES[log.type]?.label || 'Air Putih';
     const containerName = matched ? matched.name : drinkLabel;
     const amountStr = log.amount >= 1000 ? `${log.amount / 1000} L` : `${log.amount} ml`;
 
-    if (deleteLogModalTitle) deleteLogModalTitle.textContent = 'Delete Water Entry';
+    if (deleteLogModalTitle) deleteLogModalTitle.textContent = 'Hapus Catatan Minum';
     if (deleteLogModalDesc) {
-      deleteLogModalDesc.textContent = `Are you sure you want to delete this ${containerName} ${amountStr} entry?`;
+      deleteLogModalDesc.textContent = `Apakah Anda yakin ingin menghapus catatan ${containerName} ${amountStr} ini?`;
     }
 
     deleteLogModalOverlay.classList.add('active');
@@ -1671,7 +1671,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!editNameModalOverlay) return;
       const current = Storage.getSettings();
       if (inputModalUserName) {
-        inputModalUserName.value = (current.userName || 'Faith').trim() || 'Faith';
+        inputModalUserName.value = (current.userName || 'Pengguna').trim() || 'Pengguna';
       }
       editNameModalOverlay.classList.add('active');
       setTimeout(() => {
@@ -1740,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (radio.checked) {
           Storage.saveSettings({ gender: radio.value });
           UI.renderSettings();
-          UI.showToast('Gender berhasil disimpan! ✨', 'success');
+          UI.showToast('Jenis kelamin berhasil disimpan! ✨', 'success');
         }
       });
     });
@@ -1924,7 +1924,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Storage.saveSettings({ gender: genderVal });
         UI.renderSettings();
         closeGenderModal();
-        UI.showToast('Gender berhasil disimpan! ✨', 'success');
+        UI.showToast('Jenis kelamin berhasil disimpan! ✨', 'success');
       });
     }
 
@@ -1933,7 +1933,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileForm) {
       profileForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const userName = userNameInput ? userNameInput.value.trim() : 'Faith';
+        const userName = userNameInput ? userNameInput.value.trim() : 'Pengguna';
 
         const genderRadio = document.querySelector('input[name="gender"]:checked');
         const gender = genderRadio ? genderRadio.value : 'prefer-not-to-say';
@@ -1980,9 +1980,9 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.updateThemePickerUI(selectedTheme);
 
         const themeLabels = {
-          system: 'System (Mengikuti Perangkat)',
-          light: 'Light (Mode Terang)',
-          dark: 'Dark (Mode Gelap)'
+          system: 'Sistem (Mengikuti Perangkat)',
+          light: 'Terang (Mode Terang)',
+          dark: 'Gelap (Mode Gelap)'
         };
         UI.showToast(`Tema ${themeLabels[selectedTheme] || selectedTheme} diterapkan!`, 'info');
       });
