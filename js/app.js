@@ -1998,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         Storage.exportLogsToCSV();
-        UI.showToast('File CSV berhasil diunduh! 📄', 'success');
+        UI.showToast('Laporan CSV lengkap berhasil diunduh! 📄', 'success');
       });
     }
 

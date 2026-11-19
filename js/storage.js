@@ -314,35 +314,172 @@ const Storage = (() => {
     return uniqueDates.size;
   }
 
-  // EXPORT — Download all logs as CSV file (Bonus Feature)
+  // EXPORT — Download structured, Excel-ready CSV report with clear explanations
   function exportLogsToCSV() {
     const logs = getAllLogs();
     if (logs.length === 0) return false;
 
-    const headers = ['ID', 'Tanggal', 'Waktu', 'Jenis Minuman', 'Volume (ml)', 'Catatan'];
-    const rows = logs.map(log => {
-      const typeLabel = DRINK_TYPES[log.type] ? DRINK_TYPES[log.type].label : log.type;
-      const dateObj = new Date(log.timestamp);
-      const formattedDate = dateObj.toLocaleDateString('id-ID');
-      const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      const cleanNote = (log.note || '').replace(/"/g, '""');
+    const settings = getSettings();
+    const dailyGoal = parseInt(settings.dailyGoal) || 2000;
+    const userName = (settings.userName || 'Pengguna').trim() || 'Pengguna';
+    const allContainers = getAllContainers();
 
-      return [
-        `"${log.id}"`,
-        `"${formattedDate}"`,
-        `"${formattedTime}"`,
-        `"${typeLabel}"`,
-        log.amount,
-        `"${cleanNote}"`
-      ].join(',');
+    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+    const formatIndoDate = (d) => `${String(d.getDate()).padStart(2, '0')} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+    const formatIndoDay = (d) => DAY_NAMES[d.getDay()];
+    const formatIndoTime = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const formatNumberId = (n) => (parseInt(n) || 0).toLocaleString('id-ID');
+
+    const csvCell = (val) => {
+      if (typeof val === 'number' && !isNaN(val)) return String(val);
+      const cleaned = String(val ?? '').replace(/\r\n|\r|\n/g, ' ').replace(/"/g, '""');
+      return `"${cleaned}"`;
+    };
+    const csvRow = (cells) => cells.map(csvCell).join(';');
+
+    const resolveContainerName = (log) => {
+      const matched = allContainers.find(c => c.amount === log.amount && (!log.containerIcon || c.icon === log.containerIcon))
+        || allContainers.find(c => c.amount === log.amount);
+      return matched && matched.name ? matched.name : 'Takaran Kustom';
+    };
+
+    // Urutkan catatan dari terbaru ke terlama agar rapi saat dibaca
+    const sortedLogs = logs.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    // Hitung statistik keseluruhan & rekap harian
+    const totalVolume = sortedLogs.reduce((sum, l) => sum + (parseInt(l.amount) || 0), 0);
+    const totalLiters = (totalVolume / 1000).toFixed(2).replace('.', ',');
+    const dayMap = {};
+    const bevMap = {};
+
+    sortedLogs.forEach(log => {
+      const dObj = new Date(log.timestamp);
+      const dateKey = log.date || formatDateKey(dObj);
+      if (!dayMap[dateKey]) {
+        dayMap[dateKey] = { dateKey, dateObj: dObj, count: 0, total: 0 };
+      }
+      dayMap[dateKey].count += 1;
+      dayMap[dateKey].total += parseInt(log.amount) || 0;
+
+      const bevKey = log.type || 'water';
+      bevMap[bevKey] = (bevMap[bevKey] || 0) + (parseInt(log.amount) || 0);
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const dailyList = Object.values(dayMap).sort((a, b) => b.dateKey.localeCompare(a.dateKey));
+    const daysTracked = dailyList.length;
+    const avgPerDay = daysTracked > 0 ? Math.round(totalVolume / daysTracked) : 0;
+    const avgPerDrink = sortedLogs.length > 0 ? Math.round(totalVolume / sortedLogs.length) : 0;
+    const goalsMet = dailyList.filter(d => d.total >= dailyGoal).length;
+    const successRate = daysTracked > 0 ? Math.round((goalsMet / daysTracked) * 100) : 0;
+
+    // Jenis minuman paling banyak dikonsumsi
+    let topBevLabel = '-';
+    let topBevVol = 0;
+    let topBevPct = 0;
+    Object.entries(bevMap).forEach(([key, vol]) => {
+      if (vol > topBevVol) {
+        topBevVol = vol;
+        topBevPct = totalVolume > 0 ? Math.round((vol / totalVolume) * 100) : 0;
+        topBevLabel = DRINK_TYPES[key] ? DRINK_TYPES[key].label : key;
+      }
+    });
+
+    const newestDate = new Date(sortedLogs[0].timestamp);
+    const oldestDate = new Date(sortedLogs[sortedLogs.length - 1].timestamp);
+    const periodText = formatDateKey(oldestDate) === formatDateKey(newestDate)
+      ? formatIndoDate(newestDate)
+      : `${formatIndoDate(oldestDate)} s/d ${formatIndoDate(newestDate)}`;
+
+    const now = new Date();
+    const exportDateText = `${formatIndoDate(now)}, ${formatIndoTime(now)}`;
+
+    // Susun baris laporan CSV yang rapi (sep=; agar Excel Indonesia & US langsung memisahkan kolom rapi)
+    const lines = [
+      'sep=;',
+      csvRow(['LAPORAN RIWAYAT KONSUMSI AIR HARIAN - HYDROTRACK']),
+      csvRow(['Dokumen ini berisi ringkasan statistik, rekapitulasi harian, rincian catatan minum, serta penjelasan kolom.']),
+      '',
+      csvRow(['1. INFORMASI PENGGUNA & LAPORAN']),
+      csvRow(['Keterangan', 'Nilai', 'Penjelasan']),
+      csvRow(['Nama Pengguna', userName, 'Nama profil pemilik catatan hidrasi di HydroTrack.']),
+      csvRow(['Target Air Harian', `${formatNumberId(dailyGoal)} ml`, 'Target kebutuhan cairan harian yang ditetapkan pada pengaturan profil.']),
+      csvRow(['Tanggal Ekspor', exportDateText, 'Tanggal dan waktu saat file laporan CSV ini diunduh.']),
+      csvRow(['Periode Data', periodText, 'Rentang tanggal dari catatan minum pertama hingga catatan terbaru.']),
+      '',
+      csvRow(['2. RINGKASAN STATISTIK KESELURUHAN']),
+      csvRow(['Metrik', 'Nilai', 'Penjelasan']),
+      csvRow(['Total Catatan Minum', `${formatNumberId(sortedLogs.length)} catatan`, 'Jumlah seluruh aktivitas minum yang berhasil dicatat.']),
+      csvRow(['Total Hari Tercatat', `${formatNumberId(daysTracked)} hari`, 'Jumlah hari aktif yang memiliki minimal 1 catatan minum.']),
+      csvRow(['Total Volume Konsumsi', `${formatNumberId(totalVolume)} ml (${totalLiters} L)`, 'Akumulasi keseluruhan cairan yang telah dikonsumsi.']),
+      csvRow(['Rata-rata per Hari', `${formatNumberId(avgPerDay)} ml`, 'Total volume dibagi jumlah hari tercatat.']),
+      csvRow(['Rata-rata per Sekali Minum', `${formatNumberId(avgPerDrink)} ml`, 'Total volume dibagi jumlah seluruh catatan minum.']),
+      csvRow(['Hari Mencapai Target', `${goalsMet} dari ${daysTracked} hari (${successRate}%)`, 'Jumlah hari dengan total asupan sama atau melebihi target harian.']),
+      csvRow(['Minuman Dominan', `${topBevLabel} (${topBevPct}%)`, 'Jenis minuman dengan porsi volume terbesar dalam periode ini.']),
+      '',
+      csvRow(['3. REKAPITULASI HARIAN']),
+      csvRow(['No', 'Tanggal', 'Hari', 'Jumlah Catatan', 'Total Volume (ml)', 'Target Harian (ml)', 'Pencapaian (%)', 'Status Target'])
+    ];
+
+    dailyList.forEach((day, idx) => {
+      const pct = dailyGoal > 0 ? Math.round((day.total / dailyGoal) * 100) : 0;
+      const statusText = day.total >= dailyGoal
+        ? 'Tercapai'
+        : `Belum Tercapai (Kurang ${formatNumberId(dailyGoal - day.total)} ml)`;
+
+      lines.push(csvRow([
+        idx + 1,
+        formatIndoDate(day.dateObj),
+        formatIndoDay(day.dateObj),
+        day.count,
+        day.total,
+        dailyGoal,
+        `${pct}%`,
+        statusText
+      ]));
+    });
+
+    lines.push('');
+    lines.push(csvRow(['4. RINCIAN CATATAN MINUM (URUT TERBARU)']));
+    lines.push(csvRow(['No', 'Tanggal', 'Hari', 'Waktu', 'Jenis Minuman', 'Wadah', 'Volume (ml)', 'Catatan']));
+
+    sortedLogs.forEach((log, idx) => {
+      const typeLabel = DRINK_TYPES[log.type] ? DRINK_TYPES[log.type].label : log.type;
+      const dateObj = new Date(log.timestamp);
+      const cleanNote = (log.note || '').trim() || 'Tidak ada';
+
+      lines.push(csvRow([
+        idx + 1,
+        formatIndoDate(dateObj),
+        formatIndoDay(dateObj),
+        formatIndoTime(dateObj),
+        typeLabel,
+        resolveContainerName(log),
+        parseInt(log.amount) || 0,
+        cleanNote
+      ]));
+    });
+
+    lines.push('');
+    lines.push(csvRow(['5. PENJELASAN KOLOM & KETERANGAN LAPORAN']));
+    lines.push(csvRow(['Istilah / Kolom', 'Penjelasan']));
+    lines.push(csvRow(['No', 'Nomor urut data pada masing-masing tabel laporan.']));
+    lines.push(csvRow(['Tanggal & Hari', 'Tanggal dan nama hari lokal pengguna saat minuman dicatat.']));
+    lines.push(csvRow(['Waktu', 'Jam dan menit konsumsi minuman dalam format 24 jam (JJ:MM).']));
+    lines.push(csvRow(['Jenis Minuman', 'Kategori minuman yang dikonsumsi (Air Putih, Kopi, Teh, Jus Buah, dll.).']));
+    lines.push(csvRow(['Wadah', 'Nama gelas, cangkir, atau botol takaran yang digunakan (atau Takaran Kustom).']));
+    lines.push(csvRow(['Volume (ml)', 'Jumlah cairan dalam satuan mililiter (1.000 ml = 1 Liter).']));
+    lines.push(csvRow(['Catatan', 'Keterangan tambahan yang ditulis pengguna (tertulis Tidak ada jika kosong).']));
+    lines.push(csvRow(['Pencapaian (%)', 'Persentase total volume minum harian dibandingkan dengan target air harian.']));
+    lines.push(csvRow(['Status Target', 'Menandakan apakah total minum hari tersebut sudah mencapai target (Tercapai) atau masih kurang.']));
+
+    const csvContent = lines.join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `hydrotrack_logs_${_todayStr()}.csv`);
+    link.setAttribute('download', `laporan_hydrotrack_${_todayStr()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
