@@ -546,6 +546,50 @@ const HydroNotifications = (() => {
     return sharedAudioContext.state === 'running' ? sharedAudioContext : null;
   }
 
+  // Keep Web Audio session alive in background during delayed test push so custom/app ringtone can play while minimized or screen-locked.
+  let keepAliveOscillator = null;
+  let keepAliveStopTimer = null;
+  let pendingRingtoneOnWake = false;
+
+  function stopSilentAudioKeepAlive() {
+    if (keepAliveStopTimer) {
+      clearTimeout(keepAliveStopTimer);
+      keepAliveStopTimer = null;
+    }
+    if (keepAliveOscillator) {
+      try {
+        keepAliveOscillator.stop();
+        keepAliveOscillator.disconnect();
+      } catch (err) {
+        // Ignore already stopped oscillator.
+      }
+      keepAliveOscillator = null;
+    }
+  }
+
+  async function startSilentAudioKeepAlive(durationSeconds = 22) {
+    stopSilentAudioKeepAlive();
+    const ctx = await getUnlockedAudioContext();
+    if (!ctx) return false;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1, ctx.currentTime);
+      gain.gain.setValueAtTime(0.00001, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      keepAliveOscillator = osc;
+      keepAliveStopTimer = setTimeout(() => {
+        stopSilentAudioKeepAlive();
+      }, Math.max(5, durationSeconds) * 1000);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
   function scheduleToneNote(ctx, opts) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -671,6 +715,33 @@ const HydroNotifications = (() => {
     }
 
     return markPlayed(await playDefaultTone(config.defaultSoundId));
+  }
+
+  async function playSoundWithRetryOnGesture(options = {}) {
+    stopSilentAudioKeepAlive();
+    const config = options.config || getSettings();
+    if (config.soundType === 'silent') {
+      pendingRingtoneOnWake = false;
+      return false;
+    }
+
+    const played = await playSelectedSound(options);
+    if (played) {
+      pendingRingtoneOnWake = false;
+      return true;
+    }
+
+    // If browser suspended audio in background, queue immediate playback on wake or next touch.
+    pendingRingtoneOnWake = true;
+    const retryOnce = async () => {
+      if (!pendingRingtoneOnWake) return;
+      const ok = await playSelectedSound({ dedupeMs: 1500 });
+      if (ok) pendingRingtoneOnWake = false;
+    };
+    window.addEventListener('pointerdown', retryOnce, { once: true });
+    window.addEventListener('touchstart', retryOnce, { once: true });
+    window.addEventListener('keydown', retryOnce, { once: true });
+    return false;
   }
 
   // MediaRecorder voice recorder (max 15 seconds, stored in IndexedDB).
@@ -1168,10 +1239,17 @@ const HydroNotifications = (() => {
     }
   }
 
-  async function handleLocalTimerFire(expectedSlotKey) {
+  async function handleLocalTimerFire(expectedSlotKey, scheduledTargetMs) {
     localTimerId = null;
     const config = getSettings();
     if (!config.enabled) return;
+
+    // If timer was frozen while the app was closed (> 12s overdue), do NOT pop up a late surprise notification on app reopen.
+    if (scheduledTargetMs && (Date.now() - scheduledTargetMs) > 12000) {
+      scheduleLocalTimer();
+      renderSettingsUI();
+      return;
+    }
 
     if (config.pauseWhenGoalMet && safeGetTodayPercentage() >= 100) {
       scheduleLocalTimer();
@@ -1221,28 +1299,24 @@ const HydroNotifications = (() => {
       return next;
     }
 
-    const delayMs = Math.max(1000, next.nextDate.getTime() - Date.now());
+    const targetMs = next.nextDate.getTime();
+    const delayMs = Math.max(1000, targetMs - Date.now());
     localTimerId = setTimeout(() => {
-      handleLocalTimerFire(next.nextSlotKey);
+      handleLocalTimerFire(next.nextSlotKey, targetMs);
     }, Math.min(delayMs, 2147483647));
 
     return next;
   }
 
-  // Catch up a single missed local reminder within 3 minutes when returning from a throttled tab.
+  // Recalculate next timer cleanly on wake without firing late frozen notifications when the user opens the app.
   function reconcileTimerOnWake() {
+    if (pendingRingtoneOnWake) {
+      playSelectedSound({ dedupeMs: 1500 }).then((ok) => {
+        if (ok) pendingRingtoneOnWake = false;
+      });
+    }
     const config = getSettings();
     if (!config.enabled) return;
-
-    if (!config.pushConnected && config.lastScheduledAt && getNotificationPermission() === 'granted') {
-      const scheduledDate = new Date(config.lastScheduledAt);
-      const diffMs = Date.now() - scheduledDate.getTime();
-      const slotKey = buildSlotKey(scheduledDate);
-      if (diffMs >= 0 && diffMs <= 3 * 60 * 1000 && config.lastNotifiedSlot !== slotKey) {
-        handleLocalTimerFire(slotKey);
-        return;
-      }
-    }
 
     scheduleLocalTimer();
     renderSettingsUI();
@@ -1348,7 +1422,11 @@ const HydroNotifications = (() => {
     }
 
     try {
-      swRegistration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      swRegistration = await navigator.serviceWorker.register('./sw.js', {
+        scope: './',
+        updateViaCache: 'none'
+      });
+      swRegistration.update().catch(() => {});
       const readyReg = await Promise.race([
         navigator.serviceWorker.ready,
         new Promise((resolve) => setTimeout(() => resolve(swRegistration), 3000))
@@ -1822,12 +1900,19 @@ const HydroNotifications = (() => {
     clearTestTimers();
     const waitSecs = Math.max(5, parseInt(delaySeconds, 10) || 15);
 
+    // Unlock audio immediately inside user gesture and keep audio session warm so the app ringtone plays even when minimized/locked.
+    const initialConfig = getSettings();
+    if (initialConfig.soundType !== 'silent') {
+      startSilentAudioKeepAlive(waitSecs + 8);
+    }
+
     let permission = getNotificationPermission();
     if (permission === 'default') {
       permission = await requestPermission();
     }
 
     if (permission !== 'granted') {
+      stopSilentAudioKeepAlive();
       const msg = permission === 'denied'
         ? 'Izin notifikasi diblokir. Aktifkan izin notifikasi browser terlebih dahulu.'
         : 'Izinkan notifikasi terlebih dahulu untuk menjalankan uji coba push.';
@@ -1840,7 +1925,7 @@ const HydroNotifications = (() => {
     let subscription = await getActivePushSubscription();
 
     if (config.pushServerUrl && (!config.pushConnected || !subscription)) {
-      setTestFeedback('Menghubungkan ke Push Server sebelum menjadwalkan uji coba...', 'info');
+      setTestFeedback('Menghubungkan ke Push Server (tunggu 1 detik sebelum keluar aplikasi)...', 'info');
       const connectRes = await connectAndSubscribePush(config.pushServerUrl, { requestPermission: false });
       config = getSettings();
       subscription = connectRes.ok ? connectRes.subscription : await getActivePushSubscription();
@@ -1848,13 +1933,36 @@ const HydroNotifications = (() => {
 
     const appSettings = safeGetAppSettings();
     const msgObj = buildReminderMessage(new Date());
+    const soundLabel = config.soundType === 'default' ? config.defaultSoundId : config.soundType;
+
+    // Arm Service-Worker-level background timer backup so notification still fires while minimized even if mobile network delays FCM.
+    const reg = await ensureServiceWorker();
+    const swTarget = (reg && (reg.active || reg.waiting || reg.installing)) || (navigator.serviceWorker && navigator.serviceWorker.controller);
+    if (swTarget && typeof swTarget.postMessage === 'function') {
+      try {
+        swTarget.postMessage({
+          type: 'SCHEDULE_SW_DELAYED_TEST',
+          delaySeconds: waitSecs,
+          payload: {
+            title: 'Tes Push Latar Belakang Berhasil',
+            body: `Halo ${appSettings.userName || 'Pengguna'}, pengingat HydroTrack aktif di latar belakang. ${msgObj.body}`,
+            soundLabel: soundLabel,
+            silent: config.soundType === 'silent',
+            url: './pengaturan.html?from=notification'
+          }
+        });
+      } catch (err) {
+        // Ignore SW message error.
+      }
+    }
 
     if (config.pushServerUrl && config.pushConnected && subscription) {
-      setTestFeedback('Mengirim permintaan uji coba ke Push Server...', 'info');
+      setTestFeedback('Menjadwalkan push di server Cloudflare...', 'info');
       try {
         const res = await fetchWithTimeout(`${config.pushServerUrl}/test-push`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
           body: JSON.stringify({
             endpoint: subscription.endpoint,
             subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
@@ -1864,7 +1972,7 @@ const HydroNotifications = (() => {
             dailyGoal: Number(appSettings.dailyGoal) || 2000,
             remaining: safeGetTodayRemaining(),
             percentage: safeGetTodayPercentage(),
-            soundLabel: config.soundType === 'default' ? config.defaultSoundId : config.soundType,
+            soundLabel: soundLabel,
             title: msgObj.title,
             body: msgObj.body
           })
@@ -1878,13 +1986,13 @@ const HydroNotifications = (() => {
         const updateCloudCountdown = () => {
           if (remainingSecs > 0) {
             setTestFeedback(
-              `Push dijadwalkan! Tutup tab/browser atau kunci layar HP sekarang. Notifikasi akan dikirim server dalam ${remainingSecs} detik...`,
+              `SIAP! Tekan tombol Home atau kunci layar HP sekarang (jangan hapus paksa / swipe dari Recent Apps agar Android tidak memutus proses latar belakang). Notifikasi & nada dering akan berbunyi dalam ${remainingSecs} detik...`,
               'success'
             );
           } else {
             clearTestTimers();
             setTestFeedback(
-              'Waktu hitung mundur selesai. Jika notifikasi belum muncul, pastikan mode Jangan Ganggu tidak aktif dan izin notifikasi sistem aktif.',
+              'Push sudah dikirim! Jika tadi aplikasi di-swipe habis dari Recent Apps, beberapa HP Android menahan push hingga aplikasi tidak dibatasi baterai.',
               'info'
             );
           }
@@ -1900,49 +2008,33 @@ const HydroNotifications = (() => {
       } catch (err) {
         const fallbackReason = err && err.message ? err.message : 'Push Server tidak dapat dijangkau.';
         setTestFeedback(
-          `${fallbackReason} Menjalankan uji coba lokal ${waitSecs} detik sebagai cadangan (biarkan tab tetap terbuka)...`,
+          `${fallbackReason} Cadangan Service Worker tetap berjalan dalam ${waitSecs} detik (tekan tombol Home atau kunci layar)...`,
           'warning'
         );
       }
     }
 
-    // Local 15-second fallback when Push Server URL is not configured or offline.
+    // Service Worker background countdown when server is offline.
     let localRemaining = waitSecs;
     const renderLocalCountdown = () => {
       if (localRemaining > 0) {
         setTestFeedback(
-          `URL Push Server belum terhubung. Menjalankan uji coba lokal dalam ${localRemaining} detik (hubungkan URL Cloudflare Worker di atas untuk push saat browser ditutup).`,
+          `Uji coba latar belakang Service Worker dijadwalkan dalam ${localRemaining} detik. Tekan tombol Home atau kunci layar sekarang...`,
           'warning'
         );
+      } else {
+        clearTestTimers();
+        setTestFeedback('Notifikasi uji coba telah dikirim oleh Service Worker.', 'info');
       }
     };
 
     renderLocalCountdown();
     testCountdownIntervalId = setInterval(() => {
       localRemaining -= 1;
-      if (localRemaining <= 0) {
-        clearInterval(testCountdownIntervalId);
-        testCountdownIntervalId = null;
-      } else {
-        renderLocalCountdown();
-      }
+      renderLocalCountdown();
     }, 1000);
 
-    testLocalFallbackTimeoutId = setTimeout(async () => {
-      testLocalFallbackTimeoutId = null;
-      clearTestTimers();
-      await showHydroNotification({
-        isTest: true,
-        playAudio: true,
-        url: './pengaturan.html?from=notification'
-      });
-      setTestFeedback(
-        'Notifikasi uji coba lokal telah dikirim. Hubungkan URL Push Server Cloudflare Worker agar notifikasi tetap masuk saat browser ditutup.',
-        'info'
-      );
-    }, waitSecs * 1000);
-
-    return { ok: true, mode: 'local-fallback' };
+    return { ok: true, mode: 'sw-fallback' };
   }
 
   // PWA install and Push diagnostics retry.
@@ -2892,7 +2984,7 @@ const HydroNotifications = (() => {
         if (!data || typeof data !== 'object') return;
 
         if (data.type === 'HYDRO_NOTIFICATION_CLICKED') {
-          playSelectedSound({ dedupeMs: 4000 });
+          playSoundWithRetryOnGesture({ dedupeMs: 3000 });
           if (data.isTest) {
             clearTestTimers();
             setTestFeedback('Notifikasi uji coba berhasil diterima dan dibuka.', 'success');
@@ -2902,12 +2994,11 @@ const HydroNotifications = (() => {
         }
 
         if (data.type === 'HYDRO_PUSH_RECEIVED') {
-          if (document.visibilityState === 'visible') {
-            playSelectedSound({ dedupeMs: 4000 });
-          }
+          // Always play the user's selected app ringtone when push arrives (even if minimized or screen-locked!).
+          playSoundWithRetryOnGesture({ dedupeMs: 3000 });
           if (data.isTest) {
             clearTestTimers();
-            setTestFeedback('Push dari server berhasil diterima di perangkat ini.', 'success');
+            setTestFeedback('Push latar belakang berhasil diterima beserta nada pengingat!', 'success');
           }
         }
       });
@@ -2990,16 +3081,20 @@ const HydroNotifications = (() => {
       initialized = true;
       bindGlobalListeners();
       handleIncomingNotificationParam();
-      ensureServiceWorker().then((reg) => {
+      ensureServiceWorker().then(async (reg) => {
         if (!reg) return;
         const config = getSettings();
-        if (config.pushServerUrl && config.pushConnected) {
-          getActivePushSubscription().then((sub) => {
-            if (!sub) {
-              saveSettings({ pushConnected: false });
-              renderSettingsUI();
-            }
-          });
+        if (!config.pushServerUrl) return;
+
+        const sub = await getActivePushSubscription();
+        if (config.pushConnected && !sub) {
+          saveSettings({ pushConnected: false });
+          renderSettingsUI();
+        }
+
+        // Auto-connect to Cloudflare Push Server on startup when permission is already granted.
+        if (getNotificationPermission() === 'granted' && (!config.pushConnected || !sub)) {
+          connectAndSubscribePush(config.pushServerUrl, { requestPermission: false });
         }
       });
     }

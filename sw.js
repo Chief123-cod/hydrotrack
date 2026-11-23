@@ -1,14 +1,23 @@
-const SW_VERSION = 'hydrotrack-sw-v1';
-const CACHE_NAME = 'hydrotrack-shell-v1';
+const SW_VERSION = 'hydrotrack-sw-v2';
+const CACHE_NAME = 'hydrotrack-shell-v2';
 
 const DEFAULT_TITLE = 'Waktunya Minum Air';
 const DEFAULT_BODY = 'Ambil segelas air sekarang agar asupan cairan harianmu tetap terjaga.';
 const DEFAULT_URL = './index.html?from=notification';
 
+let lastTestNotificationShownAt = 0;
+
+function resolveScopeAssetUrl(relativePath) {
+  try {
+    return new URL(relativePath, self.registration.scope).href;
+  } catch (err) {
+    return relativePath;
+  }
+}
+
 function resolveNotificationUrl(rawUrl) {
   const candidate = (typeof rawUrl === 'string' && rawUrl.trim()) ? rawUrl.trim() : DEFAULT_URL;
   try {
-    // Strip leading slash when normalizing relative to scope so subpath deployments stay intact.
     const relative = candidate.startsWith('/') ? `.${candidate}` : candidate;
     const resolved = new URL(relative, self.registration.scope);
     if (!resolved.searchParams.has('from')) {
@@ -22,10 +31,10 @@ function resolveNotificationUrl(rawUrl) {
 
 function buildNotificationOptions(payload) {
   const nestedData = (payload.data && typeof payload.data === 'object') ? payload.data : {};
+  const soundLabel = payload.soundLabel || nestedData.soundLabel || 'default';
   const isSilent = Boolean(
     payload.silent ||
-    nestedData.soundLabel === 'silent' ||
-    payload.soundLabel === 'silent'
+    soundLabel === 'silent'
   );
   const isTest = Boolean(
     payload.isTest ||
@@ -35,19 +44,21 @@ function buildNotificationOptions(payload) {
   const rawUrl = payload.url || nestedData.url || (isTest ? './pengaturan.html?from=notification' : DEFAULT_URL);
   const resolvedUrl = resolveNotificationUrl(rawUrl);
   const sentAt = payload.sentAt || nestedData.sentAt || Date.now();
+  const iconUrl = resolveScopeAssetUrl('./img/icon-192.png');
 
   const options = {
     body: payload.body || DEFAULT_BODY,
-    icon: './img/icon-192.png',
-    badge: './img/icon-192.png',
+    icon: iconUrl,
+    badge: iconUrl,
     tag: payload.tag || (isTest ? 'hydrotrack-test' : 'hydrotrack-reminder'),
     renotify: true,
-    requireInteraction: false,
-    silent: isSilent,
+    requireInteraction: true,
+    timestamp: typeof sentAt === 'number' ? sentAt : Date.now(),
     data: {
       url: resolvedUrl,
       isTest: isTest,
-      sentAt: sentAt
+      sentAt: sentAt,
+      soundLabel: soundLabel
     },
     actions: [
       { action: 'open', title: 'Catat Minum' },
@@ -55,9 +66,10 @@ function buildNotificationOptions(payload) {
     ]
   };
 
-  // Avoid passing vibrate alongside silent:true, which some browsers reject.
-  if (!isSilent) {
-    options.vibrate = [180, 90, 180];
+  if (isSilent) {
+    options.silent = true;
+  } else {
+    options.vibrate = [250, 120, 250, 120, 400];
   }
 
   return options;
@@ -79,6 +91,21 @@ function parsePushPayload(eventData) {
   return {};
 }
 
+async function broadcastToClients(messageObj) {
+  try {
+    const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    clientList.forEach((client) => {
+      try {
+        client.postMessage(messageObj);
+      } catch (err) {
+        // Ignore disconnected clients.
+      }
+    });
+  } catch (err) {
+    // Ignore matchAll errors.
+  }
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());
 });
@@ -95,7 +122,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Network-first fallback for same-origin static assets so deployments stay fresh while offline visits still load.
+// Network-first with cache-busting for HTML/JS/CSS so installed PWAs always run the latest deployed code.
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -109,8 +136,26 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin !== self.location.origin) return;
 
+  const isCodeOrHtml =
+    req.mode === 'navigate' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.json');
+
+  const fetchReq = isCodeOrHtml
+    ? new Request(req.url, {
+        method: 'GET',
+        headers: req.headers,
+        mode: req.mode === 'navigate' ? 'same-origin' : req.mode,
+        credentials: req.credentials,
+        redirect: req.redirect,
+        cache: 'no-cache'
+      })
+    : req;
+
   event.respondWith(
-    fetch(req)
+    fetch(fetchReq)
       .then((res) => {
         if (res && res.ok && res.type === 'basic') {
           const clone = res.clone();
@@ -127,23 +172,21 @@ self.addEventListener('push', (event) => {
   const title = payload.title || DEFAULT_TITLE;
   const options = buildNotificationOptions(payload);
 
+  if (options.data && options.data.isTest) {
+    lastTestNotificationShownAt = Date.now();
+  }
+
   event.waitUntil(
     Promise.all([
       self.registration.showNotification(title, options),
-      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-        clientList.forEach((client) => {
-          try {
-            client.postMessage({
-              type: 'HYDRO_PUSH_RECEIVED',
-              isTest: options.data.isTest,
-              sentAt: options.data.sentAt,
-              title: title,
-              body: options.body
-            });
-          } catch (err) {
-            // Ignore disconnected clients.
-          }
-        });
+      broadcastToClients({
+        type: 'HYDRO_PUSH_RECEIVED',
+        isTest: options.data.isTest,
+        sentAt: options.data.sentAt,
+        soundLabel: options.data.soundLabel,
+        silent: Boolean(options.silent),
+        title: title,
+        body: options.body
       })
     ])
   );
@@ -177,6 +220,7 @@ self.addEventListener('notificationclick', (event) => {
             type: 'HYDRO_NOTIFICATION_CLICKED',
             isTest: isTest,
             sentAt: data.sentAt || null,
+            soundLabel: data.soundLabel || 'default',
             url: targetUrl
           });
         } catch (err) {
@@ -220,7 +264,59 @@ self.addEventListener('message', (event) => {
     const payload = data.payload || data;
     const title = payload.title || DEFAULT_TITLE;
     const options = buildNotificationOptions(payload);
-    event.waitUntil(self.registration.showNotification(title, options));
+    if (options.data && options.data.isTest) {
+      lastTestNotificationShownAt = Date.now();
+    }
+    event.waitUntil(
+      Promise.all([
+        self.registration.showNotification(title, options),
+        broadcastToClients({
+          type: 'HYDRO_PUSH_RECEIVED',
+          isTest: options.data.isTest,
+          sentAt: options.data.sentAt,
+          soundLabel: options.data.soundLabel,
+          silent: Boolean(options.silent),
+          title: title,
+          body: options.body
+        })
+      ])
+    );
+    return;
+  }
+
+  // Service-Worker-level background timer backup for 15s test push (survives tab/app minimize without freezing like page setTimeout).
+  if (data.type === 'SCHEDULE_SW_DELAYED_TEST') {
+    const delayMs = Math.max(1000, Math.min(30000, (Number(data.delaySeconds) || 15) * 1000));
+    const scheduledAt = Date.now();
+    const payload = data.payload || {};
+    const title = payload.title || 'Tes Push Latar Belakang Berhasil';
+    const options = buildNotificationOptions({
+      ...payload,
+      isTest: true,
+      tag: 'hydrotrack-test'
+    });
+
+    event.waitUntil(
+      new Promise((resolve) => setTimeout(resolve, delayMs + 1500)).then(async () => {
+        // If the real Cloudflare Web Push already arrived and showed the test notification, do not duplicate it.
+        if (lastTestNotificationShownAt >= scheduledAt) {
+          return;
+        }
+        lastTestNotificationShownAt = Date.now();
+        await Promise.all([
+          self.registration.showNotification(title, options),
+          broadcastToClients({
+            type: 'HYDRO_PUSH_RECEIVED',
+            isTest: true,
+            sentAt: Date.now(),
+            soundLabel: options.data.soundLabel,
+            silent: Boolean(options.silent),
+            title: title,
+            body: options.body
+          })
+        ]);
+      })
+    );
     return;
   }
 
@@ -229,7 +325,7 @@ self.addEventListener('message', (event) => {
     return;
   }
 
-  if (data.type === 'PING' && event.ports && event.ports[0]) {
-    event.ports[0].postMessage({ ok: true, version: SW_VERSION });
+  if (data.type === 'PING' && event.source && typeof event.source.postMessage === 'function') {
+    event.source.postMessage({ type: 'PONG', version: SW_VERSION });
   }
 });

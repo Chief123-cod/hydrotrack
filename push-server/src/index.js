@@ -838,14 +838,34 @@ async function handleTestPush(request, env, ctx, corsHeaders) {
   if (delaySeconds > 0) {
     ctx.waitUntil(
       (async () => {
-        await new Promise((resolve) => setTimeout(resolve, delaySeconds * 1000));
+        const totalWaitMs = delaySeconds * 1000;
+        const stepMs = 1000;
+        let elapsed = 0;
+        while (elapsed < totalWaitMs) {
+          const chunk = Math.min(stepMs, totalWaitMs - elapsed);
+          await new Promise((resolve) => setTimeout(resolve, chunk));
+          elapsed += chunk;
+        }
         const result = await sendWebPush(subCheck.subscription, payload, vapidConfig, {
-          ttl: 120,
-          urgency: 'high'
+          ttl: 300,
+          urgency: 'high',
+          topic: 'hydrotrack-test'
         });
-        if (result.expired && env.HYDRO_PUSH_KV) {
+        if (env.HYDRO_PUSH_KV) {
           const key = await endpointKey(subCheck.subscription.endpoint);
-          await env.HYDRO_PUSH_KV.delete(key);
+          if (result.expired) {
+            await env.HYDRO_PUSH_KV.delete(key);
+          } else {
+            const existing = await env.HYDRO_PUSH_KV.get(key, 'json');
+            if (existing) {
+              existing.lastTestSentAt = new Date().toISOString();
+              existing.lastTestStatus = result.status;
+              existing.lastTestOk = result.ok;
+              await env.HYDRO_PUSH_KV.put(key, JSON.stringify(existing), {
+                expirationTtl: SUBSCRIPTION_TTL_SECONDS
+              });
+            }
+          }
         }
       })()
     );
