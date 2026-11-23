@@ -2,31 +2,69 @@
    STORAGE.JS — LocalStorage CRUD Module
    ============================================ */
 
-// Apply saved theme early to prevent flash of wrong theme
-(function initEarlyTheme() {
-  try {
-    const raw = localStorage.getItem('hydrotrack_settings');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.theme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      } else if (parsed.theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-      } else {
-        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme-setting', 'system');
-      }
-    }
-  } catch (e) {}
-})();
-
 const Storage = (() => {
   // LocalStorage Keys
   const KEYS = {
     logs: 'hydrotrack_logs',
     settings: 'hydrotrack_settings'
   };
+
+  // Apply saved theme early to prevent flash of wrong theme
+  function syncThemeFromStorage() {
+    try {
+      const raw = localStorage.getItem(KEYS.settings);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const theme = (parsed && parsed.theme) ? parsed.theme : 'system';
+      let resolved;
+
+      if (theme === 'dark' || theme === 'light') {
+        resolved = theme;
+        document.documentElement.removeAttribute('data-theme-setting');
+      } else {
+        const isDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        resolved = isDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme-setting', 'system');
+      }
+
+      document.documentElement.setAttribute('data-theme', resolved);
+
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', resolved === 'dark' ? '#0B0E14' : '#F8FAFC');
+      }
+
+      return resolved;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Run early theme sync immediately and keep theme synchronized across navigation/tabs
+  syncThemeFromStorage();
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('pageshow', () => {
+      syncThemeFromStorage();
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === KEYS.settings || e.key === null) {
+        syncThemeFromStorage();
+      }
+    });
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncThemeFromStorage();
+      }
+    });
+
+    document.addEventListener('prerenderingchange', () => {
+      syncThemeFromStorage();
+    });
+  }
 
   // Default Settings
   const DEFAULT_SETTINGS = {
@@ -1175,6 +1213,7 @@ const Storage = (() => {
   /* ==================== PUBLIC API ==================== */
   return {
     DRINK_TYPES,
+    syncThemeFromStorage,
     formatDateKey,
     getWeeklyHistory,
     getMonthlyHistory,

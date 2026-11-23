@@ -608,7 +608,8 @@
 #goalModalOverlay,
 #activityModalOverlay,
 #editNameModalOverlay,
-#genderModalOverlay {
+#genderModalOverlay,
+#deleteBeforeModalOverlay {
   display: none;
   position: fixed;
   top: 0;
@@ -622,6 +623,7 @@
   justify-content: center;
   padding: 16px;
   box-sizing: border-box;
+  overscroll-behavior: contain;
 }
 
 #containerModalOverlay.active,
@@ -632,7 +634,8 @@
 #goalModalOverlay.active,
 #activityModalOverlay.active,
 #editNameModalOverlay.active,
-#genderModalOverlay.active {
+#genderModalOverlay.active,
+#deleteBeforeModalOverlay.active {
   display: flex !important;
 }
 
@@ -641,6 +644,10 @@
   color: #1E293B;
   width: 100%;
   max-width: 420px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   border-radius: 28px;
   padding: 18px 24px 28px 24px;
   box-shadow: 0 24px 60px rgba(44, 62, 80, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.04);
@@ -1512,6 +1519,7 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(2px);
+  overscroll-behavior: contain;
 }
 
 .modal-overlay.active {
@@ -1531,10 +1539,13 @@
   max-width: 440px !important;
   width: 90% !important;
   height: auto !important;
+  max-height: 90dvh !important;
   box-shadow: var(--shadow-lg) !important;
   animation: modalIn 0.3s ease !important;
   z-index: 2001 !important;
-  overflow: visible !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 @keyframes modalIn {
@@ -3081,6 +3092,19 @@
   color: var(--color-text-secondary);
 }
 
+.m3-nav-card__arrow {
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.m3-nav-card:hover .m3-nav-card__arrow {
+  transform: translateX(3px);
+  color: var(--color-primary);
+}
+
 /* Danger Row in Data Management */
 .m3-nav-card--danger .m3-nav-card__title {
   color: #DC2626;
@@ -3696,6 +3720,119 @@
 
 .m3-goal-hint {
   display: none;
+}
+
+/* Delete Entries Before Date Pop-up Modal (Light Theme) */
+.m3-modal-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+#deleteBeforeModalOverlay .container-modal__header {
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+#deleteBeforeModalOverlay .container-modal__title {
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+#deleteBeforeModalOverlay .modal__close {
+  flex-shrink: 0;
+}
+
+.m3-modal-danger-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #DC2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.m3-delete-before-body {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.m3-modal-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.m3-date-modal-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1.5px solid #CBD5E1;
+  background: #F8FAFC;
+  color: #1E293B;
+  font-size: 15px;
+  font-weight: 600;
+  color-scheme: light;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.m3-date-modal-input:focus {
+  border-color: #2E86DE;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(46, 134, 222, 0.16);
+  outline: none;
+}
+
+.m3-delete-before-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 0 0;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.m3-delete-before-hint i {
+  font-size: 18px;
+  color: #DC2626;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+#deleteBeforeModalOverlay .btn-modal-delete {
+  flex: 1.2;
+  color: #B91C1C;
+}
+
+#deleteBeforeModalOverlay .btn-modal-delete:hover {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
+#deleteBeforeModalOverlay .modal__close:focus-visible,
+#deleteBeforeModalOverlay .btn-modal-cancel:focus-visible,
+#deleteBeforeModalOverlay .btn-modal-delete:focus-visible,
+#btnOpenDeleteBeforeModal:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* About Sub-view Hero Card */
@@ -7020,4 +7157,45 @@
   background: #3B82F6 !important;
   color: #FFFFFF !important;
   border-color: #3B82F6 !important;
+}
+
+/* Delete Entries Before Date Pop-up Modal (Dark Theme) */
+[data-theme="dark"] .m3-modal-danger-icon {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #F87171 !important;
+}
+
+[data-theme="dark"] .m3-date-modal-input {
+  background: #0A0D14 !important;
+  border-color: #2D3548 !important;
+  color: #FFFFFF !important;
+  color-scheme: dark;
+}
+
+[data-theme="dark"] .m3-date-modal-input:focus {
+  border-color: #60A5FA !important;
+  background: #0F1420 !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.22);
+}
+
+[data-theme="dark"] .m3-delete-before-hint {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.28) !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .m3-delete-before-hint i {
+  color: #F87171 !important;
+}
+
+[data-theme="dark"] #deleteBeforeModalOverlay .btn-modal-delete {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #FCA5A5 !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+}
+
+[data-theme="dark"] #deleteBeforeModalOverlay .btn-modal-delete:hover {
+  background: #DC2626 !important;
+  color: #FFFFFF !important;
+  border-color: #DC2626 !important;
 }

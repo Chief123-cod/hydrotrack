@@ -23,13 +23,38 @@
     <meta name="view-transition" content="same-origin">
     <script type="speculationrules">
     {
-      "prerender": [
+      "prefetch": [
         {
           "source": "list",
           "urls": ["index.html", "riwayat.html", "analisis.html", "pengaturan.html"]
         }
       ]
     }
+    </script>
+
+    <!-- Early Theme Initialization (Prevents flash/flicker before first paint) -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('hydrotrack_settings');
+          var parsed = raw ? JSON.parse(raw) : null;
+          var theme = (parsed && parsed.theme) ? parsed.theme : 'system';
+          var resolved;
+          if (theme === 'dark' || theme === 'light') {
+            resolved = theme;
+            document.documentElement.removeAttribute('data-theme-setting');
+          } else {
+            var isDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            resolved = isDark ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme-setting', 'system');
+          }
+          document.documentElement.setAttribute('data-theme', resolved);
+          var metaTheme = document.querySelector('meta[name="theme-color"]');
+          if (metaTheme) {
+            metaTheme.setAttribute('content', resolved === 'dark' ? '#0B0E14' : '#F8FAFC');
+          }
+        } catch (e) {}
+      })();
     </script>
 
     <!-- Stylesheets -->

@@ -95,6 +95,163 @@ document.addEventListener('DOMContentLoaded', () => {
     initSettingsPage();
   }
 
+  /* ==================== GLOBAL MODAL SCROLL LOCK CONTROLLER ==================== */
+  let isModalScrollLocked = false;
+  let savedModalScrollY = 0;
+
+  function syncModalScrollLock() {
+    const hasActiveModal = Boolean(document.querySelector('.modal-overlay.active'));
+    if (hasActiveModal && !isModalScrollLocked) {
+      savedModalScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      isModalScrollLocked = true;
+      document.documentElement.classList.add('is-modal-open');
+      document.body.classList.add('is-modal-open');
+    } else if (!hasActiveModal && isModalScrollLocked) {
+      isModalScrollLocked = false;
+      document.documentElement.classList.remove('is-modal-open');
+      document.body.classList.remove('is-modal-open');
+      if ((window.scrollY || window.pageYOffset || 0) !== savedModalScrollY) {
+        const prevBehavior = document.documentElement.style.scrollBehavior;
+        document.documentElement.style.scrollBehavior = 'auto';
+        window.scrollTo(0, savedModalScrollY);
+        document.documentElement.style.scrollBehavior = prevBehavior;
+      }
+    }
+  }
+
+  const allModalOverlays = document.querySelectorAll('.modal-overlay');
+  if (allModalOverlays.length > 0) {
+    const modalClassObserver = new MutationObserver(() => {
+      syncModalScrollLock();
+    });
+
+    allModalOverlays.forEach(overlay => {
+      modalClassObserver.observe(overlay, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
+      const handleOverlayScrollBlock = (e) => {
+        if (!overlay.classList.contains('active')) return;
+
+        const modalBox = e.target.closest('.container-modal-box, .modal-box');
+        if (!modalBox) {
+          // Block background page scroll when scrolling/dragging on the backdrop
+          if (e.cancelable) e.preventDefault();
+          return;
+        }
+
+        // Allow horizontal icon pickers and native form controls inside modal
+        if (e.target.closest('.container-icon-picker, input, select, textarea')) {
+          return;
+        }
+
+        const canScrollVertically = modalBox.scrollHeight > modalBox.clientHeight + 1;
+        if (!canScrollVertically) {
+          if (e.cancelable) e.preventDefault();
+          return;
+        }
+
+        // Prevent desktop wheel scroll chaining past top/bottom edge of tall modal
+        if (e.type === 'wheel') {
+          const atTop = modalBox.scrollTop <= 0 && e.deltaY < 0;
+          const atBottom = modalBox.scrollTop + modalBox.clientHeight >= modalBox.scrollHeight - 1 && e.deltaY > 0;
+          if ((atTop || atBottom) && e.cancelable) {
+            e.preventDefault();
+          }
+        }
+      };
+
+      overlay.addEventListener('wheel', handleOverlayScrollBlock, { passive: false });
+      overlay.addEventListener('touchmove', handleOverlayScrollBlock, { passive: false });
+    });
+
+    syncModalScrollLock();
+  }
+
+  /* ==================== BFCACHE, CROSS-TAB & VISIBILITY THEME/UI SYNC ==================== */
+  let lastSyncedTheme = document.documentElement.getAttribute('data-theme');
+  let lastSyncedThemeSetting = document.documentElement.getAttribute('data-theme-setting');
+
+  function syncThemeAndActiveView(forceDataRefresh = false) {
+    if (typeof Storage !== 'undefined' && typeof Storage.syncThemeFromStorage === 'function') {
+      Storage.syncThemeFromStorage();
+    } else if (typeof Storage !== 'undefined' && typeof UI !== 'undefined' && typeof UI.applyTheme === 'function') {
+      const latestSettings = Storage.getSettings();
+      UI.applyTheme((latestSettings && latestSettings.theme) || 'system');
+    }
+
+    const nextTheme = document.documentElement.getAttribute('data-theme');
+    const nextSetting = document.documentElement.getAttribute('data-theme-setting');
+    const themeChanged = lastSyncedTheme !== nextTheme || lastSyncedThemeSetting !== nextSetting;
+    lastSyncedTheme = nextTheme;
+    lastSyncedThemeSetting = nextSetting;
+
+    if (!forceDataRefresh && !themeChanged) return;
+
+    syncModalScrollLock();
+
+    if (typeof UI !== 'undefined') {
+      if (typeof UI.updateDateDisplay === 'function') UI.updateDateDisplay();
+      if (typeof UI.updateUserInfo === 'function') UI.updateUserInfo();
+
+      if (document.getElementById('drinkLogList') || document.getElementById('progressBarFill')) {
+        if (typeof UI.refreshDashboard === 'function') UI.refreshDashboard();
+      }
+
+      if (document.getElementById('historyTableBody') || document.getElementById('historyVisualContainer')) {
+        refreshHistory();
+      }
+
+      if (document.getElementById('statsTotalIntake') || document.getElementById('view-analytics')) {
+        const periodSelect = document.getElementById('analyticsPeriod');
+        const currentPeriod = periodSelect ? periodSelect.value : 'all';
+        if (typeof UI.renderStatisticsPage === 'function') {
+          UI.renderStatisticsPage(currentPeriod);
+        }
+      }
+
+      if (document.getElementById('settingsProfileForm') || document.getElementById('view-settings')) {
+        if (typeof UI.renderSettings === 'function') {
+          UI.renderSettings();
+        }
+      }
+    }
+  }
+
+  window.addEventListener('pageshow', (event) => {
+    const navEntries = typeof performance !== 'undefined' && performance.getEntriesByType
+      ? performance.getEntriesByType('navigation')
+      : [];
+    const isBackForward = Boolean(event.persisted || (navEntries[0] && navEntries[0].type === 'back_forward'));
+    syncThemeAndActiveView(isBackForward);
+  });
+
+  window.addEventListener('storage', (event) => {
+    if (
+      !event.key ||
+      event.key === 'hydrotrack_settings' ||
+      event.key === 'hydrotrack_logs' ||
+      event.key === 'hydrotrack_custom_beverages' ||
+      event.key === 'hydrotrack_containers' ||
+      event.key === 'hydrotrack_custom_containers'
+    ) {
+      syncThemeAndActiveView(true);
+      if (
+        (event.key === 'hydrotrack_containers' || event.key === 'hydrotrack_custom_containers') &&
+        typeof renderAllContainers === 'function'
+      ) {
+        renderAllContainers();
+      }
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      syncThemeAndActiveView(false);
+    }
+  });
+
   /* ==================== NAVIGATION ==================== */
 
   // Bottom navigation links: jika tab sudah aktif di halaman saat ini, cegah reload dan scroll halus ke atas
@@ -2250,16 +2407,64 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 4. Data Management: Delete entries before date
-    const btnDeleteBeforeDate = document.getElementById('btnDeleteBeforeDate');
+    // 4. Data Management: Delete entries before date (Pop-up Modal)
+    const deleteBeforeModalOverlay = document.getElementById('deleteBeforeModalOverlay');
+    const btnOpenDeleteBeforeModal = document.getElementById('btnOpenDeleteBeforeModal');
+    const btnCloseDeleteBeforeModal = document.getElementById('btnCloseDeleteBeforeModal');
+    const btnCancelDeleteBeforeModal = document.getElementById('btnCancelDeleteBeforeModal');
+    const deleteBeforeModalForm = document.getElementById('deleteBeforeModalForm');
     const inputDeleteBeforeDate = document.getElementById('inputDeleteBeforeDate');
-    if (btnDeleteBeforeDate && inputDeleteBeforeDate) {
-      btnDeleteBeforeDate.addEventListener('click', () => {
+
+    function openDeleteBeforeModal() {
+      if (!deleteBeforeModalOverlay) return;
+      if (inputDeleteBeforeDate && !inputDeleteBeforeDate.value) {
+        inputDeleteBeforeDate.value = Storage.formatDateKey(new Date());
+      }
+      deleteBeforeModalOverlay.classList.add('active');
+      setTimeout(() => {
+        if (inputDeleteBeforeDate) inputDeleteBeforeDate.focus();
+      }, 120);
+    }
+
+    function closeDeleteBeforeModal(restoreFocus = false) {
+      if (deleteBeforeModalOverlay) deleteBeforeModalOverlay.classList.remove('active');
+      if (restoreFocus && btnOpenDeleteBeforeModal) {
+        btnOpenDeleteBeforeModal.focus();
+      }
+    }
+
+    if (btnOpenDeleteBeforeModal) {
+      btnOpenDeleteBeforeModal.addEventListener('click', openDeleteBeforeModal);
+    }
+    if (btnCloseDeleteBeforeModal) {
+      btnCloseDeleteBeforeModal.addEventListener('click', () => closeDeleteBeforeModal(true));
+    }
+    if (btnCancelDeleteBeforeModal) {
+      btnCancelDeleteBeforeModal.addEventListener('click', () => closeDeleteBeforeModal(true));
+    }
+    if (deleteBeforeModalOverlay) {
+      deleteBeforeModalOverlay.addEventListener('click', (e) => {
+        if (e.target === deleteBeforeModalOverlay) closeDeleteBeforeModal(true);
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && deleteBeforeModalOverlay && deleteBeforeModalOverlay.classList.contains('active')) {
+        closeDeleteBeforeModal(true);
+      }
+    });
+
+    if (deleteBeforeModalForm && inputDeleteBeforeDate) {
+      deleteBeforeModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
         const cutoffDate = inputDeleteBeforeDate.value;
         if (!cutoffDate) {
           UI.showToast('Silakan pilih batas tanggal terlebih dahulu!', 'warning');
+          inputDeleteBeforeDate.focus();
           return;
         }
+
+        closeDeleteBeforeModal(false);
 
         UI.showModal(
           'Hapus Riwayat Sebelum Tanggal',

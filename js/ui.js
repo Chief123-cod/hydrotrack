@@ -1289,17 +1289,26 @@ const UI = (() => {
   }
 
   function applyTheme(theme) {
+    let resolved;
     if (theme === 'dark') {
+      resolved = 'dark';
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.removeAttribute('data-theme-setting');
     } else if (theme === 'light') {
+      resolved = 'light';
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.removeAttribute('data-theme-setting');
     } else {
       // System: resolve OS preference
-      const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.setAttribute('data-theme', isSystemDark ? 'dark' : 'light');
+      const isSystemDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      resolved = isSystemDark ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', resolved);
       document.documentElement.setAttribute('data-theme-setting', 'system');
+    }
+
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', resolved === 'dark' ? '#0B0E14' : '#F8FAFC');
     }
   }
 

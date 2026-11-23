@@ -75,6 +75,37 @@
     overscroll-behavior: auto !important;
   }
 
+  /* Kunci scroll latar belakang & pull-to-refresh saat modal / pop-up terbuka pada mobile */
+  html.is-modal-open,
+  body.is-modal-open,
+  body.page-history.is-modal-open {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+  }
+
+  html:has(.modal-overlay.active),
+  body:has(.modal-overlay.active),
+  body.page-history:has(.modal-overlay.active) {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+  }
+
+  .modal-overlay.active {
+    overscroll-behavior: contain;
+    touch-action: none;
+  }
+
+  .modal-overlay.active .container-modal-box,
+  .modal-overlay.active .modal-box,
+  .modal-overlay.active .dark-modal-box,
+  .modal-overlay.active .theme-modal-box,
+  .modal-overlay.active .modal {
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
   /* Sembunyikan sidebar kiri dan tombol hamburger pada mobile (Gantikan dengan Bottom Nav) */
   .mobile-header {
     display: flex;

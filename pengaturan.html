@@ -21,13 +21,38 @@
     <meta name="view-transition" content="same-origin">
     <script type="speculationrules">
     {
-      "prerender": [
+      "prefetch": [
         {
           "source": "list",
           "urls": ["index.html", "riwayat.html", "analisis.html", "pengaturan.html"]
         }
       ]
     }
+    </script>
+
+    <!-- Early Synchronous Theme Script (Prevents light/dark flash on page load) -->
+    <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem('hydrotrack_settings');
+        var parsed = raw ? JSON.parse(raw) : null;
+        var pref = (parsed && parsed.theme) ? parsed.theme : 'system';
+        var resolved = pref;
+        if (pref === 'dark' || pref === 'light') {
+          document.documentElement.setAttribute('data-theme', pref);
+          document.documentElement.removeAttribute('data-theme-setting');
+        } else {
+          var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          resolved = isDark ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', resolved);
+          document.documentElement.setAttribute('data-theme-setting', 'system');
+        }
+        var metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) {
+          metaTheme.setAttribute('content', resolved === 'dark' ? '#0B0E14' : '#F8FAFC');
+        }
+      } catch (e) {}
+    })();
     </script>
 
     <!-- Stylesheets -->
@@ -384,28 +409,17 @@
                     <!-- Delete Data -->
                     <h3 class="m3-section-heading">Hapus Data</h3>
                     <div class="m3-segmented-list">
-                        <!-- 1. Delete entries before date -->
-                        <div class="m3-accordion-card m3-nav-card--top" id="accordionDeleteBefore">
-                            <button type="button" class="m3-accordion-header"
-                                data-toggle-accordion="accordionDeleteBefore">
-                                <div class="m3-nav-card__icon">
-                                    <i class="ri-calendar-close-fill"></i>
-                                </div>
-                                <div class="m3-nav-card__info">
-                                    <span class="m3-nav-card__title">Hapus catatan sebelum tanggal</span>
-                                    <span class="m3-nav-card__sub">Hapus semua riwayat catatan sebelum tanggal
-                                        tertentu</span>
-                                </div>
-                                <i class="ri-arrow-up-s-line m3-accordion-chevron"></i>
-                            </button>
-                            <div class="m3-accordion-body">
-                                <div class="m3-delete-date-row">
-                                    <input type="date" id="inputDeleteBeforeDate" class="m3-input">
-                                    <button type="button" class="m3-btn-chip m3-btn-chip--danger"
-                                        id="btnDeleteBeforeDate">Hapus</button>
-                                </div>
+                        <!-- 1. Delete entries before date (Pop-up Trigger) -->
+                        <button type="button" class="m3-nav-card m3-nav-card--top" id="btnOpenDeleteBeforeModal">
+                            <div class="m3-nav-card__icon">
+                                <i class="ri-calendar-close-fill" aria-hidden="true"></i>
                             </div>
-                        </div>
+                            <div class="m3-nav-card__info">
+                                <span class="m3-nav-card__title">Hapus catatan sebelum tanggal</span>
+                                <span class="m3-nav-card__sub">Hapus semua riwayat catatan sebelum tanggal tertentu</span>
+                            </div>
+                            <i class="ri-arrow-right-s-line m3-nav-card__arrow" aria-hidden="true"></i>
+                        </button>
 
                         <!-- 2. Delete local data only -->
                         <button type="button" class="m3-nav-card m3-nav-card--mid" id="btnDeleteLocalOnly">
@@ -816,6 +830,41 @@
                 </div>
                 <p class="m3-photo-preview-caption" id="profilePhotoPreviewCaption">Belum ada foto profil</p>
             </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL DELETE ENTRIES BEFORE DATE ========== -->
+    <div class="modal-overlay" id="deleteBeforeModalOverlay" role="dialog" aria-modal="true" aria-labelledby="deleteBeforeModalTitle">
+        <div class="container-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header">
+                <div class="m3-modal-header-main">
+                    <div class="m3-modal-danger-icon" aria-hidden="true">
+                        <i class="ri-calendar-close-fill"></i>
+                    </div>
+                    <h3 class="container-modal__title" id="deleteBeforeModalTitle">Hapus Catatan Sebelum Tanggal</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseDeleteBeforeModal" aria-label="Tutup modal">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <form id="deleteBeforeModalForm" novalidate>
+                <div class="m3-delete-before-body">
+                    <label for="inputDeleteBeforeDate" class="m3-modal-field-label">Pilih Batas Tanggal</label>
+                    <input type="date" id="inputDeleteBeforeDate" class="m3-input m3-date-modal-input" required>
+                    <p class="m3-delete-before-hint">
+                        <i class="ri-information-line" aria-hidden="true"></i>
+                        <span>Semua catatan minum sebelum tanggal ini akan dihapus. Catatan pada atau setelah tanggal tersebut tetap aman tersimpan.</span>
+                    </p>
+                </div>
+
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelDeleteBeforeModal">Batal</button>
+                    <button type="submit" class="btn-modal-delete" id="btnDeleteBeforeDate">Hapus Entri</button>
+                </div>
+            </form>
         </div>
     </div>
 
