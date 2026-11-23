@@ -1654,6 +1654,234 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    // Profile Photo Preview & Camera/Gallery Picker (Pop-up Desktop / Bottom Sheet Mobile)
+    const btnViewProfilePhoto = document.getElementById('btnViewProfilePhoto');
+    const btnUploadProfilePhoto = document.getElementById('btnUploadProfilePhoto');
+    const inputProfilePhoto = document.getElementById('inputProfilePhoto');
+    const inputProfileCamera = document.getElementById('inputProfileCamera');
+    const profilePhotoModalOverlay = document.getElementById('profilePhotoModalOverlay');
+    const btnClosePhotoModal = document.getElementById('btnClosePhotoModal');
+
+    const photoSourceModalOverlay = document.getElementById('photoSourceModalOverlay');
+    const photoSourceModalTitle = document.getElementById('photoSourceModalTitle');
+    const btnClosePhotoSourceModal = document.getElementById('btnClosePhotoSourceModal');
+    const photoSourceOptions = document.getElementById('photoSourceOptions');
+    const btnPickFromCamera = document.getElementById('btnPickFromCamera');
+    const btnPickFromGallery = document.getElementById('btnPickFromGallery');
+    const cameraCaptureView = document.getElementById('cameraCaptureView');
+    const cameraVideoStream = document.getElementById('cameraVideoStream');
+    const btnCancelCameraCapture = document.getElementById('btnCancelCameraCapture');
+    const btnCaptureSnapshot = document.getElementById('btnCaptureSnapshot');
+
+    let activeCameraStream = null;
+
+    function stopCameraStream() {
+      if (activeCameraStream) {
+        activeCameraStream.getTracks().forEach(track => track.stop());
+        activeCameraStream = null;
+      }
+      if (cameraVideoStream) {
+        cameraVideoStream.srcObject = null;
+      }
+    }
+
+    function showPhotoSourceMenu() {
+      stopCameraStream();
+      if (photoSourceModalTitle) photoSourceModalTitle.textContent = 'Ubah Foto Profil';
+      if (photoSourceOptions) photoSourceOptions.classList.remove('hidden');
+      if (cameraCaptureView) cameraCaptureView.classList.add('hidden');
+    }
+
+    function openPhotoSourceModal() {
+      if (!photoSourceModalOverlay) return;
+      showPhotoSourceMenu();
+      photoSourceModalOverlay.classList.add('active');
+    }
+
+    function closePhotoSourceModal() {
+      stopCameraStream();
+      if (photoSourceModalOverlay) photoSourceModalOverlay.classList.remove('active');
+    }
+
+    function openProfilePhotoModal() {
+      if (!profilePhotoModalOverlay) return;
+      UI.renderSettings();
+      profilePhotoModalOverlay.classList.add('active');
+    }
+
+    function closeProfilePhotoModal() {
+      if (profilePhotoModalOverlay) profilePhotoModalOverlay.classList.remove('active');
+    }
+
+    function saveCompressedProfileImage(imgSource, width, height, mirrorHorizontal = false) {
+      try {
+        const size = 512;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const minSide = Math.min(width, height);
+        const sx = (width - minSide) / 2;
+        const sy = (height - minSide) / 2;
+
+        if (mirrorHorizontal) {
+          ctx.translate(size, 0);
+          ctx.scale(-1, 1);
+        }
+        ctx.drawImage(imgSource, sx, sy, minSide, minSide, 0, 0, size, size);
+
+        const finalPhoto = canvas.toDataURL('image/jpeg', 0.86);
+        Storage.saveSettings({ profilePhoto: finalPhoto });
+        UI.updateUserInfo();
+        UI.renderSettings();
+        UI.showToast('Foto profil berhasil diperbarui! ✨', 'success');
+      } catch (err) {
+        console.error('Gagal memproses foto profil:', err);
+        UI.showToast('Gagal menyimpan foto profil.', 'danger');
+      }
+    }
+
+    function handleSelectedImageFile(file) {
+      if (!file) return;
+      if (!file.type || !file.type.startsWith('image/')) {
+        UI.showToast('Pilih file gambar yang valid!', 'warning');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const rawDataUrl = event.target?.result;
+        if (typeof rawDataUrl !== 'string') return;
+
+        const img = new Image();
+        img.onload = () => {
+          saveCompressedProfileImage(img, img.width, img.height, false);
+        };
+        img.onerror = () => {
+          UI.showToast('Gambar tidak dapat dibaca. Coba file lain.', 'warning');
+        };
+        img.src = rawDataUrl;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    if (btnViewProfilePhoto) {
+      btnViewProfilePhoto.addEventListener('click', openProfilePhotoModal);
+    }
+
+    if (btnClosePhotoModal) btnClosePhotoModal.addEventListener('click', closeProfilePhotoModal);
+    if (profilePhotoModalOverlay) {
+      profilePhotoModalOverlay.addEventListener('click', (e) => {
+        if (e.target === profilePhotoModalOverlay) closeProfilePhotoModal();
+      });
+    }
+
+    if (btnUploadProfilePhoto) {
+      btnUploadProfilePhoto.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openPhotoSourceModal();
+      });
+    }
+
+    if (btnClosePhotoSourceModal) btnClosePhotoSourceModal.addEventListener('click', closePhotoSourceModal);
+    if (photoSourceModalOverlay) {
+      photoSourceModalOverlay.addEventListener('click', (e) => {
+        if (e.target === photoSourceModalOverlay) closePhotoSourceModal();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (profilePhotoModalOverlay && profilePhotoModalOverlay.classList.contains('active')) {
+          closeProfilePhotoModal();
+        }
+        if (photoSourceModalOverlay && photoSourceModalOverlay.classList.contains('active')) {
+          closePhotoSourceModal();
+        }
+      }
+    });
+
+    // Opsi 1: Galeri (membuka galeri di HP / folder file di Desktop)
+    if (btnPickFromGallery) {
+      btnPickFromGallery.addEventListener('click', () => {
+        closePhotoSourceModal();
+        if (inputProfilePhoto) inputProfilePhoto.click();
+      });
+    }
+
+    // Opsi 2: Kamera (kamera native di HP, webcam live di Desktop dengan fallback file)
+    if (btnPickFromCamera) {
+      btnPickFromCamera.addEventListener('click', async () => {
+        const isMobileDevice = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+          || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isMobileDevice && inputProfileCamera) {
+          closePhotoSourceModal();
+          inputProfileCamera.click();
+          return;
+        }
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && cameraVideoStream) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 720 } },
+              audio: false
+            });
+            activeCameraStream = stream;
+            cameraVideoStream.srcObject = stream;
+            if (photoSourceModalTitle) photoSourceModalTitle.textContent = 'Ambil Foto Kamera';
+            if (photoSourceOptions) photoSourceOptions.classList.add('hidden');
+            if (cameraCaptureView) cameraCaptureView.classList.remove('hidden');
+          } catch (err) {
+            console.warn('Kamera tidak tersedia atau izin ditolak:', err);
+            UI.showToast('Kamera tidak dapat diakses. Pilih foto dari galeri.', 'warning');
+            if (inputProfilePhoto) {
+              closePhotoSourceModal();
+              inputProfilePhoto.click();
+            }
+          }
+        } else if (inputProfileCamera) {
+          closePhotoSourceModal();
+          inputProfileCamera.click();
+        }
+      });
+    }
+
+    if (btnCancelCameraCapture) {
+      btnCancelCameraCapture.addEventListener('click', showPhotoSourceMenu);
+    }
+
+    if (btnCaptureSnapshot && cameraVideoStream) {
+      btnCaptureSnapshot.addEventListener('click', () => {
+        if (!cameraVideoStream.videoWidth || !cameraVideoStream.videoHeight) return;
+        saveCompressedProfileImage(
+          cameraVideoStream,
+          cameraVideoStream.videoWidth,
+          cameraVideoStream.videoHeight,
+          true
+        );
+        closePhotoSourceModal();
+      });
+    }
+
+    if (inputProfilePhoto) {
+      inputProfilePhoto.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        handleSelectedImageFile(file);
+        inputProfilePhoto.value = '';
+      });
+    }
+
+    if (inputProfileCamera) {
+      inputProfileCamera.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        handleSelectedImageFile(file);
+        inputProfileCamera.value = '';
+      });
+    }
+
     // Inline Profile Name Editor
     const btnToggleEditName = document.getElementById('btnToggleEditName');
     const inlineNameEditor = document.getElementById('inlineNameEditor');

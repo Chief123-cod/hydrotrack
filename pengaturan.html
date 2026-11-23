@@ -185,7 +185,18 @@
                         <!-- Unified Hero Card (Avatar + Greeting + Name + 3 Stats Inside) -->
                         <div class="m3-profile-hero-card">
                             <div class="m3-profile-hero__top">
-                                <div class="m3-avatar-circle m3-avatar-circle--lg" id="profileInitial">P</div>
+                                <div class="m3-avatar-upload-wrap">
+                                    <input type="file" id="inputProfilePhoto" accept="image/*" class="m3-file-input-hidden">
+                                    <input type="file" id="inputProfileCamera" accept="image/*" capture="user" class="m3-file-input-hidden">
+                                    <button type="button" class="m3-avatar-view-btn" id="btnViewProfilePhoto"
+                                        aria-label="Lihat foto profil" title="Lihat Foto Profil">
+                                        <div class="m3-avatar-circle m3-avatar-circle--lg" id="profileInitial">P</div>
+                                    </button>
+                                    <button type="button" class="m3-avatar-camera-badge" id="btnUploadProfilePhoto"
+                                        aria-label="Ubah foto profil" title="Ubah Foto Profil">
+                                        <i class="ri-camera-fill" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                                 <div class="m3-profile-hero__text">
                                     <span class="m3-profile-greeting" id="profileGreeting">Selamat Pagi,</span>
                                     <div class="m3-profile-name-wrap">
@@ -733,6 +744,71 @@
                     <button type="submit" class="btn-modal-save" id="btnSubmitGenderModal">Simpan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL PILIH SUMBER FOTO PROFIL (Kamera / Galeri) ========== -->
+    <div class="modal-overlay m3-photo-source-overlay" id="photoSourceModalOverlay">
+        <div class="container-modal-box m3-photo-source-sheet">
+            <div class="modal-sheet__handle m3-photo-source-handle"></div>
+
+            <div class="m3-photo-preview-header">
+                <h3 class="container-modal__title" id="photoSourceModalTitle">Ubah Foto Profil</h3>
+                <button type="button" class="modal__close" id="btnClosePhotoSourceModal" aria-label="Tutup pilihan foto">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <!-- Pilihan Sumber: Kamera & Galeri -->
+            <div class="m3-photo-source-grid" id="photoSourceOptions">
+                <button type="button" class="m3-photo-source-option" id="btnPickFromCamera">
+                    <span class="m3-photo-source-icon m3-photo-source-icon--camera">
+                        <i class="ri-camera-fill" aria-hidden="true"></i>
+                    </span>
+                    <span class="m3-photo-source-label">Kamera</span>
+                </button>
+
+                <button type="button" class="m3-photo-source-option" id="btnPickFromGallery">
+                    <span class="m3-photo-source-icon m3-photo-source-icon--gallery">
+                        <i class="ri-image-2-fill" aria-hidden="true"></i>
+                    </span>
+                    <span class="m3-photo-source-label">Galeri</span>
+                </button>
+            </div>
+
+            <!-- Live Webcam Capture View (untuk Desktop saat memilih Kamera) -->
+            <div class="m3-camera-capture-view hidden" id="cameraCaptureView">
+                <div class="m3-camera-video-wrap">
+                    <video id="cameraVideoStream" class="m3-camera-video" autoplay playsinline muted></video>
+                </div>
+                <div class="container-modal__actions">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelCameraCapture">Kembali</button>
+                    <button type="button" class="btn-modal-save m3-photo-modal-upload-btn" id="btnCaptureSnapshot">
+                        <i class="ri-camera-fill" aria-hidden="true"></i>
+                        <span>Ambil Foto</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL PREVIEW FOTO PROFIL ========== -->
+    <div class="modal-overlay" id="profilePhotoModalOverlay">
+        <div class="container-modal-box m3-photo-preview-modal">
+            <div class="m3-photo-preview-header">
+                <h3 class="container-modal__title">Foto Profil</h3>
+                <button type="button" class="modal__close" id="btnClosePhotoModal" aria-label="Tutup pratinjau foto">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="m3-photo-preview-body">
+                <div class="m3-photo-preview-frame" id="profilePhotoPreviewFrame">
+                    <img id="profilePhotoPreviewImg" class="m3-photo-preview-img hidden" alt="Foto profil pengguna">
+                    <div class="m3-photo-preview-initial" id="profilePhotoPreviewInitial">P</div>
+                </div>
+                <p class="m3-photo-preview-caption" id="profilePhotoPreviewCaption">Belum ada foto profil</p>
+            </div>
         </div>
     </div>
 

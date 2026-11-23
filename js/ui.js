@@ -1144,6 +1144,26 @@ const UI = (() => {
       }
     }
 
+    const previewImgEl = document.getElementById('profilePhotoPreviewImg');
+    const previewInitEl = document.getElementById('profilePhotoPreviewInitial');
+    const previewCaptionEl = document.getElementById('profilePhotoPreviewCaption');
+    if (previewImgEl && previewInitEl) {
+      if (hasPhoto) {
+        previewImgEl.src = settings.profilePhoto;
+        previewImgEl.classList.remove('hidden');
+        previewInitEl.classList.add('hidden');
+        if (previewCaptionEl) previewCaptionEl.classList.add('hidden');
+      } else {
+        previewImgEl.classList.add('hidden');
+        previewInitEl.textContent = initial;
+        previewInitEl.classList.remove('hidden');
+        if (previewCaptionEl) {
+          previewCaptionEl.textContent = 'Belum ada foto profil';
+          previewCaptionEl.classList.remove('hidden');
+        }
+      }
+    }
+
     const menuNameEl = document.getElementById('menuProfileName');
     if (menuNameEl) menuNameEl.textContent = userName;
 
