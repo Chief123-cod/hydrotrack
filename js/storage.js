@@ -300,6 +300,9 @@ const Storage = (() => {
       localStorage.removeItem('hydrotrack_containers');
       localStorage.removeItem('hydrotrack_custom_containers');
       localStorage.removeItem('hydrotrack_logs_cleared_fresh');
+      try {
+        sessionStorage.removeItem('hydrotrack_welcome_draft');
+      } catch (err) {}
       return true;
     } catch (e) {
       console.error('Error resetting all data:', e);

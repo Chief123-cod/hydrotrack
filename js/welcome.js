@@ -4,6 +4,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  const DRAFT_STORAGE_KEY = 'hydrotrack_welcome_draft';
+
   // State object to hold user onboarding choices
   const onboardingData = {
     gender: 'male',
@@ -20,6 +22,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentStep = 1;
   const TOTAL_FORM_STEPS = 6; // Steps 2 through 7
+
+  function saveDraftState() {
+    try {
+      sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({
+        step: currentStep,
+        data: onboardingData
+      }));
+    } catch (e) {
+      // Ignore storage quota or private mode errors gracefully
+    }
+  }
+
+  function loadDraftState() {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return null;
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearDraftState() {
+    try {
+      sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (e) {}
+  }
 
   // DOM Elements
   const topbar = document.getElementById('welcomeTopbar');
@@ -157,8 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ==================== STEP NAVIGATION ==================== */
 
-  function goToStep(step) {
+  function goToStep(step, options = {}) {
     if (step < 1 || step > 8) return;
+    const { instant = false, save = true } = options;
 
     // Hide all steps
     document.querySelectorAll('.welcome-step').forEach(el => {
@@ -187,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       waveTrack.setAttribute('aria-valuenow', formStepIndex);
       requestAnimationFrame(() => {
-        animateWaveProgress(ratio, targetAmp, wasHidden);
+        animateWaveProgress(ratio, targetAmp, instant || wasHidden);
       });
     } else {
       topbar.style.display = 'none';
@@ -200,16 +232,35 @@ document.addEventListener('DOMContentLoaded', () => {
       updateReviewUI();
     }
 
-    // When reaching Step 8 (Final Success), update final card UI
+    // When reaching Step 8 (Final Success), recalculate & update final card UI
     if (step === 8) {
+      calculateGoals();
       updateFinalUI();
     }
 
-    // Scroll to top of container smoothly
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (save) {
+      saveDraftState();
+    }
+
+    // Scroll to top of container smoothly (skip smooth animation on instant restore)
+    if (!instant) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   /* ==================== OPTION CARD SELECTION ==================== */
+
+  function syncOptionCardSelection(stepId, fieldName) {
+    const stepEl = document.getElementById(stepId);
+    if (!stepEl) return;
+    const cards = stepEl.querySelectorAll('.welcome-option-card');
+    cards.forEach(card => {
+      const isSelected = card.getAttribute('data-value') === onboardingData[fieldName];
+      card.classList.toggle('selected', isSelected);
+      const radio = card.querySelector('input[type="radio"]');
+      if (radio) radio.checked = isSelected;
+    });
+  }
 
   function setupOptionCardSelectors(stepId, fieldName) {
     const stepEl = document.getElementById(stepId);
@@ -226,6 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const radio = card.querySelector('input[type="radio"]');
         if (radio) radio.checked = true;
+
+        saveDraftState();
       });
     });
   }
@@ -270,8 +323,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (inputWake && inputSleep) {
-    inputWake.addEventListener('change', updateAwakeDuration);
-    inputSleep.addEventListener('change', updateAwakeDuration);
+    inputWake.addEventListener('change', () => {
+      updateAwakeDuration();
+      saveDraftState();
+    });
+    inputSleep.addEventListener('change', () => {
+      updateAwakeDuration();
+      saveDraftState();
+    });
     updateAwakeDuration();
   }
 
@@ -321,6 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!ctx) {
             onboardingData.profilePhoto = rawDataUrl;
             updateAvatarDisplay();
+            saveDraftState();
             return;
           }
 
@@ -332,6 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           onboardingData.profilePhoto = canvas.toDataURL('image/jpeg', 0.85);
           updateAvatarDisplay();
+          saveDraftState();
         } catch (err) {
           console.error('Failed to compress profile photo:', err);
         }
@@ -397,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Sync avatar initial if no photo uploaded
       updateAvatarDisplay();
+      saveDraftState();
     });
 
     inputName.addEventListener('keydown', (e) => {
@@ -581,8 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('hydrotrack_settings', JSON.stringify(settingsPayload));
       }
 
-      // Clear any flags
+      // Clear any flags & temporary onboarding draft
       localStorage.removeItem('hydrotrack_onboarding_needed');
+      clearDraftState();
 
       // Initialize empty logs if none exist
       if (!localStorage.getItem('hydrotrack_logs')) {
@@ -596,5 +659,41 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'index.html';
     }
   });
+
+  /* ==================== RESTORE LAST STEP ON REFRESH ==================== */
+  const savedDraft = loadDraftState();
+  if (savedDraft) {
+    if (savedDraft.data && typeof savedDraft.data === 'object') {
+      Object.assign(onboardingData, savedDraft.data);
+    }
+
+    // Restore option cards (Steps 2 - 4)
+    syncOptionCardSelection('step2', 'gender');
+    syncOptionCardSelection('step3', 'ageGroup');
+    syncOptionCardSelection('step4', 'activityLevel');
+
+    // Restore wake & sleep inputs (Step 5)
+    if (inputWake && onboardingData.wakeTime) inputWake.value = onboardingData.wakeTime;
+    if (inputSleep && onboardingData.sleepTime) inputSleep.value = onboardingData.sleepTime;
+    if (inputWake && inputSleep) updateAwakeDuration();
+
+    // Restore name & profile photo (Step 6)
+    if (inputName) {
+      const restoredName = typeof onboardingData.userName === 'string' ? onboardingData.userName : '';
+      inputName.value = restoredName;
+      if (charCounter) {
+        charCounter.textContent = `${restoredName.length}/15 karakter`;
+      }
+      updateAvatarDisplay();
+    }
+
+    // Stay on the exact step the user was on before refreshing
+    const restoredStep = parseInt(savedDraft.step, 10);
+    if (restoredStep >= 1 && restoredStep <= 8) {
+      goToStep(restoredStep, { instant: true, save: false });
+    }
+  }
+  // Lepas atribut pre-paint agar transisi tombol Lanjut & panah kembali berjalan normal
+  document.documentElement.removeAttribute('data-welcome-step');
 
 });

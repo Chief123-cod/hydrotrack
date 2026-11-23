@@ -182,6 +182,33 @@ body.welcome-body {
   transform: translateY(0);
 }
 
+/* Pre-paint step restore: mencegah kedipan card Step 1 saat halaman di-refresh */
+html[data-welcome-step] #step1 {
+  display: none !important;
+}
+
+html[data-welcome-step="2"] #step2,
+html[data-welcome-step="3"] #step3,
+html[data-welcome-step="4"] #step4,
+html[data-welcome-step="5"] #step5,
+html[data-welcome-step="6"] #step6,
+html[data-welcome-step="7"] #step7,
+html[data-welcome-step="8"] #step8 {
+  display: flex;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+html[data-welcome-step="2"] #welcomeTopbar,
+html[data-welcome-step="3"] #welcomeTopbar,
+html[data-welcome-step="4"] #welcomeTopbar,
+html[data-welcome-step="5"] #welcomeTopbar,
+html[data-welcome-step="6"] #welcomeTopbar,
+html[data-welcome-step="7"] #welcomeTopbar {
+  display: flex !important;
+}
+
 /* Header typography for steps */
 .welcome-step-header {
   margin-bottom: 14px;

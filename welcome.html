@@ -20,6 +20,21 @@
   <!-- Base & Welcome CSS -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/welcome.css">
+
+  <!-- Early Step Restore (Prevents Step 1 card flash on page refresh) -->
+  <script>
+    (function () {
+      try {
+        var raw = sessionStorage.getItem('hydrotrack_welcome_draft');
+        if (!raw) return;
+        var parsed = JSON.parse(raw);
+        var step = parsed && parseInt(parsed.step, 10);
+        if (step >= 2 && step <= 8) {
+          document.documentElement.setAttribute('data-welcome-step', String(step));
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body class="welcome-body">
