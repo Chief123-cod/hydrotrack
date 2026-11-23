@@ -1,0 +1,15 @@
+name = "hydrotrack-push"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[kv_namespaces]]
+binding = "HYDRO_PUSH_KV"
+id = "41ae1614c1604e518292217b6f1d7d8e"
+# preview_id = "REPLACE_WITH_YOUR_PREVIEW_KV_ID"
+
+[vars]
+VAPID_SUBJECT = "mailto:admin@hydrotrack.app"
+ALLOWED_ORIGIN = "*"

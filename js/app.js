@@ -47,6 +47,18 @@ document.addEventListener('DOMContentLoaded', () => {
   UI.updateDateDisplay();
   UI.updateUserInfo();
 
+  // Helper to sync hydration progress to local scheduler & Cloudflare Web Push server
+  function notifyHydrationSync() {
+    if (typeof HydroNotifications !== 'undefined' && typeof HydroNotifications.syncHydrationProgress === 'function') {
+      HydroNotifications.syncHydrationProgress();
+    }
+  }
+
+  // Initialize Notification & PWA Push Controller across all pages
+  if (typeof HydroNotifications !== 'undefined' && typeof HydroNotifications.init === 'function') {
+    HydroNotifications.init();
+  }
+
   // Render dashboard if on dashboard page (index.html)
   if (document.getElementById('drinkLogList') || document.getElementById('progressBarFill')) {
     UI.refreshDashboard();
@@ -214,6 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (document.getElementById('settingsProfileForm') || document.getElementById('view-settings')) {
         if (typeof UI.renderSettings === 'function') {
           UI.renderSettings();
+        }
+        if (typeof HydroNotifications !== 'undefined' && typeof HydroNotifications.renderSettingsUI === 'function') {
+          HydroNotifications.renderSettingsUI();
         }
       }
     }
@@ -536,6 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
       UI.closeHistoryForm();
       refreshHistory();
       UI.refreshDashboard();
+      notifyHydrationSync();
     });
   }
 
@@ -559,6 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
           Storage.deleteLog(logId);
           refreshHistory();
           UI.refreshDashboard();
+          notifyHydrationSync();
           UI.showToast('Catatan berhasil dihapus.', 'warning');
         }
       );
@@ -745,6 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       Storage.addLog(amount, drinkType, '', null, containerIcon);
       UI.refreshDashboard();
+      notifyHydrationSync();
       UI.showToast(`${amount} ml ${typeInfo.label} (${cupName}) berhasil dicatat! 💧`, 'success');
 
       // Check if daily goal reached
@@ -1159,6 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       UI.refreshDashboard();
       if (typeof refreshHistory === 'function') refreshHistory();
+      notifyHydrationSync();
       if (editLogModalOverlay) editLogModalOverlay.classList.remove('active');
       UI.showToast('Catatan berhasil diperbarui! ✨', 'success');
     });
@@ -1197,6 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Storage.deleteLog(pendingDeleteLogId);
       UI.refreshDashboard();
       if (typeof refreshHistory === 'function') refreshHistory();
+      notifyHydrationSync();
       if (deleteLogModalOverlay) deleteLogModalOverlay.classList.remove('active');
       pendingDeleteLogId = null;
       UI.showToast('Catatan berhasil dihapus! 🗑️', 'info');
@@ -1251,6 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
               Storage.deleteLog(logId);
               UI.refreshDashboard();
               refreshHistory();
+              notifyHydrationSync();
               UI.showToast('Catatan berhasil dihapus.', 'warning');
             }
           );
@@ -1495,6 +1516,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const typeInfo = Storage.DRINK_TYPES[type] || Storage.DRINK_TYPES.water;
       Storage.addLog(amount, type, '', dateObj.toISOString());
       UI.refreshDashboard();
+      notifyHydrationSync();
       if (customIntakeModalOverlay) customIntakeModalOverlay.classList.remove('active');
       UI.showToast(`${amount} ml ${typeInfo.label} berhasil dicatat! ✨`, 'success');
     });
@@ -1744,6 +1766,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       refreshHistory();
       UI.refreshDashboard();
+      notifyHydrationSync();
       if (pastEntryModalOverlay) pastEntryModalOverlay.classList.remove('active');
       UI.showToast(`${amount} ml ${typeInfo.label} berhasil ditambahkan!`, 'success');
     });
@@ -1769,6 +1792,9 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ==================== SETTINGS PAGE CONTROLLER ==================== */
   function initSettingsPage() {
     UI.renderSettings();
+    if (typeof HydroNotifications !== 'undefined' && typeof HydroNotifications.initSettingsUI === 'function') {
+      HydroNotifications.initSettingsUI();
+    }
 
     // 0. Sub-view Navigation (Main Settings Menu <-> Profile / Appearance / Data / About)
     const allSettingsViews = document.querySelectorAll('.m3-settings-view');
@@ -2119,6 +2145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Storage.saveSettings({ userName: newName });
         UI.updateUserInfo();
         UI.renderSettings();
+        notifyHydrationSync();
         closeEditNameModal();
         UI.showToast('Nama profil berhasil diperbarui! ✨', 'success');
       });
@@ -2240,6 +2267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.renderSettings();
         UI.updateUserInfo();
         if (UI.refreshDashboard) UI.refreshDashboard();
+        notifyHydrationSync();
         closeGoalModal();
         UI.showToast(`Target harian ${val.toLocaleString('id-ID')} ml berhasil disimpan! ✨`, 'success');
       });
@@ -2473,6 +2501,7 @@ document.addEventListener('DOMContentLoaded', () => {
           () => {
             const deletedCount = Storage.deleteLogsBeforeDate(cutoffDate);
             UI.renderSettings();
+            notifyHydrationSync();
             if (deletedCount > 0) {
               UI.showToast(`Berhasil menghapus ${deletedCount} entri riwayat lama.`, 'success');
             } else {
@@ -2494,6 +2523,7 @@ document.addEventListener('DOMContentLoaded', () => {
           () => {
             Storage.deleteLocalLogsOnly();
             UI.renderSettings();
+            notifyHydrationSync();
             UI.showToast('Seluruh riwayat catatan lokal berhasil dihapus!', 'success');
           }
         );

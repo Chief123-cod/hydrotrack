@@ -2,3 +2,8 @@
 rules
 WORKFLOW.md
 PRD.md
+node_modules/
+push-server/node_modules/
+push-server/.wrangler/
+push-server/.dev.vars
+.dev.vars

@@ -46,6 +46,17 @@
   .contributors-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Notification Settings Reflow (Tablet & Mobile <= 1024px) */
+  #subview-notifications {
+    --notif-card-bg: #FFFFFF;
+    --notif-card-inset: #F8FAFC;
+  }
+
+  .notif-settings-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 /* ---------- Tablet (max-width: 768px) ---------- */
@@ -2426,5 +2437,110 @@
 
   .about-badges {
     justify-content: center;
+  }
+
+  /* Notification Settings Mobile Reflow (<= 768px, safe down to 360px) */
+  #subview-notifications {
+    gap: 16px;
+  }
+
+  .notif-master-card,
+  .notif-panel,
+  .notif-push-card {
+    padding: 16px;
+    border-radius: 18px;
+    gap: 15px;
+  }
+
+  .notif-master-card__top {
+    gap: 12px;
+  }
+
+  .notif-master-card__lead {
+    gap: 12px;
+  }
+
+  .notif-master-card__icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .notif-master-card__title {
+    font-size: 16px;
+  }
+
+  .notif-permission-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notif-btn-inline {
+    width: 100%;
+  }
+
+  .notif-preset-chip {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .notif-custom-interval-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .notif-apply-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .notif-sound-type-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .notif-sound-type-card__body {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .notif-recorder-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .notif-action-btn--record,
+  .notif-rec-timer {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .notif-server-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  #btnSavePushServer {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .notif-test-actions,
+  .notif-pwa-actions {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .notif-action-btn {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .notif-pwa-card {
+    padding: 14px;
   }
 }

@@ -74,7 +74,24 @@ const Storage = (() => {
     activityLevel: 'moderate',
     gender: 'prefer-not-to-say',
     theme: 'system',
-    enableSound: true
+    enableSound: true,
+    notifications: {
+      enabled: false,
+      mode: 'fixed',
+      startTime: '07:00',
+      endTime: '21:00',
+      intervalMinutes: 120,
+      pauseWhenGoalMet: true,
+      soundType: 'default',
+      defaultSoundId: 'water-drop',
+      customAudioName: '',
+      customVoiceName: '',
+      customVoiceDuration: 0,
+      pushServerUrl: 'https://hydrotrack-push.faithpontoh182.workers.dev',
+      pushConnected: false,
+      lastScheduledAt: null,
+      lastNotifiedSlot: ''
+    }
   };
 
   // Drink Type Labels & Icons
@@ -341,6 +358,11 @@ const Storage = (() => {
       try {
         sessionStorage.removeItem('hydrotrack_welcome_draft');
       } catch (err) {}
+      try {
+        if (typeof window !== 'undefined' && window.HydroNotifications && typeof window.HydroNotifications.resetNotificationAudioData === 'function') {
+          window.HydroNotifications.resetNotificationAudioData();
+        }
+      } catch (err) {}
       return true;
     } catch (e) {
       console.error('Error resetting all data:', e);
@@ -530,15 +552,31 @@ const Storage = (() => {
 
   /* ==================== SETTINGS ==================== */
 
-  // Get settings (with defaults)
+  // Get settings (with defaults and deep merge for notifications)
   function getSettings() {
-    return { ...DEFAULT_SETTINGS, ..._parse(KEYS.settings, {}) };
+    const stored = _parse(KEYS.settings, {});
+    const mergedNotifications = {
+      ...DEFAULT_SETTINGS.notifications,
+      ...(stored && typeof stored.notifications === 'object' && stored.notifications ? stored.notifications : {})
+    };
+    return {
+      ...DEFAULT_SETTINGS,
+      ...stored,
+      notifications: mergedNotifications
+    };
   }
 
   // Save settings
   function saveSettings(updates) {
     const current = getSettings();
-    const merged = { ...current, ...updates };
+    const mergedNotifications = updates && typeof updates.notifications === 'object' && updates.notifications
+      ? { ...current.notifications, ...updates.notifications }
+      : current.notifications;
+    const merged = {
+      ...current,
+      ...updates,
+      notifications: mergedNotifications
+    };
     _save(KEYS.settings, merged);
     return merged;
   }
