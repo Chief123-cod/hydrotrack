@@ -1668,6 +1668,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const photoSourceOptions = document.getElementById('photoSourceOptions');
     const btnPickFromCamera = document.getElementById('btnPickFromCamera');
     const btnPickFromGallery = document.getElementById('btnPickFromGallery');
+    const btnDeleteProfilePhoto = document.getElementById('btnDeleteProfilePhoto');
     const cameraCaptureView = document.getElementById('cameraCaptureView');
     const cameraVideoStream = document.getElementById('cameraVideoStream');
     const btnCancelCameraCapture = document.getElementById('btnCancelCameraCapture');
@@ -1688,7 +1689,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function showPhotoSourceMenu() {
       stopCameraStream();
       if (photoSourceModalTitle) photoSourceModalTitle.textContent = 'Ubah Foto Profil';
-      if (photoSourceOptions) photoSourceOptions.classList.remove('hidden');
+      if (photoSourceOptions) {
+        const currentSettings = Storage.getSettings();
+        const hasPhoto = typeof currentSettings.profilePhoto === 'string' && currentSettings.profilePhoto.startsWith('data:image/');
+        if (btnDeleteProfilePhoto) {
+          btnDeleteProfilePhoto.classList.toggle('hidden', !hasPhoto);
+        }
+        photoSourceOptions.classList.toggle('has-delete', hasPhoto);
+        photoSourceOptions.classList.remove('hidden');
+      }
       if (cameraCaptureView) cameraCaptureView.classList.add('hidden');
     }
 
@@ -1808,6 +1817,17 @@ document.addEventListener('DOMContentLoaded', () => {
       btnPickFromGallery.addEventListener('click', () => {
         closePhotoSourceModal();
         if (inputProfilePhoto) inputProfilePhoto.click();
+      });
+    }
+
+    // Opsi 3: Hapus Foto Profil (kembali ke inisial huruf)
+    if (btnDeleteProfilePhoto) {
+      btnDeleteProfilePhoto.addEventListener('click', () => {
+        Storage.saveSettings({ profilePhoto: '' });
+        UI.updateUserInfo();
+        UI.renderSettings();
+        closePhotoSourceModal();
+        UI.showToast('Foto profil berhasil dihapus.', 'info');
       });
     }
 
