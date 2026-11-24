@@ -1,5 +1,5 @@
-const SW_VERSION = 'hydrotrack-sw-v2';
-const CACHE_NAME = 'hydrotrack-shell-v2';
+const SW_VERSION = 'hydrotrack-sw-v3';
+const CACHE_NAME = 'hydrotrack-shell-v3';
 
 const DEFAULT_TITLE = 'Waktunya Minum Air';
 const DEFAULT_BODY = 'Ambil segelas air sekarang agar asupan cairan harianmu tetap terjaga.';

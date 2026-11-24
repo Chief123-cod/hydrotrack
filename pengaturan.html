@@ -613,63 +613,6 @@
                             </div>
                         </section>
                     </div>
-
-                    <!-- Bottom Full-Width Push & PWA Card -->
-                    <section class="notif-push-card" aria-labelledby="notifPushCardHeading">
-                        <div class="notif-panel__header">
-                            <div class="notif-panel__icon" aria-hidden="true">
-                                <i class="ri-cloud-line"></i>
-                            </div>
-                            <h2 class="notif-panel__title" id="notifPushCardHeading">Push Background 24/7 &amp; Instalasi Aplikasi</h2>
-                        </div>
-
-                        <!-- Server Connection Block -->
-                        <div class="notif-push-block">
-                            <div class="notif-server-status-row">
-                                <span class="notif-server-badge" id="pushServerStatusBadge">Mode Lokal</span>
-                                <span class="notif-server-desc" id="pushServerStatusDesc">Belum terhubung ke server push Cloudflare (mode lokal aktif).</span>
-                            </div>
-                            <label for="inputPushServerUrl" class="m3-modal-field-label">URL Push Server (Cloudflare Worker)</label>
-                            <div class="notif-server-row">
-                                <input type="url" id="inputPushServerUrl" class="m3-input" placeholder="https://hydrotrack-push.faithpontoh182.workers.dev" autocomplete="off">
-                                <button type="button" class="m3-btn-chip m3-btn-chip--primary" id="btnSavePushServer">Hubungkan</button>
-                            </div>
-                        </div>
-
-                        <!-- Notification Test Actions -->
-                        <div class="notif-push-block">
-                            <div class="notif-test-actions">
-                                <button type="button" class="notif-action-btn notif-action-btn--secondary" id="btnTestNotifNow">
-                                    <i class="ri-notification-badge-line" aria-hidden="true"></i>
-                                    <span>Tes Bunyi &amp; Pesan Sekarang</span>
-                                </button>
-                                <button type="button" class="notif-action-btn notif-action-btn--primary" id="btnTestPushDelayed">
-                                    <i class="ri-send-plane-fill" aria-hidden="true"></i>
-                                    <span>Uji Push Tutup Aplikasi (15 dtk)</span>
-                                </button>
-                            </div>
-                            <p class="notif-test-feedback hidden" id="testPushFeedback" role="status" aria-live="polite"></p>
-                        </div>
-
-                        <!-- PWA Install & Retry Fallback Card -->
-                        <div class="notif-pwa-card" id="pwaInstallCard">
-                            <p class="notif-pwa-status" id="pwaInstallStatusText">Jika notifikasi tidak masuk saat browser ditutup, install HydroTrack ke layar utama lalu coba ulang aktivasi notifikasi.</p>
-                            <div class="notif-pwa-actions">
-                                <button type="button" class="notif-action-btn notif-action-btn--outline" id="btnInstallPwa">
-                                    <i class="ri-install-line" aria-hidden="true"></i>
-                                    <span>Install Aplikasi dari Web</span>
-                                </button>
-                                <button type="button" class="notif-action-btn notif-action-btn--secondary" id="btnRetryPushSetup">
-                                    <i class="ri-refresh-line" aria-hidden="true"></i>
-                                    <span>Coba Ulang Notifikasi</span>
-                                </button>
-                            </div>
-                            <div class="notif-ios-hint hidden" id="iosInstallHint">
-                                <i class="ri-smartphone-line" aria-hidden="true"></i>
-                                <p>Pengguna iPhone/iPad (Safari): ketuk ikon Bagikan di browser, pilih &quot;Tambahkan ke Layar Utama&quot;, lalu buka HydroTrack dari ikon layar utama dan tekan Coba Ulang Notifikasi.</p>
-                            </div>
-                        </div>
-                    </section>
                 </div>
 
                 <!-- ==========================================

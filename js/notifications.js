@@ -1743,7 +1743,8 @@ const HydroNotifications = (() => {
 
   function queueScheduleSyncToServer(options = {}) {
     const config = getSettings();
-    if (!config.pushServerUrl || !config.pushConnected) return;
+    const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+    if (!serverUrl) return;
 
     if (syncScheduleDebounceId) {
       clearTimeout(syncScheduleDebounceId);
@@ -1752,13 +1753,19 @@ const HydroNotifications = (() => {
 
     const executeSync = async () => {
       const latest = getSettings();
-      if (!latest.pushServerUrl || !latest.pushConnected) return;
+      const targetUrl = latest.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+      if (!targetUrl) return;
 
-      const subscription = await getActivePushSubscription();
+      let subscription = await getActivePushSubscription();
+      if ((!latest.pushConnected || !subscription) && getNotificationPermission() === 'granted') {
+        const connected = await connectAndSubscribePush(targetUrl, { requestPermission: false });
+        if (connected.ok) return;
+        subscription = await getActivePushSubscription();
+      }
       if (!subscription) return;
 
       try {
-        const res = await fetchWithTimeout(`${latest.pushServerUrl}/subscribe`, {
+        const res = await fetchWithTimeout(`${targetUrl}/subscribe`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           keepalive: Boolean(options.keepalive),
@@ -1791,7 +1798,8 @@ const HydroNotifications = (() => {
     renderSettingsUI();
 
     const config = getSettings();
-    if (!config.pushServerUrl || !config.pushConnected) return;
+    const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+    if (!serverUrl) return;
 
     if (syncProgressDebounceId) {
       clearTimeout(syncProgressDebounceId);
@@ -1800,14 +1808,20 @@ const HydroNotifications = (() => {
     syncProgressDebounceId = setTimeout(async () => {
       syncProgressDebounceId = null;
       const latest = getSettings();
-      if (!latest.pushServerUrl || !latest.pushConnected) return;
+      const targetUrl = latest.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+      if (!targetUrl) return;
 
-      const subscription = await getActivePushSubscription();
+      let subscription = await getActivePushSubscription();
+      if ((!latest.pushConnected || !subscription) && getNotificationPermission() === 'granted') {
+        const connected = await connectAndSubscribePush(targetUrl, { requestPermission: false });
+        if (connected.ok) return;
+        subscription = await getActivePushSubscription();
+      }
       if (!subscription) return;
 
       const payload = buildPushPayload(subscription, latest);
       try {
-        const res = await fetchWithTimeout(`${latest.pushServerUrl}/sync-progress`, {
+        const res = await fetchWithTimeout(`${targetUrl}/sync-progress`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1820,7 +1834,7 @@ const HydroNotifications = (() => {
 
         // Re-register automatically if KV record expired or server was reset.
         if (res.status === 404) {
-          await fetchWithTimeout(`${latest.pushServerUrl}/subscribe`, {
+          await fetchWithTimeout(`${targetUrl}/subscribe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -2393,7 +2407,7 @@ const HydroNotifications = (() => {
         badgeLabel = 'Dijeda (100%)';
         badgeStatus = 'active';
       } else {
-        badgeLabel = config.pushConnected ? 'Aktif (Cloud Push)' : 'Aktif';
+        badgeLabel = 'Aktif';
         badgeStatus = 'active';
       }
     }
@@ -2426,8 +2440,7 @@ const HydroNotifications = (() => {
         if (nextInfo.pausedByGoal) {
           nextTextEl.textContent = `Target hari ini tercapai (100%). Pengingat dilanjutkan ${dayLabel.toLowerCase()}, ${hh}:${mm}.`;
         } else {
-          const deliveryNote = config.pushConnected ? 'Push Background 24/7' : 'Mode Lokal';
-          nextTextEl.textContent = `Pengingat berikutnya: ${dayLabel}, ${hh}:${mm} (${deliveryNote})`;
+          nextTextEl.textContent = `Pengingat berikutnya: ${dayLabel}, ${hh}:${mm}`;
         }
       }
     }
