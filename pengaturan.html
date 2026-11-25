@@ -409,7 +409,7 @@
                             </div>
                         </button>
 
-                        <button type="button" class="notif-master-card notif-trigger-card" id="btnDemoTestNotif">
+                        <button type="button" class="notif-master-card notif-trigger-card" id="btnOpenNotifTestModal" aria-haspopup="dialog" aria-controls="notifTestModalOverlay">
                             <div class="notif-master-card__top">
                                 <div class="notif-master-card__lead">
                                     <div class="notif-master-card__icon" aria-hidden="true">
@@ -419,7 +419,7 @@
                                         <div class="notif-master-card__title-row">
                                             <h2 class="notif-master-card__title">Tes Notifikasi</h2>
                                         </div>
-                                        <p class="notif-next-schedule" id="notifDemoTestStatusText">Kirim contoh push notifikasi untuk demo</p>
+                                        <p class="notif-next-schedule" id="notifDemoTestStatusText">Uji tutup aplikasi, nada dering &amp; pesan kustom</p>
                                     </div>
                                 </div>
                                 <div class="notif-master-card__control">
@@ -1144,6 +1144,80 @@
 
             <div class="container-modal__actions notif-modal__actions">
                 <button type="button" class="btn-modal-save" id="btnDoneNotifSoundModal">Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL TES NOTIFIKASI & KELOLA PESAN ========== -->
+    <div class="modal-overlay notif-modal-overlay" id="notifTestModalOverlay" role="dialog" aria-modal="true" aria-labelledby="notifPanelTestHeading">
+        <div class="container-modal-box notif-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header notif-modal__header">
+                <div class="notif-modal__header-lead">
+                    <div class="notif-panel__icon" aria-hidden="true">
+                        <i class="ri-send-plane-2-line"></i>
+                    </div>
+                    <h3 class="container-modal__title" id="notifPanelTestHeading">Tes Notifikasi</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseNotifTestModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="notif-modal__body">
+                <!-- Pilihan Mode Tes Demo -->
+                <div class="notif-field">
+                    <span class="notif-field-label">Pilih Mode Uji Coba</span>
+                    <div class="notif-demo-actions-grid">
+                        <button type="button" class="notif-demo-btn notif-demo-btn--secondary" id="btnDemoTestNow">
+                            <i class="ri-volume-up-line" aria-hidden="true"></i>
+                            <span class="notif-demo-btn__text">
+                                <strong>Tes Sekarang</strong>
+                                <small>Pesan &amp; nada dering</small>
+                            </span>
+                        </button>
+                        <button type="button" class="notif-demo-btn notif-demo-btn--primary" id="btnDemoTestDelayed">
+                            <i class="ri-timer-flash-line" aria-hidden="true"></i>
+                            <span class="notif-demo-btn__text">
+                                <strong>Tutup Aplikasi</strong>
+                                <small>Push demo 15 detik</small>
+                            </span>
+                        </button>
+                    </div>
+                    <p class="notif-test-feedback hidden" id="notifDemoFeedback" role="status" aria-live="polite"></p>
+                </div>
+
+                <!-- Form Tambah / Edit Pesan Notifikasi -->
+                <div class="notif-field">
+                    <div class="notif-msg-section-head">
+                        <span class="notif-field-label" id="notifMsgFormLabel">Tambah Pesan Baru</span>
+                    </div>
+                    <div class="notif-msg-composer">
+                        <input type="text" id="inputNotifMsgTitle" class="m3-input" placeholder="Judul pesan (cth: Waktunya Minum Air!)" maxlength="80" autocomplete="off">
+                        <textarea id="inputNotifMsgBody" class="m3-input notif-textarea" rows="2" placeholder="Tulis isi pesan notifikasi..." maxlength="220"></textarea>
+                        <div class="notif-msg-composer__actions">
+                            <button type="button" class="notif-action-btn notif-action-btn--secondary notif-msg-cancel-btn hidden" id="btnCancelEditNotifMessage">Batal</button>
+                            <button type="button" class="m3-btn-chip m3-btn-chip--primary notif-msg-save-btn" id="btnSaveNotifMessage">
+                                <i class="ri-add-line" aria-hidden="true"></i>
+                                <span>Tambah Pesan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daftar Pesan Kustom (Pilih untuk Tes / Edit / Hapus) -->
+                <div class="notif-field">
+                    <div class="notif-msg-section-head">
+                        <span class="notif-field-label">Daftar Pesan Notifikasi</span>
+                        <span class="notif-msg-count" id="notifCustomMsgCount">0 pesan</span>
+                    </div>
+                    <div class="notif-msg-list" id="notifCustomMsgList"></div>
+                </div>
+            </div>
+
+            <div class="container-modal__actions notif-modal__actions">
+                <button type="button" class="btn-modal-save" id="btnDoneNotifTestModal">Selesai</button>
             </div>
         </div>
     </div>

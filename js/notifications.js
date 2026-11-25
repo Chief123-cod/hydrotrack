@@ -12,6 +12,19 @@ const HydroNotifications = (() => {
   const MAX_VOICE_SECONDS = 15;
   const ALLOWED_AUDIO_EXTENSIONS = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.webm', '.flac', '.opus'];
 
+  const STARTER_CUSTOM_MESSAGES = Object.freeze([
+    {
+      id: 'starter-1',
+      title: 'Waktunya Minum Air!',
+      body: 'Rehat sebentar dan minum segelas air putih agar tubuh tetap segar dan fokus.'
+    },
+    {
+      id: 'starter-2',
+      title: 'Jangan Lupa Hidrasi',
+      body: 'Jaga ritme minum airmu hari ini supaya target cairan harian segera tercapai.'
+    }
+  ]);
+
   const DEFAULT_NOTIFICATION_SETTINGS = Object.freeze({
     enabled: false,
     mode: 'fixed',
@@ -24,6 +37,9 @@ const HydroNotifications = (() => {
     customAudioName: '',
     customVoiceName: '',
     customVoiceDuration: 0,
+    customMessages: [],
+    customMessagesInitialized: false,
+    selectedDemoMessageId: '',
     pushServerUrl: '',
     pushConnected: false,
     lastScheduledAt: null,
@@ -207,6 +223,39 @@ const HydroNotifications = (() => {
     merged.customAudioName = typeof merged.customAudioName === 'string' ? merged.customAudioName : '';
     merged.customVoiceName = typeof merged.customVoiceName === 'string' ? merged.customVoiceName : '';
     merged.customVoiceDuration = Math.max(0, Number(merged.customVoiceDuration) || 0);
+
+    const hasCustomInit = Boolean(raw && typeof raw === 'object' && raw.customMessagesInitialized === true);
+    const rawMsgList = Array.isArray(merged.customMessages)
+      ? merged.customMessages
+      : [];
+    const cleanedMessages = [];
+    for (let i = 0; i < rawMsgList.length && cleanedMessages.length < 20; i++) {
+      const item = rawMsgList[i];
+      if (!item || typeof item !== 'object') continue;
+      const title = typeof item.title === 'string' ? item.title.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 80) : '';
+      const body = typeof item.body === 'string' ? item.body.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 220) : '';
+      if (!title && !body) continue;
+      cleanedMessages.push({
+        id: typeof item.id === 'string' && item.id.trim() ? item.id.trim().slice(0, 40) : `msg-${i + 1}`,
+        title: title || 'Pengingat Hidrasi',
+        body: body || title
+      });
+    }
+
+    if (!hasCustomInit && cleanedMessages.length === 0) {
+      merged.customMessages = STARTER_CUSTOM_MESSAGES.map((m) => ({ ...m }));
+      merged.customMessagesInitialized = true;
+    } else {
+      merged.customMessages = cleanedMessages;
+      merged.customMessagesInitialized = true;
+    }
+
+    const rawSelId = typeof merged.selectedDemoMessageId === 'string' ? merged.selectedDemoMessageId.trim() : '';
+    const hasSel = rawSelId && merged.customMessages.some((m) => m.id === rawSelId);
+    merged.selectedDemoMessageId = hasSel
+      ? rawSelId
+      : (merged.customMessages[0] ? merged.customMessages[0].id : '');
+
     merged.pushServerUrl = typeof merged.pushServerUrl === 'string' ? merged.pushServerUrl.trim() : '';
     merged.pushConnected = Boolean(merged.pushConnected && merged.pushServerUrl);
     merged.lastScheduledAt = typeof merged.lastScheduledAt === 'string' ? merged.lastScheduledAt : null;
@@ -1021,6 +1070,22 @@ const HydroNotifications = (() => {
       body = closeOptions[variantSeed % closeOptions.length];
     }
 
+    const config = getSettings();
+    if (Array.isArray(config.customMessages) && config.customMessages.length > 0) {
+      const totalMinutesNow = hour * 60 + now.getMinutes();
+      const step = Math.floor(totalMinutesNow / Math.max(1, config.intervalMinutes || 60));
+      const chosen = config.customMessages[step % config.customMessages.length];
+      return {
+        title: chosen.title,
+        body: chosen.body,
+        period,
+        todayTotal,
+        dailyGoal,
+        remaining,
+        percentage
+      };
+    }
+
     return {
       title,
       body,
@@ -1558,6 +1623,7 @@ const HydroNotifications = (() => {
         intervalMinutes: config.intervalMinutes,
         pauseWhenGoalMet: Boolean(config.pauseWhenGoalMet),
         soundLabel: soundLabel,
+        customMessages: Array.isArray(config.customMessages) ? config.customMessages : [],
         timeZone: timeZone,
         timezoneOffsetMinutes: new Date().getTimezoneOffset()
       },
@@ -1947,22 +2013,129 @@ const HydroNotifications = (() => {
 
   let isSendingDemoNotif = false;
   let demoStatusResetTimerId = null;
+  let editingCustomMessageId = null;
 
-  function setDemoTestStatusText(text, autoResetMs = 0) {
-    if (demoStatusResetTimerId) {
-      clearTimeout(demoStatusResetTimerId);
-      demoStatusResetTimerId = null;
+  function setDemoFeedback(message, state = 'info') {
+    const el = document.getElementById('notifDemoFeedback');
+    if (!el) return;
+    if (!message) {
+      el.textContent = '';
+      el.classList.add('hidden');
+      el.removeAttribute('data-status');
+      return;
     }
-    const statusEl = document.getElementById('notifDemoTestStatusText');
-    if (statusEl) {
-      statusEl.textContent = text;
+    el.textContent = message;
+    const mapped = state === 'danger' ? 'error' : state;
+    if (mapped === 'success' || mapped === 'warning' || mapped === 'error') {
+      el.dataset.status = mapped;
+    } else {
+      el.removeAttribute('data-status');
     }
-    if (autoResetMs > 0 && statusEl) {
-      demoStatusResetTimerId = setTimeout(() => {
-        demoStatusResetTimerId = null;
-        statusEl.textContent = 'Kirim contoh push notifikasi untuk demo';
-      }, autoResetMs);
+    el.classList.remove('hidden');
+  }
+
+  function getSelectedDemoMessage(config = getSettings()) {
+    const list = Array.isArray(config.customMessages) ? config.customMessages : [];
+    if (list.length > 0) {
+      const selected = list.find((m) => m.id === config.selectedDemoMessageId) || list[0];
+      return {
+        title: selected.title,
+        body: selected.body
+      };
     }
+    const autoMsg = buildReminderMessage(new Date());
+    return {
+      title: autoMsg.title,
+      body: autoMsg.body
+    };
+  }
+
+  function resetCustomMessageComposer() {
+    editingCustomMessageId = null;
+    const titleInput = document.getElementById('inputNotifMsgTitle');
+    const bodyInput = document.getElementById('inputNotifMsgBody');
+    const formLabel = document.getElementById('notifMsgFormLabel');
+    const saveBtn = document.getElementById('btnSaveNotifMessage');
+    const cancelBtn = document.getElementById('btnCancelEditNotifMessage');
+
+    if (titleInput) titleInput.value = '';
+    if (bodyInput) bodyInput.value = '';
+    if (formLabel) formLabel.textContent = 'Tambah Pesan Baru';
+    if (saveBtn) {
+      saveBtn.innerHTML = '<i class="ri-add-line" aria-hidden="true"></i><span>Tambah Pesan</span>';
+    }
+    if (cancelBtn) cancelBtn.classList.add('hidden');
+  }
+
+  function startEditCustomMessage(msgId) {
+    const config = getSettings();
+    const target = (config.customMessages || []).find((m) => m.id === msgId);
+    if (!target) return;
+
+    editingCustomMessageId = target.id;
+    const titleInput = document.getElementById('inputNotifMsgTitle');
+    const bodyInput = document.getElementById('inputNotifMsgBody');
+    const formLabel = document.getElementById('notifMsgFormLabel');
+    const saveBtn = document.getElementById('btnSaveNotifMessage');
+    const cancelBtn = document.getElementById('btnCancelEditNotifMessage');
+
+    if (titleInput) {
+      titleInput.value = target.title;
+      titleInput.focus();
+    }
+    if (bodyInput) bodyInput.value = target.body;
+    if (formLabel) formLabel.textContent = 'Edit Pesan Notifikasi';
+    if (saveBtn) {
+      saveBtn.innerHTML = '<i class="ri-check-line" aria-hidden="true"></i><span>Simpan Perubahan</span>';
+    }
+    if (cancelBtn) cancelBtn.classList.remove('hidden');
+  }
+
+  function renderCustomMessagesUI(config = getSettings()) {
+    const listEl = document.getElementById('notifCustomMsgList');
+    const countEl = document.getElementById('notifCustomMsgCount');
+    const cardSubEl = document.getElementById('notifDemoTestStatusText');
+    const messages = Array.isArray(config.customMessages) ? config.customMessages : [];
+
+    if (countEl) {
+      countEl.textContent = messages.length > 0 ? `${messages.length} pesan` : 'Otomatis';
+    }
+
+    if (cardSubEl && !isSendingDemoNotif) {
+      cardSubEl.textContent = messages.length > 0
+        ? `Uji tutup aplikasi, nada dering · ${messages.length} pesan`
+        : 'Uji tutup aplikasi, nada dering & pesan kustom';
+    }
+
+    if (!listEl) return;
+
+    if (messages.length === 0) {
+      listEl.innerHTML = '<p class="notif-msg-empty">Menggunakan pesan otomatis HydroTrack. Tambahkan pesan baru di atas jika ingin pesan bergantian sesuai keinginan Anda.</p>';
+      return;
+    }
+
+    listEl.innerHTML = messages.map((msg) => {
+      const isSelected = msg.id === config.selectedDemoMessageId;
+      return `
+        <div class="notif-msg-item ${isSelected ? 'is-selected' : ''}" data-msg-id="${escapeHtml(msg.id)}">
+          <button type="button" class="notif-msg-item__select" data-select-msg-id="${escapeHtml(msg.id)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+            <span class="notif-msg-item__dot" aria-hidden="true"></span>
+            <span class="notif-msg-item__content">
+              <span class="notif-msg-item__title">${escapeHtml(msg.title)}</span>
+              <span class="notif-msg-item__body">${escapeHtml(msg.body)}</span>
+            </span>
+          </button>
+          <div class="notif-msg-item__actions">
+            <button type="button" class="notif-msg-mini-btn" data-edit-msg-id="${escapeHtml(msg.id)}" aria-label="Edit pesan ${escapeHtml(msg.title)}" title="Edit pesan">
+              <i class="ri-edit-line" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="notif-msg-mini-btn notif-msg-mini-btn--danger" data-delete-msg-id="${escapeHtml(msg.id)}" aria-label="Hapus pesan ${escapeHtml(msg.title)}" title="Hapus pesan">
+              <i class="ri-delete-bin-line" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   async function ensurePushSubscriptionForDemoOnly(serverUrl) {
@@ -1999,15 +2172,19 @@ const HydroNotifications = (() => {
     }
   }
 
-  // Isolated Demo Push Notification (uses tag "hydrotrack-test" and never touches the user's scheduled reminders or KV schedule).
-  async function sendDemoPushNotification() {
+  // Isolated Demo Push Notification (instant + ringtone OR 15s closed-app push).
+  // Uses tag "hydrotrack-test" & topic "hydrotrack-test" and NEVER modifies user's scheduled reminders in KV or localStorage.
+  async function sendDemoPushNotification(options = {}) {
     if (isSendingDemoNotif) return { ok: false, reason: 'busy' };
+    clearTestTimers();
 
+    const delaySeconds = Math.max(0, Math.min(25, parseInt(options.delaySeconds, 10) || 0));
     const state = getPlatformState();
     if (state.needsIosInstall || !state.notifSupported) {
       const msg = state.needsIosInstall
         ? 'Tambahkan HydroTrack ke Layar Utama Safari terlebih dahulu untuk mencoba notifikasi.'
         : 'Browser ini tidak mendukung notifikasi web.';
+      setDemoFeedback(msg, 'warning');
       showToastSafe(msg, 'warning');
       return { ok: false };
     }
@@ -2020,24 +2197,116 @@ const HydroNotifications = (() => {
     if (permission !== 'granted') {
       const msg = permission === 'denied'
         ? 'Izin notifikasi diblokir browser. Aktifkan lewat pengaturan situs terlebih dahulu.'
-        : 'Izin notifikasi diperlukan untuk mengirim tes notifikasi.';
+        : 'Izin notifikasi diperlukan untuk menjalankan tes notifikasi.';
+      setDemoFeedback(msg, 'warning');
       showToastSafe(msg, 'warning');
       return { ok: false };
     }
 
+    const config = getSettings();
+    const appSettings = safeGetAppSettings();
+    const demoMsg = getSelectedDemoMessage(config);
+    const soundLabel = config.soundType === AUDIO_KEY_UPLOAD ? 'custom-upload' : 'default';
+    const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+
+    const nowBtn = document.getElementById('btnDemoTestNow');
+    const delayBtn = document.getElementById('btnDemoTestDelayed');
     isSendingDemoNotif = true;
-    const demoBtn = document.getElementById('btnDemoTestNotif');
-    if (demoBtn) demoBtn.disabled = true;
-    setDemoTestStatusText('Mengirim tes notifikasi...');
+    if (nowBtn) nowBtn.disabled = true;
+    if (delayBtn) delayBtn.disabled = true;
 
     try {
-      const config = getSettings();
-      const appSettings = safeGetAppSettings();
-      const msgObj = buildReminderMessage(new Date());
-      const soundLabel = config.soundType === AUDIO_KEY_UPLOAD ? 'custom-upload' : 'default';
-      const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+      // Mode 1: Tes Sekarang & Nada Dering (instant)
+      if (delaySeconds === 0) {
+        setDemoFeedback('Mengirim tes notifikasi & nada dering...', 'info');
 
-      // Primary: real Web Push through Cloudflare Worker /test-push (isolated from user's real reminder schedule).
+        // Immediately test user's Custom ringtone on gesture if Custom sound is active.
+        if (config.soundType === AUDIO_KEY_UPLOAD) {
+          playSelectedSound({ config, dedupeMs: 1500 });
+        }
+
+        if (state.pushSupported && serverUrl && navigator.onLine !== false) {
+          const subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
+          if (subscription) {
+            try {
+              const res = await fetchWithTimeout(`${serverUrl}/test-push`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  endpoint: subscription.endpoint,
+                  subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
+                  delaySeconds: 0,
+                  userName: appSettings.userName || 'Pengguna',
+                  todayTotal: safeGetTodayTotal(),
+                  dailyGoal: Number(appSettings.dailyGoal) || 2000,
+                  remaining: safeGetTodayRemaining(),
+                  percentage: safeGetTodayPercentage(),
+                  soundLabel: soundLabel,
+                  title: demoMsg.title,
+                  body: demoMsg.body
+                })
+              }, 10000);
+
+              if (res.ok) {
+                setDemoFeedback('Tes notifikasi & nada dering berhasil dikirim!', 'success');
+                showToastSafe('Tes notifikasi demo berhasil dikirim.', 'success');
+                return { ok: true, mode: 'push' };
+              }
+            } catch (err) {
+              // Fall back to isolated local SW demo notification if offline/timeout.
+            }
+          }
+        }
+
+        const localRes = await showHydroNotification({
+          isTest: true,
+          tag: 'hydrotrack-test',
+          title: demoMsg.title,
+          body: demoMsg.body,
+          playAudio: true,
+          url: './pengaturan.html?from=notification'
+        });
+
+        if (localRes.ok) {
+          setDemoFeedback('Tes notifikasi & nada dering berhasil ditampilkan!', 'success');
+          showToastSafe('Tes notifikasi demo berhasil dikirim.', 'success');
+          return { ok: true, mode: 'local' };
+        }
+
+        setDemoFeedback('Gagal menampilkan tes notifikasi. Pastikan notifikasi perangkat tidak diblokir.', 'error');
+        showToastSafe('Gagal menampilkan tes notifikasi.', 'danger');
+        return { ok: false };
+      }
+
+      // Mode 2: Tes Tutup Aplikasi (15 detik via Cloudflare Web Push + SW fallback)
+      if (config.soundType === AUDIO_KEY_UPLOAD) {
+        startSilentAudioKeepAlive(delaySeconds + 8);
+      }
+
+      setDemoFeedback(`Menjadwalkan push demo ${delaySeconds} detik di server...`, 'info');
+
+      // Arm SW-level backup timer in case mobile network delays FCM while minimized.
+      const reg = await ensureServiceWorker();
+      const swTarget = (reg && (reg.active || reg.waiting || reg.installing)) || (navigator.serviceWorker && navigator.serviceWorker.controller);
+      if (swTarget && typeof swTarget.postMessage === 'function') {
+        try {
+          swTarget.postMessage({
+            type: 'SCHEDULE_SW_DELAYED_TEST',
+            delaySeconds: delaySeconds,
+            payload: {
+              title: demoMsg.title,
+              body: demoMsg.body,
+              soundLabel: soundLabel,
+              silent: false,
+              url: './pengaturan.html?from=notification'
+            }
+          });
+        } catch (err) {
+          // Ignore SW postMessage failure.
+        }
+      }
+
+      let serverScheduled = false;
       if (state.pushSupported && serverUrl && navigator.onLine !== false) {
         const subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
         if (subscription) {
@@ -2045,52 +2314,57 @@ const HydroNotifications = (() => {
             const res = await fetchWithTimeout(`${serverUrl}/test-push`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              keepalive: true,
               body: JSON.stringify({
                 endpoint: subscription.endpoint,
                 subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
-                delaySeconds: 0,
+                delaySeconds: delaySeconds,
                 userName: appSettings.userName || 'Pengguna',
                 todayTotal: safeGetTodayTotal(),
                 dailyGoal: Number(appSettings.dailyGoal) || 2000,
                 remaining: safeGetTodayRemaining(),
                 percentage: safeGetTodayPercentage(),
-                soundLabel: soundLabel
+                soundLabel: soundLabel,
+                title: demoMsg.title,
+                body: demoMsg.body
               })
             }, 10000);
-
             if (res.ok) {
-              setDemoTestStatusText('Tes push notifikasi terkirim!', 4000);
-              showToastSafe('Tes push notifikasi demo berhasil dikirim.', 'success');
-              return { ok: true, mode: 'push' };
+              serverScheduled = true;
             }
           } catch (err) {
-            // Fall through to isolated local SW demo notification if offline/timeout.
+            serverScheduled = false;
           }
         }
       }
 
-      // Fallback (offline / local environment): isolated local SW notification with tag "hydrotrack-test".
-      const localRes = await showHydroNotification({
-        isTest: true,
-        tag: 'hydrotrack-test',
-        title: 'Tes Notifikasi HydroTrack',
-        body: msgObj.body,
-        playAudio: true,
-        url: './pengaturan.html?from=notification'
-      });
+      let remainingSecs = delaySeconds;
+      const updateCountdown = () => {
+        if (remainingSecs > 0) {
+          setDemoFeedback(
+            serverScheduled
+              ? `Siap! Tutup aplikasi atau kunci layar sekarang. Push demo masuk dalam ${remainingSecs} detik...`
+              : `Mode lokal: tutup/perkecil aplikasi sekarang. Tes notifikasi masuk dalam ${remainingSecs} detik...`,
+            serverScheduled ? 'success' : 'warning'
+          );
+        } else {
+          clearTestTimers();
+          setDemoFeedback('Tes push notifikasi demo sudah dikirim!', 'success');
+        }
+      };
 
-      if (localRes.ok) {
-        setDemoTestStatusText('Tes notifikasi terkirim!', 4000);
-        showToastSafe('Tes notifikasi demo berhasil dikirim.', 'success');
-        return { ok: true, mode: 'local' };
-      }
+      updateCountdown();
+      testCountdownIntervalId = setInterval(() => {
+        remainingSecs -= 1;
+        updateCountdown();
+      }, 1000);
 
-      setDemoTestStatusText('Gagal mengirim tes notifikasi', 4000);
-      showToastSafe('Gagal menampilkan tes notifikasi. Pastikan notifikasi perangkat tidak diblokir.', 'danger');
-      return { ok: false };
+      showToastSafe(`Tes push tutup aplikasi dijadwalkan (${delaySeconds} detik).`, 'success');
+      return { ok: true, mode: serverScheduled ? 'server-delayed' : 'sw-delayed' };
     } finally {
       isSendingDemoNotif = false;
-      if (demoBtn) demoBtn.disabled = false;
+      if (nowBtn) nowBtn.disabled = false;
+      if (delayBtn) delayBtn.disabled = false;
     }
   }
 
@@ -2711,6 +2985,7 @@ const HydroNotifications = (() => {
 
     renderScheduleTimeline(config, nextInfo);
     renderSoundUI(config);
+    renderCustomMessagesUI(config);
 
     // Summary subtitles on the trigger cards ("Jadwal & Interval" and "Nada Dering & Suara").
     const scheduleSummaryEl = document.getElementById('notifScheduleSummaryText');
@@ -3127,11 +3402,128 @@ const HydroNotifications = (() => {
       });
     }
 
-    // Test notification buttons.
-    const demoTestBtn = document.getElementById('btnDemoTestNotif');
-    if (demoTestBtn) {
-      demoTestBtn.addEventListener('click', () => {
-        sendDemoPushNotification();
+    // Demo Test Push modal actions (instant + ringtone & 15s closed-app) and custom message CRUD.
+    const demoTestNowBtn = document.getElementById('btnDemoTestNow');
+    if (demoTestNowBtn) {
+      demoTestNowBtn.addEventListener('click', () => {
+        sendDemoPushNotification({ delaySeconds: 0 });
+      });
+    }
+
+    const demoTestDelayedBtn = document.getElementById('btnDemoTestDelayed');
+    if (demoTestDelayedBtn) {
+      demoTestDelayedBtn.addEventListener('click', () => {
+        sendDemoPushNotification({ delaySeconds: 15 });
+      });
+    }
+
+    const saveMsgBtn = document.getElementById('btnSaveNotifMessage');
+    if (saveMsgBtn) {
+      saveMsgBtn.addEventListener('click', () => {
+        const titleInput = document.getElementById('inputNotifMsgTitle');
+        const bodyInput = document.getElementById('inputNotifMsgBody');
+        const title = titleInput ? titleInput.value.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 80) : '';
+        const body = bodyInput ? bodyInput.value.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 220) : '';
+
+        if (!title && !body) {
+          showToastSafe('Tulis judul atau isi pesan notifikasi terlebih dahulu.', 'warning');
+          if (titleInput) titleInput.focus();
+          return;
+        }
+
+        const current = getSettings();
+        const messages = Array.isArray(current.customMessages) ? current.customMessages.slice() : [];
+        const finalTitle = title || 'Pengingat Hidrasi';
+        const finalBody = body || finalTitle;
+
+        if (editingCustomMessageId) {
+          const idx = messages.findIndex((m) => m.id === editingCustomMessageId);
+          if (idx !== -1) {
+            messages[idx] = {
+              ...messages[idx],
+              title: finalTitle,
+              body: finalBody
+            };
+            saveSettings({
+              customMessages: messages,
+              customMessagesInitialized: true,
+              selectedDemoMessageId: messages[idx].id
+            });
+            queueScheduleSyncToServer();
+            resetCustomMessageComposer();
+            renderSettingsUI();
+            showToastSafe('Pesan notifikasi berhasil diperbarui.', 'success');
+            return;
+          }
+        }
+
+        if (messages.length >= 20) {
+          showToastSafe('Maksimal 20 pesan notifikasi. Hapus salah satu pesan terlebih dahulu.', 'warning');
+          return;
+        }
+
+        const newId = `msg-${Date.now().toString(36)}`;
+        messages.unshift({
+          id: newId,
+          title: finalTitle,
+          body: finalBody
+        });
+
+        saveSettings({
+          customMessages: messages,
+          customMessagesInitialized: true,
+          selectedDemoMessageId: newId
+        });
+        queueScheduleSyncToServer();
+        resetCustomMessageComposer();
+        renderSettingsUI();
+        showToastSafe('Pesan notifikasi baru berhasil ditambahkan.', 'success');
+      });
+    }
+
+    const cancelEditMsgBtn = document.getElementById('btnCancelEditNotifMessage');
+    if (cancelEditMsgBtn) {
+      cancelEditMsgBtn.addEventListener('click', () => {
+        resetCustomMessageComposer();
+      });
+    }
+
+    const msgListEl = document.getElementById('notifCustomMsgList');
+    if (msgListEl) {
+      msgListEl.addEventListener('click', (event) => {
+        const editBtn = event.target.closest('[data-edit-msg-id]');
+        if (editBtn) {
+          startEditCustomMessage(editBtn.dataset.editMsgId);
+          return;
+        }
+
+        const deleteBtn = event.target.closest('[data-delete-msg-id]');
+        if (deleteBtn) {
+          const delId = deleteBtn.dataset.deleteMsgId;
+          const current = getSettings();
+          const filtered = (current.customMessages || []).filter((m) => m.id !== delId);
+          if (editingCustomMessageId === delId) {
+            resetCustomMessageComposer();
+          }
+          saveSettings({
+            customMessages: filtered,
+            customMessagesInitialized: true,
+            selectedDemoMessageId: current.selectedDemoMessageId === delId
+              ? (filtered[0] ? filtered[0].id : '')
+              : current.selectedDemoMessageId
+          });
+          queueScheduleSyncToServer();
+          renderSettingsUI();
+          showToastSafe('Pesan notifikasi dihapus.', 'success');
+          return;
+        }
+
+        const selectBtn = event.target.closest('[data-select-msg-id]');
+        if (selectBtn) {
+          const selId = selectBtn.dataset.selectMsgId;
+          saveSettings({ selectedDemoMessageId: selId });
+          renderSettingsUI();
+        }
       });
     }
 
@@ -3217,6 +3609,16 @@ const HydroNotifications = (() => {
       }
     );
 
+    bindNotifModal(
+      'btnOpenNotifTestModal',
+      'notifTestModalOverlay',
+      ['btnCloseNotifTestModal', 'btnDoneNotifTestModal'],
+      () => {
+        stopAudioPlayback();
+        resetCustomMessageComposer();
+      }
+    );
+
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
       const scheduleOverlay = document.getElementById('notifScheduleModalOverlay');
@@ -3231,6 +3633,13 @@ const HydroNotifications = (() => {
         if (isRecordingVoice) {
           stopVoiceRecording();
         }
+        renderSettingsUI();
+      }
+      const testOverlay = document.getElementById('notifTestModalOverlay');
+      if (testOverlay && testOverlay.classList.contains('active')) {
+        testOverlay.classList.remove('active');
+        stopAudioPlayback();
+        resetCustomMessageComposer();
         renderSettingsUI();
       }
     });
@@ -3280,6 +3689,7 @@ const HydroNotifications = (() => {
           if (data.isTest) {
             clearTestTimers();
             setTestFeedback('Notifikasi uji coba berhasil diterima dan dibuka.', 'success');
+            setDemoFeedback('Tes push notifikasi berhasil diterima dan dibuka!', 'success');
             showToastSafe('Notifikasi uji coba berhasil diterima.', 'success');
           }
           return;
@@ -3299,6 +3709,7 @@ const HydroNotifications = (() => {
           if (data.isTest) {
             clearTestTimers();
             setTestFeedback('Push latar belakang berhasil diterima beserta nada pengingat!', 'success');
+            setDemoFeedback('Tes push latar belakang berhasil diterima!', 'success');
           }
         }
       });

@@ -2543,6 +2543,29 @@
     max-height: 84px;
   }
 
+  .notif-demo-actions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .notif-demo-btn {
+    padding: 9px 10px;
+    gap: 8px;
+    min-height: 52px;
+  }
+
+  .notif-demo-btn__text strong {
+    font-size: 12.5px;
+  }
+
+  .notif-demo-btn__text small {
+    font-size: 10.5px;
+  }
+
+  .notif-msg-list {
+    max-height: 150px;
+  }
+
   .notif-master-card__top {
     gap: 12px;
   }

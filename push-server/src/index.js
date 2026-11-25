@@ -191,6 +191,28 @@ function sanitizeSoundLabel(value) {
   return trimmed || 'default';
 }
 
+function sanitizeCustomMessages(rawList) {
+  if (!Array.isArray(rawList)) return [];
+  const cleaned = [];
+  for (let i = 0; i < rawList.length && cleaned.length < 20; i += 1) {
+    const item = rawList[i];
+    if (!item || typeof item !== 'object') continue;
+    const title = typeof item.title === 'string'
+      ? item.title.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 80)
+      : '';
+    const body = typeof item.body === 'string'
+      ? item.body.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 220)
+      : '';
+    if (!title && !body) continue;
+    cleaned.push({
+      id: typeof item.id === 'string' && item.id.trim() ? item.id.trim().slice(0, 40) : `msg-${i + 1}`,
+      title: title || 'Pengingat Hidrasi HydroTrack',
+      body: body || title
+    });
+  }
+  return cleaned;
+}
+
 export function getUserLocalTime(nowMs, timeZone, timezoneOffsetMinutes = DEFAULT_TZ_OFFSET_MINUTES) {
   const date = new Date(nowMs);
 
@@ -269,6 +291,10 @@ function normalizeSchedule(rawSchedule = {}, body = {}, existingSchedule = {}) {
   const rawTimeZone = rawSchedule.timeZone ?? body.timeZone ?? existingSchedule.timeZone;
   const rawOffset = rawSchedule.timezoneOffsetMinutes ?? body.timezoneOffsetMinutes ?? existingSchedule.timezoneOffsetMinutes;
 
+  const rawCustomMessages = rawSchedule.customMessages !== undefined
+    ? rawSchedule.customMessages
+    : (body.customMessages !== undefined ? body.customMessages : existingSchedule.customMessages);
+
   return {
     enabled: Boolean(source.enabled ?? true),
     mode: source.mode === 'smart' ? 'smart' : 'fixed',
@@ -283,7 +309,8 @@ function normalizeSchedule(rawSchedule = {}, body = {}, existingSchedule = {}) {
     timeZone: sanitizeTimeZone(rawTimeZone),
     timezoneOffsetMinutes: clampInt(rawOffset, -840, 840, DEFAULT_TZ_OFFSET_MINUTES),
     pauseWhenGoalMet: Boolean(source.pauseWhenGoalMet ?? true),
-    soundLabel: sanitizeSoundLabel(source.soundLabel ?? body.soundLabel)
+    soundLabel: sanitizeSoundLabel(source.soundLabel ?? body.soundLabel),
+    customMessages: sanitizeCustomMessages(rawCustomMessages)
   };
 }
 
@@ -555,7 +582,13 @@ export function buildReminderPayload(record, evalResult, nowMs = Date.now()) {
   let title;
   let body;
 
-  if (total === 0) {
+  const customMessages = sanitizeCustomMessages(schedule.customMessages);
+  if (customMessages.length > 0) {
+    const slotStep = Math.floor((evalResult.slotMinute || 0) / Math.max(1, schedule.intervalMinutes || 60));
+    const chosen = customMessages[slotStep % customMessages.length];
+    title = chosen.title;
+    body = chosen.body;
+  } else if (total === 0) {
     if (period === 'pagi') {
       title = 'Selamat pagi, saatnya minum air pertama';
       body = `${greeting} mulai harimu dengan segelas air putih. Target hidrasi hari ini ${formatMl(goal)}.`;
@@ -608,7 +641,7 @@ export function buildReminderPayload(record, evalResult, nowMs = Date.now()) {
   };
 }
 
-function buildTestPayload({ userName, todayTotal, dailyGoal, delaySeconds, soundLabel }) {
+function buildTestPayload({ userName, todayTotal, dailyGoal, delaySeconds, soundLabel, title: rawTitle, body: rawBody }) {
   const name = sanitizeUserName(userName);
   const greeting = name ? `Halo ${name},` : 'Halo,';
   const hasGoal = Number.isFinite(Number(dailyGoal)) && Number(dailyGoal) > 0;
@@ -620,13 +653,16 @@ function buildTestPayload({ userName, todayTotal, dailyGoal, delaySeconds, sound
     ? ` Progres tercatat ${formatMl(total)} dari ${formatMl(goal)}.`
     : '';
 
-  const title = delaySeconds > 0
-    ? 'Tes Push Latar Belakang Berhasil'
-    : 'Tes Notifikasi HydroTrack Berhasil';
+  const customTitle = typeof rawTitle === 'string' ? rawTitle.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 80) : '';
+  const customBody = typeof rawBody === 'string' ? rawBody.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 220) : '';
 
-  const body = delaySeconds > 0
+  const title = customTitle || (delaySeconds > 0
+    ? 'Tes Push Latar Belakang Berhasil'
+    : 'Tes Notifikasi HydroTrack Berhasil');
+
+  const body = customBody || (delaySeconds > 0
     ? `${greeting} notifikasi ini dikirim dari server setelah jeda ${delaySeconds} detik.${progressText}`
-    : `${greeting} koneksi push server HydroTrack aktif dan siap mengirim pengingat.${progressText}`;
+    : `${greeting} koneksi push server HydroTrack aktif dan siap mengirim pengingat.${progressText}`);
 
   return {
     title,
@@ -833,6 +869,8 @@ async function handleTestPush(request, env, ctx, corsHeaders) {
     todayTotal: body.todayTotal ?? body.profile?.todayTotal,
     dailyGoal: body.dailyGoal ?? body.profile?.dailyGoal,
     soundLabel: body.soundLabel ?? body.schedule?.soundLabel,
+    title: body.title,
+    body: body.body,
     delaySeconds
   });
 
@@ -880,7 +918,8 @@ async function handleTestPush(request, env, ctx, corsHeaders) {
 
   const result = await sendWebPush(subCheck.subscription, payload, vapidConfig, {
     ttl: 120,
-    urgency: 'high'
+    urgency: 'high',
+    topic: 'hydrotrack-test'
   });
 
   if (result.expired && env.HYDRO_PUSH_KV) {

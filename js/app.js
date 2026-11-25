@@ -158,18 +158,55 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        const canScrollVertically = modalBox.scrollHeight > modalBox.clientHeight + 1;
-        if (!canScrollVertically) {
+        // Find the nearest scrollable container inside modalBox (supports .notif-modal__body, .notif-timeline, .notif-msg-list, etc.)
+        let scrollEl = null;
+        let node = e.target instanceof Element ? e.target : (e.target && e.target.parentElement);
+        while (node && node !== overlay) {
+          const style = window.getComputedStyle(node);
+          const overflowY = style ? style.overflowY : '';
+          if (
+            (overflowY === 'auto' || overflowY === 'scroll') &&
+            node.scrollHeight > node.clientHeight + 1
+          ) {
+            scrollEl = node;
+            break;
+          }
+          if (node === modalBox) break;
+          node = node.parentElement;
+        }
+
+        if (!scrollEl) {
           if (e.cancelable) e.preventDefault();
           return;
         }
 
-        // Prevent desktop wheel scroll chaining past top/bottom edge of tall modal
+        // Prevent desktop wheel scroll chaining past top/bottom edge unless a parent scrollable inside modalBox can take over
         if (e.type === 'wheel') {
-          const atTop = modalBox.scrollTop <= 0 && e.deltaY < 0;
-          const atBottom = modalBox.scrollTop + modalBox.clientHeight >= modalBox.scrollHeight - 1 && e.deltaY > 0;
-          if ((atTop || atBottom) && e.cancelable) {
-            e.preventDefault();
+          const atTop = scrollEl.scrollTop <= 0 && e.deltaY < 0;
+          const atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 1 && e.deltaY > 0;
+          if (atTop || atBottom) {
+            let parentCanScroll = false;
+            let parent = scrollEl.parentElement;
+            while (parent && parent !== overlay) {
+              const pStyle = window.getComputedStyle(parent);
+              const pOverflowY = pStyle ? pStyle.overflowY : '';
+              if (
+                (pOverflowY === 'auto' || pOverflowY === 'scroll') &&
+                parent.scrollHeight > parent.clientHeight + 1
+              ) {
+                const pAtTop = parent.scrollTop <= 0 && e.deltaY < 0;
+                const pAtBottom = parent.scrollTop + parent.clientHeight >= parent.scrollHeight - 1 && e.deltaY > 0;
+                if (!pAtTop && !pAtBottom) {
+                  parentCanScroll = true;
+                  break;
+                }
+              }
+              if (parent === modalBox) break;
+              parent = parent.parentElement;
+            }
+            if (!parentCanScroll && e.cancelable) {
+              e.preventDefault();
+            }
           }
         }
       };
