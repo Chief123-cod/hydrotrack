@@ -351,13 +351,9 @@
                                 </div>
                                 <div class="notif-master-card__meta">
                                     <div class="notif-master-card__title-row">
-                                        <h2 class="notif-master-card__title">Pengingat Minum Air</h2>
-                                        <span class="notif-status-badge" id="notifStatusBadge">
-                                            <span class="notif-status-dot" aria-hidden="true"></span>
-                                            <span id="notifStatusText">Nonaktif</span>
-                                        </span>
+                                        <h2 class="notif-master-card__title">Pengingat Hidrasi</h2>
                                     </div>
-                                    <p class="notif-next-schedule" id="notifNextScheduleText">Aktifkan pengingat untuk mulai menjadwalkan notifikasi minum.</p>
+                                    <p class="notif-next-schedule">Ingatkan saya untuk minum air secara rutin.</p>
                                 </div>
                             </div>
                             <div class="notif-master-card__control">
@@ -367,251 +363,72 @@
                                 </label>
                             </div>
                         </div>
-
-                        <!-- Real-Time Message Preview -->
-                        <div class="notif-msg-preview">
-                            <span class="notif-msg-preview__label">
-                                <i class="ri-chat-3-line" aria-hidden="true"></i>
-                                <span>Pratinjau Pesan Real-Time</span>
-                            </span>
-                            <p class="notif-msg-preview__text" id="notifMessagePreview">Waktunya minum air putih agar tubuh tetap segar dan fokus.</p>
-                        </div>
-
-                        <!-- Conditional Permission Alert Banner -->
-                        <div class="notif-permission-banner hidden" id="notifPermissionBanner" role="alert">
-                            <div class="notif-permission-banner__content">
-                                <i class="ri-alert-line" aria-hidden="true"></i>
-                                <span id="notifPermissionBannerText"></span>
-                            </div>
-                            <button type="button" class="notif-btn-inline" id="btnRequestNotifPermission">Izinkan Notifikasi</button>
-                        </div>
                     </div>
 
-                    <!-- Main 2-Column Settings Grid -->
-                    <div class="notif-settings-grid">
-                        <!-- Panel 1: Schedule & Interval -->
-                        <section class="notif-panel" aria-labelledby="notifPanelScheduleHeading">
-                            <div class="notif-panel__header">
-                                <div class="notif-panel__icon" aria-hidden="true">
-                                    <i class="ri-time-line"></i>
-                                </div>
-                                <h2 class="notif-panel__title" id="notifPanelScheduleHeading">Jadwal &amp; Interval</h2>
-                            </div>
-
-                            <!-- Schedule Mode Radios -->
-                            <fieldset class="notif-fieldset">
-                                <legend class="notif-field-label">Mode Jadwal</legend>
-                                <div class="notif-mode-grid">
-                                    <label class="notif-mode-card" for="notifModeFixed">
-                                        <input type="radio" name="notifMode" id="notifModeFixed" value="fixed" checked>
-                                        <span class="notif-mode-card__body">
-                                            <span class="notif-mode-card__title">Jadwal Tetap</span>
-                                            <span class="notif-mode-card__sub">Sesuai jam rutin</span>
-                                        </span>
-                                    </label>
-                                    <label class="notif-mode-card" for="notifModeSmart">
-                                        <input type="radio" name="notifMode" id="notifModeSmart" value="smart">
-                                        <span class="notif-mode-card__body">
-                                            <span class="notif-mode-card__title">Mode Pintar</span>
-                                            <span class="notif-mode-card__sub">Dari minum terakhir</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </fieldset>
-
-                            <!-- Active Hours -->
-                            <div class="notif-hours-grid">
-                                <div class="notif-field">
-                                    <label for="notifStartTime" class="notif-field-label">Jam Mulai</label>
-                                    <input type="time" id="notifStartTime" class="m3-input notif-time-input" value="07:00">
-                                </div>
-                                <div class="notif-field">
-                                    <label for="notifEndTime" class="notif-field-label">Jam Selesai</label>
-                                    <input type="time" id="notifEndTime" class="m3-input notif-time-input" value="21:00">
-                                </div>
-                            </div>
-
-                            <!-- Interval Presets -->
-                            <div class="notif-field">
-                                <span class="notif-field-label">Interval Pengingat</span>
-                                <div class="notif-interval-presets" role="group" aria-label="Pilihan interval cepat">
-                                    <button type="button" class="notif-preset-chip" data-notif-interval="30">30 Menit</button>
-                                    <button type="button" class="notif-preset-chip" data-notif-interval="60">1 Jam</button>
-                                    <button type="button" class="notif-preset-chip" data-notif-interval="90">1,5 Jam</button>
-                                    <button type="button" class="notif-preset-chip active" data-notif-interval="120">2 Jam</button>
-                                    <button type="button" class="notif-preset-chip" data-notif-interval="180">3 Jam</button>
-                                </div>
-                            </div>
-
-                            <!-- Custom Interval -->
-                            <div class="notif-field">
-                                <label for="notifCustomHours" class="notif-field-label">Interval Kustom</label>
-                                <div class="notif-custom-interval-row">
-                                    <div class="notif-num-box">
-                                        <input type="number" id="notifCustomHours" class="m3-input notif-num-input" min="0" max="8" value="2" inputmode="numeric" aria-label="Jam interval kustom">
-                                        <span class="notif-num-unit">jam</span>
+                    <!-- Trigger Cards: Jadwal & Interval + Nada Dering & Suara -->
+                    <div class="notif-trigger-list">
+                        <button type="button" class="notif-master-card notif-trigger-card" id="btnOpenNotifScheduleModal" aria-haspopup="dialog" aria-controls="notifScheduleModalOverlay">
+                            <div class="notif-master-card__top">
+                                <div class="notif-master-card__lead">
+                                    <div class="notif-master-card__icon" aria-hidden="true">
+                                        <i class="ri-time-line"></i>
                                     </div>
-                                    <div class="notif-num-box">
-                                        <input type="number" id="notifCustomMinutes" class="m3-input notif-num-input" min="0" max="59" value="0" inputmode="numeric" aria-label="Menit interval kustom">
-                                        <span class="notif-num-unit">mnt</span>
-                                    </div>
-                                    <button type="button" class="m3-btn-chip m3-btn-chip--primary notif-apply-btn" id="btnApplyCustomInterval">Terapkan</button>
-                                </div>
-                                <p class="notif-field-error hidden" id="notifScheduleError" role="alert"></p>
-                            </div>
-
-                            <!-- Auto-Pause Checkbox -->
-                            <label class="notif-checkbox-row" for="notifPauseGoalMet">
-                                <input type="checkbox" id="notifPauseGoalMet" checked>
-                                <span>Jeda otomatis jika target harian sudah tercapai 100%</span>
-                            </label>
-
-                            <!-- Today's Schedule Timeline Preview -->
-                            <div class="notif-timeline-wrap">
-                                <span class="notif-field-label">Perkiraan Jadwal Hari Ini</span>
-                                <div class="notif-timeline" id="notifScheduleTimeline"></div>
-                            </div>
-                        </section>
-
-                        <!-- Panel 2: Ringtone & Sound -->
-                        <section class="notif-panel" aria-labelledby="notifPanelSoundHeading">
-                            <div class="notif-panel__header">
-                                <div class="notif-panel__icon" aria-hidden="true">
-                                    <i class="ri-volume-up-line"></i>
-                                </div>
-                                <h2 class="notif-panel__title" id="notifPanelSoundHeading">Nada Dering &amp; Suara</h2>
-                            </div>
-
-                            <!-- Sound Source 2x2 Selector -->
-                            <fieldset class="notif-fieldset">
-                                <legend class="notif-field-label">Sumber Suara</legend>
-                                <div class="notif-sound-type-grid">
-                                    <label class="notif-sound-type-card" for="soundTypeDefault">
-                                        <input type="radio" name="notifSoundType" id="soundTypeDefault" value="default" checked>
-                                        <span class="notif-sound-type-card__body">
-                                            <i class="ri-music-2-line" aria-hidden="true"></i>
-                                            <span>Nada Bawaan</span>
-                                        </span>
-                                    </label>
-                                    <label class="notif-sound-type-card" for="soundTypeUpload">
-                                        <input type="radio" name="notifSoundType" id="soundTypeUpload" value="custom-upload">
-                                        <span class="notif-sound-type-card__body">
-                                            <i class="ri-folder-music-line" aria-hidden="true"></i>
-                                            <span>Audio dari HP</span>
-                                        </span>
-                                    </label>
-                                    <label class="notif-sound-type-card" for="soundTypeVoice">
-                                        <input type="radio" name="notifSoundType" id="soundTypeVoice" value="custom-voice">
-                                        <span class="notif-sound-type-card__body">
-                                            <i class="ri-mic-line" aria-hidden="true"></i>
-                                            <span>Rekam Suara</span>
-                                        </span>
-                                    </label>
-                                    <label class="notif-sound-type-card" for="soundTypeSilent">
-                                        <input type="radio" name="notifSoundType" id="soundTypeSilent" value="silent">
-                                        <span class="notif-sound-type-card__body">
-                                            <i class="ri-volume-mute-line" aria-hidden="true"></i>
-                                            <span>Hening</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </fieldset>
-
-                            <!-- Panel A: Default Ringtones -->
-                            <div class="notif-sound-subpanel" id="soundDefaultPanel">
-                                <div class="notif-ringtone-list" role="radiogroup" aria-label="Pilih nada bawaan">
-                                    <div class="notif-ringtone-row">
-                                        <label class="notif-ringtone-label" for="ringtoneWaterDrop">
-                                            <input type="radio" name="notifDefaultSound" id="ringtoneWaterDrop" value="water-drop" checked>
-                                            <span class="notif-ringtone-radio" aria-hidden="true"></span>
-                                            <span class="notif-ringtone-name">Tetesan Air</span>
-                                        </label>
-                                        <button type="button" class="notif-play-btn" data-preview-sound="water-drop" aria-label="Putar pratinjau Tetesan Air">
-                                            <i class="ri-volume-up-line" aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-                                    <div class="notif-ringtone-row">
-                                        <label class="notif-ringtone-label" for="ringtoneSoftBell">
-                                            <input type="radio" name="notifDefaultSound" id="ringtoneSoftBell" value="soft-bell">
-                                            <span class="notif-ringtone-radio" aria-hidden="true"></span>
-                                            <span class="notif-ringtone-name">Lonceng Lembut</span>
-                                        </label>
-                                        <button type="button" class="notif-play-btn" data-preview-sound="soft-bell" aria-label="Putar pratinjau Lonceng Lembut">
-                                            <i class="ri-volume-up-line" aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-                                    <div class="notif-ringtone-row">
-                                        <label class="notif-ringtone-label" for="ringtoneFreshChime">
-                                            <input type="radio" name="notifDefaultSound" id="ringtoneFreshChime" value="fresh-chime">
-                                            <span class="notif-ringtone-radio" aria-hidden="true"></span>
-                                            <span class="notif-ringtone-name">Chime Segar</span>
-                                        </label>
-                                        <button type="button" class="notif-play-btn" data-preview-sound="fresh-chime" aria-label="Putar pratinjau Chime Segar">
-                                            <i class="ri-volume-up-line" aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-                                    <div class="notif-ringtone-row">
-                                        <label class="notif-ringtone-label" for="ringtoneGentlePulse">
-                                            <input type="radio" name="notifDefaultSound" id="ringtoneGentlePulse" value="gentle-pulse">
-                                            <span class="notif-ringtone-radio" aria-hidden="true"></span>
-                                            <span class="notif-ringtone-name">Nada Halus</span>
-                                        </label>
-                                        <button type="button" class="notif-play-btn" data-preview-sound="gentle-pulse" aria-label="Putar pratinjau Nada Halus">
-                                            <i class="ri-volume-up-line" aria-hidden="true"></i>
-                                        </button>
+                                    <div class="notif-master-card__meta">
+                                        <div class="notif-master-card__title-row">
+                                            <h2 class="notif-master-card__title">Jadwal &amp; Interval</h2>
+                                        </div>
+                                        <p class="notif-next-schedule" id="notifScheduleSummaryText">Jadwal Tetap · 07:00 - 21:00 · Tiap 2 jam</p>
                                     </div>
                                 </div>
+                                <div class="notif-master-card__control">
+                                    <span class="notif-trigger-card__arrow" aria-hidden="true">
+                                        <i class="ri-arrow-right-s-line"></i>
+                                    </span>
+                                </div>
                             </div>
+                        </button>
 
-                            <!-- Panel B: Upload Custom Audio -->
-                            <div class="notif-sound-subpanel hidden" id="soundUploadPanel">
-                                <input type="file" id="inputCustomRingtone" accept="audio/*" class="m3-file-input-hidden">
-                                <button type="button" class="notif-action-btn notif-action-btn--outline" id="btnChooseCustomAudio">
-                                    <i class="ri-folder-music-line" aria-hidden="true"></i>
-                                    <span>Pilih File Audio dari Perangkat</span>
-                                </button>
-                                <div class="notif-media-box" id="customAudioInfo">
-                                    <span class="notif-media-box__name" id="customAudioName">Belum ada file audio dipilih</span>
-                                    <div class="notif-media-box__actions">
-                                        <button type="button" class="notif-icon-btn hidden" id="btnPreviewCustomAudio" aria-label="Putar audio kustom">
-                                            <i class="ri-play-fill" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" class="notif-icon-btn notif-icon-btn--danger hidden" id="btnRemoveCustomAudio" aria-label="Hapus audio kustom">
-                                            <i class="ri-delete-bin-line" aria-hidden="true"></i>
-                                        </button>
+                        <button type="button" class="notif-master-card notif-trigger-card" id="btnOpenNotifSoundModal" aria-haspopup="dialog" aria-controls="notifSoundModalOverlay">
+                            <div class="notif-master-card__top">
+                                <div class="notif-master-card__lead">
+                                    <div class="notif-master-card__icon" aria-hidden="true">
+                                        <i class="ri-volume-up-line"></i>
+                                    </div>
+                                    <div class="notif-master-card__meta">
+                                        <div class="notif-master-card__title-row">
+                                            <h2 class="notif-master-card__title">Nada Dering &amp; Suara</h2>
+                                        </div>
+                                        <p class="notif-next-schedule" id="notifSoundSummaryText">Default · Mengikuti sistem perangkat</p>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Panel C: Voice Recorder -->
-                            <div class="notif-sound-subpanel hidden" id="soundVoicePanel">
-                                <div class="notif-recorder-controls">
-                                    <button type="button" class="notif-action-btn notif-action-btn--record" id="btnToggleVoiceRecord">
-                                        <i class="ri-mic-fill" aria-hidden="true"></i>
-                                        <span>Mulai Rekam Suara</span>
-                                    </button>
-                                    <span class="notif-rec-timer" id="voiceRecordTimer">00:00 / 00:15</span>
+                                <div class="notif-master-card__control">
+                                    <span class="notif-trigger-card__arrow" aria-hidden="true">
+                                        <i class="ri-arrow-right-s-line"></i>
+                                    </span>
                                 </div>
-                                <p class="notif-rec-status" id="voiceRecordStatus">Rekam pengingat dengan suara Anda sendiri (maksimal 15 detik).</p>
-                                <div class="notif-media-box" id="customVoiceInfo">
-                                    <span class="notif-media-box__name" id="customVoiceLabel">Belum ada rekaman suara</span>
-                                    <div class="notif-media-box__actions">
-                                        <button type="button" class="notif-icon-btn hidden" id="btnPreviewCustomVoice" aria-label="Putar rekaman suara">
-                                            <i class="ri-play-fill" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" class="notif-icon-btn notif-icon-btn--danger hidden" id="btnRemoveCustomVoice" aria-label="Hapus rekaman suara">
-                                            <i class="ri-delete-bin-line" aria-hidden="true"></i>
-                                        </button>
+                            </div>
+                        </button>
+
+                        <button type="button" class="notif-master-card notif-trigger-card" id="btnDemoTestNotif">
+                            <div class="notif-master-card__top">
+                                <div class="notif-master-card__lead">
+                                    <div class="notif-master-card__icon" aria-hidden="true">
+                                        <i class="ri-send-plane-2-line"></i>
+                                    </div>
+                                    <div class="notif-master-card__meta">
+                                        <div class="notif-master-card__title-row">
+                                            <h2 class="notif-master-card__title">Tes Notifikasi</h2>
+                                        </div>
+                                        <p class="notif-next-schedule" id="notifDemoTestStatusText">Kirim contoh push notifikasi untuk demo</p>
                                     </div>
                                 </div>
+                                <div class="notif-master-card__control">
+                                    <span class="notif-trigger-card__arrow" aria-hidden="true">
+                                        <i class="ri-arrow-right-s-line"></i>
+                                    </span>
+                                </div>
                             </div>
-
-                            <!-- Mobile OS Audio Note -->
-                            <div class="notif-info-note">
-                                <i class="ri-information-line" aria-hidden="true"></i>
-                                <p>Suara kustom diputar penuh saat aplikasi terbuka atau notifikasi diketuk. Saat browser ditutup total di HP, notifikasi tetap masuk real-time mengikuti nada notifikasi bawaan sistem perangkat.</p>
-                            </div>
-                        </section>
+                        </button>
                     </div>
                 </div>
 
@@ -1163,6 +980,171 @@
                     <button type="submit" class="btn-modal-delete" id="btnDeleteBeforeDate">Hapus Entri</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL JADWAL & INTERVAL NOTIFIKASI ========== -->
+    <div class="modal-overlay notif-modal-overlay" id="notifScheduleModalOverlay" role="dialog" aria-modal="true" aria-labelledby="notifPanelScheduleHeading">
+        <div class="container-modal-box notif-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header notif-modal__header">
+                <div class="notif-modal__header-lead">
+                    <div class="notif-panel__icon" aria-hidden="true">
+                        <i class="ri-time-line"></i>
+                    </div>
+                    <h3 class="container-modal__title" id="notifPanelScheduleHeading">Jadwal &amp; Interval</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseNotifScheduleModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="notif-modal__body">
+                <!-- Schedule Mode Radios -->
+                <fieldset class="notif-fieldset">
+                    <legend class="notif-field-label">Mode Jadwal</legend>
+                    <div class="notif-mode-grid">
+                        <label class="notif-mode-card" for="notifModeFixed">
+                            <input type="radio" name="notifMode" id="notifModeFixed" value="fixed" checked>
+                            <span class="notif-mode-card__body">
+                                <span class="notif-mode-card__title">Jadwal Tetap</span>
+                                <span class="notif-mode-card__sub">Sesuai jam rutin</span>
+                            </span>
+                        </label>
+                        <label class="notif-mode-card" for="notifModeSmart">
+                            <input type="radio" name="notifMode" id="notifModeSmart" value="smart">
+                            <span class="notif-mode-card__body">
+                                <span class="notif-mode-card__title">Mode Pintar</span>
+                                <span class="notif-mode-card__sub">Dari minum terakhir</span>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <!-- Active Hours -->
+                <div class="notif-hours-grid">
+                    <div class="notif-field">
+                        <label for="notifStartTime" class="notif-field-label">Jam Mulai</label>
+                        <input type="time" id="notifStartTime" class="m3-input notif-time-input" value="07:00">
+                    </div>
+                    <div class="notif-field">
+                        <label for="notifEndTime" class="notif-field-label">Jam Selesai</label>
+                        <input type="time" id="notifEndTime" class="m3-input notif-time-input" value="21:00">
+                    </div>
+                </div>
+
+                <!-- Interval Presets -->
+                <div class="notif-field">
+                    <span class="notif-field-label">Interval Pengingat</span>
+                    <div class="notif-interval-presets" role="group" aria-label="Pilihan interval cepat">
+                        <button type="button" class="notif-preset-chip" data-notif-interval="30">30 Menit</button>
+                        <button type="button" class="notif-preset-chip" data-notif-interval="60">1 Jam</button>
+                        <button type="button" class="notif-preset-chip" data-notif-interval="90">1,5 Jam</button>
+                        <button type="button" class="notif-preset-chip active" data-notif-interval="120">2 Jam</button>
+                        <button type="button" class="notif-preset-chip" data-notif-interval="180">3 Jam</button>
+                    </div>
+                </div>
+
+                <!-- Custom Interval -->
+                <div class="notif-field">
+                    <label for="notifCustomHours" class="notif-field-label">Interval Kustom</label>
+                    <div class="notif-custom-interval-row">
+                        <div class="notif-num-box">
+                            <input type="number" id="notifCustomHours" class="m3-input notif-num-input" min="0" max="8" value="2" inputmode="numeric" aria-label="Jam interval kustom">
+                            <span class="notif-num-unit">jam</span>
+                        </div>
+                        <div class="notif-num-box">
+                            <input type="number" id="notifCustomMinutes" class="m3-input notif-num-input" min="0" max="59" value="0" inputmode="numeric" aria-label="Menit interval kustom">
+                            <span class="notif-num-unit">mnt</span>
+                        </div>
+                        <button type="button" class="m3-btn-chip m3-btn-chip--primary notif-apply-btn" id="btnApplyCustomInterval">Terapkan</button>
+                    </div>
+                    <p class="notif-field-error hidden" id="notifScheduleError" role="alert"></p>
+                </div>
+
+                <!-- Auto-Pause Checkbox -->
+                <label class="notif-checkbox-row" for="notifPauseGoalMet">
+                    <input type="checkbox" id="notifPauseGoalMet" checked>
+                    <span>Jeda otomatis jika target harian sudah tercapai 100%</span>
+                </label>
+
+                <!-- Today's Schedule Timeline Preview -->
+                <div class="notif-timeline-wrap">
+                    <span class="notif-field-label">Perkiraan Jadwal Hari Ini</span>
+                    <div class="notif-timeline" id="notifScheduleTimeline"></div>
+                </div>
+            </div>
+
+            <div class="container-modal__actions notif-modal__actions">
+                <button type="button" class="btn-modal-save" id="btnDoneNotifScheduleModal">Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL NADA DERING & SUARA NOTIFIKASI ========== -->
+    <div class="modal-overlay notif-modal-overlay" id="notifSoundModalOverlay" role="dialog" aria-modal="true" aria-labelledby="notifPanelSoundHeading">
+        <div class="container-modal-box notif-modal-box">
+            <div class="modal-sheet__handle"></div>
+
+            <div class="container-modal__header notif-modal__header">
+                <div class="notif-modal__header-lead">
+                    <div class="notif-panel__icon" aria-hidden="true">
+                        <i class="ri-volume-up-line"></i>
+                    </div>
+                    <h3 class="container-modal__title" id="notifPanelSoundHeading">Nada Dering &amp; Suara</h3>
+                </div>
+                <button type="button" class="modal__close" id="btnCloseNotifSoundModal" aria-label="Tutup modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="notif-modal__body">
+                <!-- Sound Source Selector: Default (Sistem) & Custom (Audio User) -->
+                <fieldset class="notif-fieldset">
+                    <legend class="notif-field-label">Sumber Suara</legend>
+                    <div class="notif-sound-type-grid">
+                        <label class="notif-sound-type-card" for="soundTypeDefault">
+                            <input type="radio" name="notifSoundType" id="soundTypeDefault" value="default" checked>
+                            <span class="notif-sound-type-card__body">
+                                <i class="ri-notification-3-line" aria-hidden="true"></i>
+                                <span>Default</span>
+                            </span>
+                        </label>
+                        <label class="notif-sound-type-card" for="soundTypeUpload">
+                            <input type="radio" name="notifSoundType" id="soundTypeUpload" value="custom-upload">
+                            <span class="notif-sound-type-card__body">
+                                <i class="ri-folder-music-line" aria-hidden="true"></i>
+                                <span>Custom</span>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <!-- Panel Custom: Pilih Nada Dering dari Perangkat User -->
+                <div class="notif-sound-subpanel hidden" id="soundUploadPanel">
+                    <input type="file" id="inputCustomRingtone" accept="audio/*" class="m3-file-input-hidden">
+                    <button type="button" class="notif-action-btn notif-action-btn--outline" id="btnChooseCustomAudio">
+                        <i class="ri-folder-music-line" aria-hidden="true"></i>
+                        <span>Pilih Audio dari Perangkat</span>
+                    </button>
+                    <div class="notif-media-box" id="customAudioInfo">
+                        <span class="notif-media-box__name" id="customAudioName">Belum ada file audio dipilih</span>
+                        <div class="notif-media-box__actions">
+                            <button type="button" class="notif-icon-btn hidden" id="btnPreviewCustomAudio" aria-label="Putar audio kustom">
+                                <i class="ri-play-fill" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="notif-icon-btn notif-icon-btn--danger hidden" id="btnRemoveCustomAudio" aria-label="Hapus audio kustom">
+                                <i class="ri-delete-bin-line" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-modal__actions notif-modal__actions">
+                <button type="button" class="btn-modal-save" id="btnDoneNotifSoundModal">Selesai</button>
+            </div>
         </div>
     </div>
 

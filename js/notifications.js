@@ -30,7 +30,7 @@ const HydroNotifications = (() => {
     lastNotifiedSlot: ''
   });
 
-  const VALID_SOUND_TYPES = new Set(['default', 'custom-upload', 'custom-voice', 'silent']);
+  const VALID_SOUND_TYPES = new Set(['default', 'custom-upload']);
   const VALID_DEFAULT_SOUNDS = new Set(['water-drop', 'soft-bell', 'fresh-chime', 'gentle-pulse']);
 
   let initialized = false;
@@ -692,7 +692,8 @@ const HydroNotifications = (() => {
     const config = options.config || getSettings();
     const dedupeMs = Number(options.dedupeMs) || 0;
 
-    if (config.soundType === 'silent') return false;
+    // Mode Default menggunakan nada notifikasi bawaan sistem perangkat (tanpa Web Audio buatan).
+    if (config.soundType !== AUDIO_KEY_UPLOAD) return false;
     if (dedupeMs > 0 && (Date.now() - lastSoundPlayedAt) < dedupeMs) return false;
 
     const markPlayed = (ok) => {
@@ -700,27 +701,15 @@ const HydroNotifications = (() => {
       return ok;
     };
 
-    if (config.soundType === AUDIO_KEY_UPLOAD) {
-      const res = await playStoredAudio(AUDIO_KEY_UPLOAD);
-      if (res.ok) return markPlayed(true);
-      if (res.reason === 'autoplay') return false;
-      return markPlayed(await playDefaultTone(config.defaultSoundId));
-    }
-
-    if (config.soundType === AUDIO_KEY_VOICE) {
-      const res = await playStoredAudio(AUDIO_KEY_VOICE);
-      if (res.ok) return markPlayed(true);
-      if (res.reason === 'autoplay') return false;
-      return markPlayed(await playDefaultTone(config.defaultSoundId));
-    }
-
-    return markPlayed(await playDefaultTone(config.defaultSoundId));
+    const res = await playStoredAudio(AUDIO_KEY_UPLOAD);
+    if (res.ok) return markPlayed(true);
+    return false;
   }
 
   async function playSoundWithRetryOnGesture(options = {}) {
     stopSilentAudioKeepAlive();
     const config = options.config || getSettings();
-    if (config.soundType === 'silent') {
+    if (config.soundType !== AUDIO_KEY_UPLOAD) {
       pendingRingtoneOnWake = false;
       return false;
     }
@@ -1239,13 +1228,42 @@ const HydroNotifications = (() => {
     }
   }
 
-  async function handleLocalTimerFire(expectedSlotKey, scheduledTargetMs) {
+  const LAST_FIRED_LOCK_KEY = 'hydrotrack_last_notif_lock';
+  let lastPushReceivedAt = 0;
+
+  function readLastFiredLock() {
+    try {
+      const raw = localStorage.getItem(LAST_FIRED_LOCK_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === 'object') {
+        return { slotKey: String(parsed.slotKey || ''), at: Number(parsed.at) || 0 };
+      }
+    } catch (err) {
+      // Ignore storage access errors.
+    }
+    return { slotKey: '', at: 0 };
+  }
+
+  function recordLastFiredLock(slotKey, atMs = Date.now()) {
+    try {
+      localStorage.setItem(LAST_FIRED_LOCK_KEY, JSON.stringify({
+        slotKey: String(slotKey || ''),
+        at: Number(atMs) || Date.now()
+      }));
+    } catch (err) {
+      // Ignore storage quota errors.
+    }
+  }
+
+  async function handleLocalTimerFire(expectedSlotKey, expectedFireMs, isPushFallback = false) {
     localTimerId = null;
     const config = getSettings();
     if (!config.enabled) return;
 
-    // If timer was frozen while the app was closed (> 12s overdue), do NOT pop up a late surprise notification on app reopen.
-    if (scheduledTargetMs && (Date.now() - scheduledTargetMs) > 12000) {
+    const nowMs = Date.now();
+
+    // If timer was frozen while the app was closed (> 15s overdue), do NOT pop up a late surprise notification on app reopen.
+    if (expectedFireMs && (nowMs - expectedFireMs) > 15000) {
       scheduleLocalTimer();
       renderSettingsUI();
       return;
@@ -1257,14 +1275,29 @@ const HydroNotifications = (() => {
       return;
     }
 
-    if (expectedSlotKey && config.lastNotifiedSlot === expectedSlotKey) {
+    // If Push Server already delivered a notification in the last 3 minutes, skip local fallback to prevent duplicates.
+    if (isPushFallback && lastPushReceivedAt && (nowMs - lastPushReceivedAt) < 180000) {
+      saveSettings({ lastNotifiedSlot: expectedSlotKey || buildSlotKey(new Date()) });
+      scheduleLocalTimer();
+      renderSettingsUI();
+      return;
+    }
+
+    const lock = readLastFiredLock();
+    if (
+      (expectedSlotKey && config.lastNotifiedSlot === expectedSlotKey) ||
+      (expectedSlotKey && lock.slotKey === expectedSlotKey && (nowMs - lock.at) < 10 * 60000) ||
+      (lock.at && (nowMs - lock.at) < 55000)
+    ) {
       scheduleLocalTimer();
       return;
     }
 
     if (getNotificationPermission() === 'granted') {
-      saveSettings({ lastNotifiedSlot: expectedSlotKey || buildSlotKey(new Date()) });
-      await showHydroNotification({ isTest: false, playAudio: true });
+      const slot = expectedSlotKey || buildSlotKey(new Date());
+      recordLastFiredLock(slot, nowMs);
+      saveSettings({ lastNotifiedSlot: slot });
+      await showHydroNotification({ isTest: false, playAudio: true, slotKey: slot });
     }
 
     scheduleLocalTimer();
@@ -1299,10 +1332,13 @@ const HydroNotifications = (() => {
       return next;
     }
 
-    const targetMs = next.nextDate.getTime();
+    // When Push Server is actively connected and online, delay local timer by 90s as a pure fallback so server push and local timer never collide.
+    const isPushActive = Boolean(config.pushConnected && config.pushServerUrl && navigator.onLine !== false);
+    const fallbackGraceMs = isPushActive ? 90000 : 0;
+    const targetMs = next.nextDate.getTime() + fallbackGraceMs;
     const delayMs = Math.max(1000, targetMs - Date.now());
     localTimerId = setTimeout(() => {
-      handleLocalTimerFire(next.nextSlotKey, targetMs);
+      handleLocalTimerFire(next.nextSlotKey, targetMs, isPushActive);
     }, Math.min(delayMs, 2147483647));
 
     return next;
@@ -1334,7 +1370,7 @@ const HydroNotifications = (() => {
     const title = options.title || msg.title;
     const body = options.body || msg.body;
     const isTest = Boolean(options.isTest);
-    const isSilent = config.soundType === 'silent';
+    const isSilent = false;
     const targetUrl = options.url || (isTest ? './pengaturan.html?from=notification' : './index.html?from=notification');
     const payload = {
       title: title,
@@ -1342,6 +1378,7 @@ const HydroNotifications = (() => {
       tag: options.tag || (isTest ? 'hydrotrack-test' : 'hydrotrack-reminder'),
       url: targetUrl,
       isTest: isTest,
+      slotKey: options.slotKey || '',
       silent: isSilent,
       sentAt: Date.now()
     };
@@ -1509,7 +1546,7 @@ const HydroNotifications = (() => {
 
     const lastDrink = getLatestDrinkDateToday();
     const subJson = typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription;
-    const soundLabel = config.soundType === 'default' ? config.defaultSoundId : config.soundType;
+    const soundLabel = config.soundType === AUDIO_KEY_UPLOAD ? 'custom-upload' : 'default';
 
     return {
       subscription: subJson,
@@ -1741,6 +1778,26 @@ const HydroNotifications = (() => {
     renderSettingsUI();
   }
 
+  let pendingScheduleSyncFn = null;
+  let pendingProgressSyncFn = null;
+
+  function flushPendingServerSyncs() {
+    if (syncScheduleDebounceId && typeof pendingScheduleSyncFn === 'function') {
+      clearTimeout(syncScheduleDebounceId);
+      syncScheduleDebounceId = null;
+      const fn = pendingScheduleSyncFn;
+      pendingScheduleSyncFn = null;
+      fn();
+    }
+    if (syncProgressDebounceId && typeof pendingProgressSyncFn === 'function') {
+      clearTimeout(syncProgressDebounceId);
+      syncProgressDebounceId = null;
+      const fn = pendingProgressSyncFn;
+      pendingProgressSyncFn = null;
+      fn();
+    }
+  }
+
   function queueScheduleSyncToServer(options = {}) {
     const config = getSettings();
     const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
@@ -1752,6 +1809,7 @@ const HydroNotifications = (() => {
     }
 
     const executeSync = async () => {
+      pendingScheduleSyncFn = null;
       const latest = getSettings();
       const targetUrl = latest.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
       if (!targetUrl) return;
@@ -1768,7 +1826,7 @@ const HydroNotifications = (() => {
         const res = await fetchWithTimeout(`${targetUrl}/subscribe`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          keepalive: Boolean(options.keepalive),
+          keepalive: true,
           body: JSON.stringify(buildPushPayload(subscription, latest))
         }, 8000);
 
@@ -1787,10 +1845,11 @@ const HydroNotifications = (() => {
       return;
     }
 
+    pendingScheduleSyncFn = executeSync;
     syncScheduleDebounceId = setTimeout(() => {
       syncScheduleDebounceId = null;
       executeSync();
-    }, 500);
+    }, 150);
   }
 
   function syncHydrationProgress() {
@@ -1803,10 +1862,11 @@ const HydroNotifications = (() => {
 
     if (syncProgressDebounceId) {
       clearTimeout(syncProgressDebounceId);
+      syncProgressDebounceId = null;
     }
 
-    syncProgressDebounceId = setTimeout(async () => {
-      syncProgressDebounceId = null;
+    const executeProgressSync = async () => {
+      pendingProgressSyncFn = null;
       const latest = getSettings();
       const targetUrl = latest.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
       if (!targetUrl) return;
@@ -1824,6 +1884,7 @@ const HydroNotifications = (() => {
         const res = await fetchWithTimeout(`${targetUrl}/sync-progress`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
           body: JSON.stringify({
             endpoint: subscription.endpoint,
             subscription: payload.subscription,
@@ -1837,13 +1898,20 @@ const HydroNotifications = (() => {
           await fetchWithTimeout(`${targetUrl}/subscribe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            keepalive: true,
             body: JSON.stringify(payload)
           }, 8000);
         }
       } catch (err) {
         // Ignore network errors while offline so water logging stays instant.
       }
-    }, 800);
+    };
+
+    pendingProgressSyncFn = executeProgressSync;
+    syncProgressDebounceId = setTimeout(() => {
+      syncProgressDebounceId = null;
+      executeProgressSync();
+    }, 250);
   }
 
   // Test notification actions (instant and delayed 15-second closed-browser test).
@@ -1875,6 +1943,155 @@ const HydroNotifications = (() => {
       el.removeAttribute('data-status');
     }
     el.classList.remove('hidden');
+  }
+
+  let isSendingDemoNotif = false;
+  let demoStatusResetTimerId = null;
+
+  function setDemoTestStatusText(text, autoResetMs = 0) {
+    if (demoStatusResetTimerId) {
+      clearTimeout(demoStatusResetTimerId);
+      demoStatusResetTimerId = null;
+    }
+    const statusEl = document.getElementById('notifDemoTestStatusText');
+    if (statusEl) {
+      statusEl.textContent = text;
+    }
+    if (autoResetMs > 0 && statusEl) {
+      demoStatusResetTimerId = setTimeout(() => {
+        demoStatusResetTimerId = null;
+        statusEl.textContent = 'Kirim contoh push notifikasi untuk demo';
+      }, autoResetMs);
+    }
+  }
+
+  async function ensurePushSubscriptionForDemoOnly(serverUrl) {
+    const reg = await ensureServiceWorker();
+    if (!reg || !reg.pushManager) return null;
+
+    try {
+      let subscription = await reg.pushManager.getSubscription();
+      if (subscription) return subscription;
+
+      const keyRes = await fetchWithTimeout(`${serverUrl}/vapid-public-key`, {
+        method: 'GET',
+        headers: { Accept: 'application/json, text/plain' }
+      }, 8000);
+      if (!keyRes.ok) return null;
+
+      const contentType = keyRes.headers.get('content-type') || '';
+      let vapidKey = '';
+      if (contentType.includes('application/json')) {
+        const keyData = await keyRes.json();
+        vapidKey = keyData.publicKey || keyData.vapidPublicKey || '';
+      } else {
+        vapidKey = (await keyRes.text()).trim();
+      }
+      if (!vapidKey) return null;
+
+      subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey)
+      });
+      return subscription;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  // Isolated Demo Push Notification (uses tag "hydrotrack-test" and never touches the user's scheduled reminders or KV schedule).
+  async function sendDemoPushNotification() {
+    if (isSendingDemoNotif) return { ok: false, reason: 'busy' };
+
+    const state = getPlatformState();
+    if (state.needsIosInstall || !state.notifSupported) {
+      const msg = state.needsIosInstall
+        ? 'Tambahkan HydroTrack ke Layar Utama Safari terlebih dahulu untuk mencoba notifikasi.'
+        : 'Browser ini tidak mendukung notifikasi web.';
+      showToastSafe(msg, 'warning');
+      return { ok: false };
+    }
+
+    let permission = getNotificationPermission();
+    if (permission === 'default') {
+      permission = await requestPermission();
+    }
+
+    if (permission !== 'granted') {
+      const msg = permission === 'denied'
+        ? 'Izin notifikasi diblokir browser. Aktifkan lewat pengaturan situs terlebih dahulu.'
+        : 'Izin notifikasi diperlukan untuk mengirim tes notifikasi.';
+      showToastSafe(msg, 'warning');
+      return { ok: false };
+    }
+
+    isSendingDemoNotif = true;
+    const demoBtn = document.getElementById('btnDemoTestNotif');
+    if (demoBtn) demoBtn.disabled = true;
+    setDemoTestStatusText('Mengirim tes notifikasi...');
+
+    try {
+      const config = getSettings();
+      const appSettings = safeGetAppSettings();
+      const msgObj = buildReminderMessage(new Date());
+      const soundLabel = config.soundType === AUDIO_KEY_UPLOAD ? 'custom-upload' : 'default';
+      const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+
+      // Primary: real Web Push through Cloudflare Worker /test-push (isolated from user's real reminder schedule).
+      if (state.pushSupported && serverUrl && navigator.onLine !== false) {
+        const subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
+        if (subscription) {
+          try {
+            const res = await fetchWithTimeout(`${serverUrl}/test-push`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                endpoint: subscription.endpoint,
+                subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
+                delaySeconds: 0,
+                userName: appSettings.userName || 'Pengguna',
+                todayTotal: safeGetTodayTotal(),
+                dailyGoal: Number(appSettings.dailyGoal) || 2000,
+                remaining: safeGetTodayRemaining(),
+                percentage: safeGetTodayPercentage(),
+                soundLabel: soundLabel
+              })
+            }, 10000);
+
+            if (res.ok) {
+              setDemoTestStatusText('Tes push notifikasi terkirim!', 4000);
+              showToastSafe('Tes push notifikasi demo berhasil dikirim.', 'success');
+              return { ok: true, mode: 'push' };
+            }
+          } catch (err) {
+            // Fall through to isolated local SW demo notification if offline/timeout.
+          }
+        }
+      }
+
+      // Fallback (offline / local environment): isolated local SW notification with tag "hydrotrack-test".
+      const localRes = await showHydroNotification({
+        isTest: true,
+        tag: 'hydrotrack-test',
+        title: 'Tes Notifikasi HydroTrack',
+        body: msgObj.body,
+        playAudio: true,
+        url: './pengaturan.html?from=notification'
+      });
+
+      if (localRes.ok) {
+        setDemoTestStatusText('Tes notifikasi terkirim!', 4000);
+        showToastSafe('Tes notifikasi demo berhasil dikirim.', 'success');
+        return { ok: true, mode: 'local' };
+      }
+
+      setDemoTestStatusText('Gagal mengirim tes notifikasi', 4000);
+      showToastSafe('Gagal menampilkan tes notifikasi. Pastikan notifikasi perangkat tidak diblokir.', 'danger');
+      return { ok: false };
+    } finally {
+      isSendingDemoNotif = false;
+      if (demoBtn) demoBtn.disabled = false;
+    }
   }
 
   async function sendTestNotificationNow() {
@@ -1914,9 +2131,9 @@ const HydroNotifications = (() => {
     clearTestTimers();
     const waitSecs = Math.max(5, parseInt(delaySeconds, 10) || 15);
 
-    // Unlock audio immediately inside user gesture and keep audio session warm so the app ringtone plays even when minimized/locked.
+    // Unlock audio immediately inside user gesture when Custom audio is selected.
     const initialConfig = getSettings();
-    if (initialConfig.soundType !== 'silent') {
+    if (initialConfig.soundType === AUDIO_KEY_UPLOAD) {
       startSilentAudioKeepAlive(waitSecs + 8);
     }
 
@@ -1947,7 +2164,7 @@ const HydroNotifications = (() => {
 
     const appSettings = safeGetAppSettings();
     const msgObj = buildReminderMessage(new Date());
-    const soundLabel = config.soundType === 'default' ? config.defaultSoundId : config.soundType;
+    const soundLabel = config.soundType === AUDIO_KEY_UPLOAD ? 'custom-upload' : 'default';
 
     // Arm Service-Worker-level background timer backup so notification still fires while minimized even if mobile network delays FCM.
     const reg = await ensureServiceWorker();
@@ -1961,7 +2178,7 @@ const HydroNotifications = (() => {
             title: 'Tes Push Latar Belakang Berhasil',
             body: `Halo ${appSettings.userName || 'Pengguna'}, pengingat HydroTrack aktif di latar belakang. ${msgObj.body}`,
             soundLabel: soundLabel,
-            silent: config.soundType === 'silent',
+            silent: false,
             url: './pengaturan.html?from=notification'
           }
         });
@@ -2250,25 +2467,12 @@ const HydroNotifications = (() => {
   }
 
   function renderSoundUI(config = getSettings()) {
-    setSelectableState(document.getElementById('soundTypeDefault'), config.soundType === 'default');
-    setSelectableState(document.getElementById('soundTypeUpload'), config.soundType === AUDIO_KEY_UPLOAD);
-    setSelectableState(document.getElementById('soundTypeVoice'), config.soundType === AUDIO_KEY_VOICE);
-    setSelectableState(document.getElementById('soundTypeSilent'), config.soundType === 'silent');
+    const isCustom = config.soundType === AUDIO_KEY_UPLOAD;
+    setSelectableState(document.getElementById('soundTypeDefault'), !isCustom);
+    setSelectableState(document.getElementById('soundTypeUpload'), isCustom);
 
-    const defaultPanel = document.getElementById('soundDefaultPanel');
     const uploadPanel = document.getElementById('soundUploadPanel');
-    const voicePanel = document.getElementById('soundVoicePanel');
-
-    if (defaultPanel) defaultPanel.classList.toggle('hidden', config.soundType !== 'default');
-    if (uploadPanel) uploadPanel.classList.toggle('hidden', config.soundType !== AUDIO_KEY_UPLOAD);
-    if (voicePanel) voicePanel.classList.toggle('hidden', config.soundType !== AUDIO_KEY_VOICE);
-
-    const soundRadios = document.querySelectorAll('input[name="notifDefaultSound"]');
-    soundRadios.forEach((radio) => {
-      radio.checked = radio.value === config.defaultSoundId;
-      const parentLabel = radio.closest('label');
-      if (parentLabel) parentLabel.classList.toggle('active', radio.checked);
-    });
+    if (uploadPanel) uploadPanel.classList.toggle('hidden', !isCustom);
 
     const hasUpload = Boolean(config.customAudioName) && audioAvailability[AUDIO_KEY_UPLOAD] !== false;
     const customAudioInfo = document.getElementById('customAudioInfo');
@@ -2279,28 +2483,6 @@ const HydroNotifications = (() => {
     if (customAudioName) customAudioName.textContent = hasUpload ? config.customAudioName : 'Belum ada file audio dipilih';
     if (previewUploadBtn) previewUploadBtn.classList.toggle('hidden', !hasUpload);
     if (removeUploadBtn) removeUploadBtn.classList.toggle('hidden', !hasUpload);
-
-    const hasVoice = Boolean(config.customVoiceName) && audioAvailability[AUDIO_KEY_VOICE] !== false;
-    const customVoiceInfo = document.getElementById('customVoiceInfo');
-    const customVoiceLabel = document.getElementById('customVoiceLabel');
-    const previewVoiceBtn = document.getElementById('btnPreviewCustomVoice');
-    const removeVoiceBtn = document.getElementById('btnRemoveCustomVoice');
-    if (customVoiceInfo) customVoiceInfo.dataset.hasAudio = hasVoice ? 'true' : 'false';
-    if (customVoiceLabel) {
-      customVoiceLabel.textContent = hasVoice
-        ? config.customVoiceName
-        : 'Belum ada rekaman suara';
-    }
-    if (previewVoiceBtn) previewVoiceBtn.classList.toggle('hidden', !hasVoice);
-    if (removeVoiceBtn) removeVoiceBtn.classList.toggle('hidden', !hasVoice);
-
-    if (!isRecordingVoice) {
-      const timerEl = document.getElementById('voiceRecordTimer');
-      if (timerEl) {
-        const shownSecs = hasVoice ? config.customVoiceDuration : 0;
-        timerEl.textContent = `${formatDurationMMSS(shownSecs)} / ${formatDurationMMSS(MAX_VOICE_SECONDS)}`;
-      }
-    }
   }
 
   function renderScheduleTimeline(config, nextInfo) {
@@ -2529,6 +2711,25 @@ const HydroNotifications = (() => {
 
     renderScheduleTimeline(config, nextInfo);
     renderSoundUI(config);
+
+    // Summary subtitles on the trigger cards ("Jadwal & Interval" and "Nada Dering & Suara").
+    const scheduleSummaryEl = document.getElementById('notifScheduleSummaryText');
+    if (scheduleSummaryEl) {
+      const modeLabel = config.mode === 'smart' ? 'Mode Pintar' : 'Jadwal Tetap';
+      scheduleSummaryEl.textContent = `${modeLabel} · ${config.startTime} - ${config.endTime} · Tiap ${formatIntervalLabel(config.intervalMinutes)}`;
+    }
+
+    const soundSummaryEl = document.getElementById('notifSoundSummaryText');
+    if (soundSummaryEl) {
+      if (config.soundType === AUDIO_KEY_UPLOAD) {
+        const hasUpload = Boolean(config.customAudioName) && audioAvailability[AUDIO_KEY_UPLOAD] !== false;
+        soundSummaryEl.textContent = hasUpload
+          ? `Custom · ${config.customAudioName}`
+          : 'Custom · Belum ada file audio dipilih';
+      } else {
+        soundSummaryEl.textContent = 'Default · Mengikuti sistem perangkat';
+      }
+    }
 
     // Push server section.
     const pushBadge = document.getElementById('pushServerStatusBadge');
@@ -2927,6 +3128,13 @@ const HydroNotifications = (() => {
     }
 
     // Test notification buttons.
+    const demoTestBtn = document.getElementById('btnDemoTestNotif');
+    if (demoTestBtn) {
+      demoTestBtn.addEventListener('click', () => {
+        sendDemoPushNotification();
+      });
+    }
+
     const testNowBtn = document.getElementById('btnTestNotifNow');
     if (testNowBtn) {
       testNowBtn.addEventListener('click', () => {
@@ -2956,6 +3164,77 @@ const HydroNotifications = (() => {
       });
     }
 
+    // Pop-up Modals for "Jadwal & Interval" and "Nada Dering & Suara".
+    const bindNotifModal = (openBtnId, overlayId, closeBtnIds, onCloseCallback) => {
+      const openBtn = document.getElementById(openBtnId);
+      const overlay = document.getElementById(overlayId);
+      if (!overlay) return;
+
+      const closeModal = () => {
+        overlay.classList.remove('active');
+        if (typeof onCloseCallback === 'function') {
+          onCloseCallback();
+        }
+        renderSettingsUI();
+      };
+
+      if (openBtn) {
+        openBtn.addEventListener('click', () => {
+          renderSettingsUI();
+          overlay.classList.add('active');
+        });
+      }
+
+      closeBtnIds.forEach((id) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', closeModal);
+        }
+      });
+
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+          closeModal();
+        }
+      });
+    };
+
+    bindNotifModal(
+      'btnOpenNotifScheduleModal',
+      'notifScheduleModalOverlay',
+      ['btnCloseNotifScheduleModal', 'btnDoneNotifScheduleModal']
+    );
+
+    bindNotifModal(
+      'btnOpenNotifSoundModal',
+      'notifSoundModalOverlay',
+      ['btnCloseNotifSoundModal', 'btnDoneNotifSoundModal'],
+      () => {
+        stopAudioPlayback();
+        if (isRecordingVoice) {
+          stopVoiceRecording();
+        }
+      }
+    );
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const scheduleOverlay = document.getElementById('notifScheduleModalOverlay');
+      if (scheduleOverlay && scheduleOverlay.classList.contains('active')) {
+        scheduleOverlay.classList.remove('active');
+        renderSettingsUI();
+      }
+      const soundOverlay = document.getElementById('notifSoundModalOverlay');
+      if (soundOverlay && soundOverlay.classList.contains('active')) {
+        soundOverlay.classList.remove('active');
+        stopAudioPlayback();
+        if (isRecordingVoice) {
+          stopVoiceRecording();
+        }
+        renderSettingsUI();
+      }
+    });
+
     syncAudioAvailabilityFromDB();
     renderSettingsUI();
   }
@@ -2968,7 +3247,7 @@ const HydroNotifications = (() => {
 
       const tryPlay = async () => {
         const played = await playSelectedSound({ dedupeMs: 4000 });
-        if (!played && getSettings().soundType !== 'silent') {
+        if (!played && getSettings().soundType === AUDIO_KEY_UPLOAD) {
           const onFirstInteraction = () => {
             playSelectedSound({ dedupeMs: 4000 });
           };
@@ -3007,7 +3286,15 @@ const HydroNotifications = (() => {
         }
 
         if (data.type === 'HYDRO_PUSH_RECEIVED') {
-          // Always play the user's selected app ringtone when push arrives (even if minimized or screen-locked!).
+          if (!data.isTest) {
+            const nowMs = Date.now();
+            lastPushReceivedAt = nowMs;
+            const slot = data.slotKey || buildSlotKey(new Date(nowMs));
+            recordLastFiredLock(slot, nowMs);
+            saveSettings({ lastNotifiedSlot: slot });
+            scheduleLocalTimer();
+          }
+          // Play custom user ringtone if configured when push arrives while app is open/active.
           playSoundWithRetryOnGesture({ dedupeMs: 3000 });
           if (data.isTest) {
             clearTestTimers();
@@ -3020,6 +3307,8 @@ const HydroNotifications = (() => {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         reconcileTimerOnWake();
+      } else if (document.visibilityState === 'hidden') {
+        flushPendingServerSyncs();
       }
     });
 
@@ -3040,6 +3329,7 @@ const HydroNotifications = (() => {
     });
 
     window.addEventListener('pagehide', () => {
+      flushPendingServerSyncs();
       if (isRecordingVoice) {
         stopVoiceRecording();
       }

@@ -1,11 +1,64 @@
-const SW_VERSION = 'hydrotrack-sw-v3';
-const CACHE_NAME = 'hydrotrack-shell-v3';
+const SW_VERSION = 'hydrotrack-sw-v12';
+const CACHE_NAME = 'hydrotrack-shell-v12';
+const NOTIF_STATE_CACHE = 'hydrotrack-notif-state';
+const LAST_REMINDER_STATE_URL = '/__hydrotrack_last_reminder_slot__';
 
 const DEFAULT_TITLE = 'Waktunya Minum Air';
 const DEFAULT_BODY = 'Ambil segelas air sekarang agar asupan cairan harianmu tetap terjaga.';
 const DEFAULT_URL = './index.html?from=notification';
 
 let lastTestNotificationShownAt = 0;
+let lastReminderSlotMem = { slotKey: '', shownAt: 0 };
+
+async function readLastReminderState() {
+  try {
+    const cache = await caches.open(NOTIF_STATE_CACHE);
+    const res = await cache.match(LAST_REMINDER_STATE_URL);
+    if (res) {
+      const parsed = await res.json();
+      if (parsed && typeof parsed === 'object') {
+        if ((parsed.shownAt || 0) >= (lastReminderSlotMem.shownAt || 0)) {
+          lastReminderSlotMem = {
+            slotKey: String(parsed.slotKey || ''),
+            shownAt: Number(parsed.shownAt) || 0
+          };
+        }
+      }
+    }
+  } catch (err) {
+    // Fall back to in-memory state if Cache API is unavailable.
+  }
+  return lastReminderSlotMem;
+}
+
+async function recordLastReminderState(slotKey, shownAt) {
+  lastReminderSlotMem = {
+    slotKey: String(slotKey || ''),
+    shownAt: Number(shownAt) || Date.now()
+  };
+  try {
+    const cache = await caches.open(NOTIF_STATE_CACHE);
+    await cache.put(
+      LAST_REMINDER_STATE_URL,
+      new Response(JSON.stringify(lastReminderSlotMem), {
+        headers: { 'Content-Type': 'application/json' }
+      })
+    );
+  } catch (err) {
+    // Ignore cache persistence errors.
+  }
+}
+
+async function isDuplicateReminderSlot(slotKey, nowMs = Date.now()) {
+  const prev = await readLastReminderState();
+  if (slotKey && prev.slotKey === slotKey && (nowMs - prev.shownAt) < 10 * 60 * 1000) {
+    return true;
+  }
+  if (prev.shownAt && (nowMs - prev.shownAt) < 45 * 1000) {
+    return true;
+  }
+  return false;
+}
 
 function resolveScopeAssetUrl(relativePath) {
   try {
@@ -58,6 +111,7 @@ function buildNotificationOptions(payload) {
       url: resolvedUrl,
       isTest: isTest,
       sentAt: sentAt,
+      slotKey: payload.slotKey || nestedData.slotKey || '',
       soundLabel: soundLabel
     },
     actions: [
@@ -171,25 +225,41 @@ self.addEventListener('push', (event) => {
   const payload = parsePushPayload(event.data);
   const title = payload.title || DEFAULT_TITLE;
   const options = buildNotificationOptions(payload);
+  const isTest = Boolean(options.data && options.data.isTest);
+  const slotKey = (options.data && options.data.slotKey) || '';
 
-  if (options.data && options.data.isTest) {
+  if (isTest) {
     lastTestNotificationShownAt = Date.now();
   }
 
-  event.waitUntil(
-    Promise.all([
+  event.waitUntil((async () => {
+    const nowMs = Date.now();
+    if (!isTest) {
+      const duplicate = await isDuplicateReminderSlot(slotKey, nowMs);
+      if (duplicate) {
+        // Satisfy Chrome's userVisibleOnly policy silently in-place without re-alerting or ringing again.
+        const quietOptions = { ...options, renotify: false, silent: true };
+        delete quietOptions.vibrate;
+        await self.registration.showNotification(title, quietOptions);
+        return;
+      }
+      await recordLastReminderState(slotKey, nowMs);
+    }
+
+    await Promise.all([
       self.registration.showNotification(title, options),
       broadcastToClients({
         type: 'HYDRO_PUSH_RECEIVED',
-        isTest: options.data.isTest,
+        isTest: isTest,
+        slotKey: slotKey,
         sentAt: options.data.sentAt,
         soundLabel: options.data.soundLabel,
         silent: Boolean(options.silent),
         title: title,
         body: options.body
       })
-    ])
-  );
+    ]);
+  })());
 });
 
 self.addEventListener('notificationclick', (event) => {
@@ -264,23 +334,32 @@ self.addEventListener('message', (event) => {
     const payload = data.payload || data;
     const title = payload.title || DEFAULT_TITLE;
     const options = buildNotificationOptions(payload);
-    if (options.data && options.data.isTest) {
+    const isTest = Boolean(options.data && options.data.isTest);
+    const slotKey = (options.data && options.data.slotKey) || '';
+    if (isTest) {
       lastTestNotificationShownAt = Date.now();
     }
-    event.waitUntil(
-      Promise.all([
+    event.waitUntil((async () => {
+      const nowMs = Date.now();
+      if (!isTest) {
+        const duplicate = await isDuplicateReminderSlot(slotKey, nowMs);
+        if (duplicate) return;
+        await recordLastReminderState(slotKey, nowMs);
+      }
+      await Promise.all([
         self.registration.showNotification(title, options),
         broadcastToClients({
           type: 'HYDRO_PUSH_RECEIVED',
-          isTest: options.data.isTest,
+          isTest: isTest,
+          slotKey: slotKey,
           sentAt: options.data.sentAt,
           soundLabel: options.data.soundLabel,
           silent: Boolean(options.silent),
           title: title,
           body: options.body
         })
-      ])
-    );
+      ]);
+    })());
     return;
   }
 

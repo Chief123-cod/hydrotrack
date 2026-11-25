@@ -12,6 +12,8 @@ const DEFAULT_DAILY_GOAL = 2000;
 const DEFAULT_TZ_OFFSET_MINUTES = -420;
 const DEFAULT_ICON_PATH = '/img/icon-192.png';
 const CRON_BATCH_SIZE = 5;
+const REMINDER_PUSH_TTL_SECONDS = 3600;
+const recentIsolateSentSlots = new Map();
 
 function getCorsHeaders(request, env) {
   const configured = String(env.ALLOWED_ORIGIN || '*').trim();
@@ -368,8 +370,7 @@ export function evaluateReminderSchedule(record, nowMs = Date.now()) {
     };
   }
 
-  // Allow up to 2 minutes of cron jitter while preventing adjacent slots from overlapping.
-  const tolerance = Math.min(2, Math.max(0, intervalMinutes - 1));
+  // Match strictly on the exact scheduled minute so 1-minute Cron triggers never send duplicate pushes on t+1/t+2 due to Cloudflare KV eventual consistency.
   let slotMinute = null;
   let slotKind = 'fixed';
 
@@ -381,7 +382,7 @@ export function evaluateReminderSchedule(record, nowMs = Date.now()) {
       if (currentMin >= firstDue) {
         const k = Math.floor((currentMin - firstDue) / intervalMinutes);
         const candidate = firstDue + k * intervalMinutes;
-        if (candidate >= startMinutes && candidate <= endMinutes && currentMin <= candidate + tolerance) {
+        if (candidate >= startMinutes && candidate <= endMinutes && currentMin === candidate) {
           slotMinute = candidate;
         }
       }
@@ -391,7 +392,7 @@ export function evaluateReminderSchedule(record, nowMs = Date.now()) {
   if (slotKind === 'fixed') {
     const k = Math.floor((currentMin - startMinutes) / intervalMinutes);
     const candidate = startMinutes + k * intervalMinutes;
-    if (candidate <= endMinutes && currentMin >= candidate && currentMin <= candidate + tolerance) {
+    if (candidate <= endMinutes && currentMin === candidate) {
       slotMinute = candidate;
     }
   }
@@ -910,10 +911,24 @@ async function processSubscriptionKey(keyName, env, vapidConfig, nowMs) {
     return;
   }
 
+  // Isolate-level anti-duplicate guard in case the same minute fires twice before KV propagates.
+  const dedupeKey = `${keyName}|${evalResult.slotKey}`;
+  const prevIsolateSent = recentIsolateSentSlots.get(dedupeKey);
+  if (prevIsolateSent && nowMs - prevIsolateSent < 10 * 60_000) {
+    return;
+  }
+  recentIsolateSentSlots.set(dedupeKey, nowMs);
+  if (recentIsolateSentSlots.size > 500) {
+    for (const [k, ts] of recentIsolateSentSlots) {
+      if (nowMs - ts >= 10 * 60_000) recentIsolateSentSlots.delete(k);
+    }
+  }
+
   const payload = buildReminderPayload(record, evalResult, nowMs);
   const sendResult = await sendWebPush(record.subscription, payload, vapidConfig, {
-    ttl: 300,
-    urgency: 'high'
+    ttl: REMINDER_PUSH_TTL_SECONDS,
+    urgency: 'high',
+    topic: 'hydrotrack-reminder'
   });
 
   if (sendResult.expired) {

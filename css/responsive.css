@@ -2376,6 +2376,19 @@
     border-bottom: none !important;
   }
 
+  #subview-notifications .m3-page-title {
+    margin-bottom: 4px !important;
+  }
+
+  #subview-data .m3-segmented-list {
+    gap: 12px;
+  }
+
+  #subview-data .m3-nav-card {
+    border-radius: 18px;
+    padding: 16px;
+  }
+
   .m3-profile-hero-card {
     padding: 20px 18px;
     border-radius: 24px;
@@ -2440,8 +2453,9 @@
   }
 
   /* Notification Settings Mobile Reflow (<= 768px, safe down to 360px) */
-  #subview-notifications {
-    gap: 16px;
+  #subview-notifications,
+  .notif-trigger-list {
+    gap: 12px;
   }
 
   .notif-master-card,
@@ -2450,6 +2464,83 @@
     padding: 16px;
     border-radius: 18px;
     gap: 15px;
+  }
+
+  .notif-modal-overlay {
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .notif-modal-box {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 88dvh !important;
+    border-radius: 24px 24px 0 0 !important;
+    border-bottom: none !important;
+    padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px !important;
+  }
+
+  .notif-modal-box .modal-sheet__handle {
+    display: block;
+    margin: 0 auto 10px auto;
+    flex-shrink: 0;
+  }
+
+  .notif-modal__header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+
+  .notif-modal__body {
+    gap: 11px;
+    padding: 2px 4px 4px 2px;
+    margin-right: -2px;
+  }
+
+  .notif-modal-box .m3-input {
+    height: 42px;
+    min-height: 42px;
+  }
+
+  .notif-modal-box .m3-btn-chip--primary {
+    min-height: 42px;
+    height: 42px;
+    padding: 0 14px;
+  }
+
+  .notif-modal-box .notif-interval-presets {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .notif-modal-box .notif-preset-chip {
+    min-height: 38px;
+  }
+
+  .notif-modal-box .notif-custom-interval-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+
+  .notif-modal-box .notif-apply-btn {
+    grid-column: auto;
+    width: auto;
+    min-height: 42px;
+  }
+
+  .notif-modal-box .notif-num-input {
+    padding-right: 36px;
+  }
+
+  .notif-modal-box .notif-num-unit {
+    right: 10px;
+    font-size: 12px;
+  }
+
+  .notif-modal-box .notif-timeline {
+    max-height: 84px;
   }
 
   .notif-master-card__top {
