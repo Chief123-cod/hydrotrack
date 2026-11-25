@@ -1,5 +1,5 @@
-const SW_VERSION = 'hydrotrack-sw-v14';
-const CACHE_NAME = 'hydrotrack-shell-v14';
+const SW_VERSION = 'hydrotrack-sw-v15';
+const CACHE_NAME = 'hydrotrack-shell-v15';
 const NOTIF_STATE_CACHE = 'hydrotrack-notif-state';
 const LAST_REMINDER_STATE_URL = '/__hydrotrack_last_reminder_slot__';
 
