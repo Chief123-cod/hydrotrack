@@ -1,6 +1,7 @@
-import { sendWebPush } from './webpush.js';
+import { createVapidAuthHeader, encryptWebPushPayload, sendWebPush } from './webpush.js';
 
 const SUBSCRIPTION_PREFIX = 'sub:';
+const SUB_INDEX_KEY = 'meta:sub_index';
 const SUBSCRIPTION_TTL_SECONDS = 90 * 24 * 60 * 60;
 const MAX_TEST_DELAY_SECONDS = 25;
 const MIN_INTERVAL_MINUTES = 1;
@@ -664,12 +665,14 @@ function buildTestPayload({ userName, todayTotal, dailyGoal, delaySeconds, sound
     ? `${greeting} notifikasi ini dikirim dari server setelah jeda ${delaySeconds} detik.${progressText}`
     : `${greeting} koneksi push server HydroTrack aktif dan siap mengirim pengingat.${progressText}`);
 
+  const testTag = `hydrotrack-test-${Date.now()}`;
+
   return {
     title,
     body,
     icon: DEFAULT_ICON_PATH,
     badge: DEFAULT_ICON_PATH,
-    tag: 'hydrotrack-test',
+    tag: testTag,
     renotify: true,
     silent: cleanSoundLabel === 'silent',
     url: '/pengaturan.html',
@@ -682,6 +685,50 @@ function buildTestPayload({ userName, todayTotal, dailyGoal, delaySeconds, sound
       sentAt: new Date().toISOString()
     }
   };
+}
+
+// Maintain a single-key subscription index so 1-minute Cron uses KV.get (100k/day free) instead of KV.list (1k/day free).
+async function getSubscriptionIndex(env) {
+  const indexed = await env.HYDRO_PUSH_KV.get(SUB_INDEX_KEY, 'json');
+  if (Array.isArray(indexed)) {
+    return indexed.filter((k) => typeof k === 'string' && k.startsWith(SUBSCRIPTION_PREFIX));
+  }
+
+  // One-time bootstrap from existing KV keys if meta:sub_index does not exist yet.
+  const discovered = [];
+  let cursor = undefined;
+  do {
+    const page = await env.HYDRO_PUSH_KV.list({
+      prefix: SUBSCRIPTION_PREFIX,
+      cursor,
+      limit: 1000
+    });
+    for (const entry of (page.keys || [])) {
+      if (entry && typeof entry.name === 'string') {
+        discovered.push(entry.name);
+      }
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+
+  await env.HYDRO_PUSH_KV.put(SUB_INDEX_KEY, JSON.stringify(discovered));
+  return discovered;
+}
+
+async function addKeyToIndex(env, keyName) {
+  const list = await getSubscriptionIndex(env);
+  if (!list.includes(keyName)) {
+    list.push(keyName);
+    await env.HYDRO_PUSH_KV.put(SUB_INDEX_KEY, JSON.stringify(list));
+  }
+}
+
+async function removeKeyFromIndex(env, keyName) {
+  const list = await getSubscriptionIndex(env);
+  const filtered = list.filter((k) => k !== keyName);
+  if (filtered.length !== list.length) {
+    await env.HYDRO_PUSH_KV.put(SUB_INDEX_KEY, JSON.stringify(filtered));
+  }
 }
 
 function getVapidConfig(env) {
@@ -737,6 +784,9 @@ async function handleSubscribe(request, env, corsHeaders) {
     profile,
     lastNotifiedSlot: existing?.lastNotifiedSlot || null,
     lastSentAt: existing?.lastSentAt || null,
+    lastTestSentAt: existing?.lastTestSentAt || null,
+    lastTestStatus: existing?.lastTestStatus ?? null,
+    lastTestOk: existing?.lastTestOk ?? null,
     createdAt: existing?.createdAt || nowIso,
     updatedAt: nowIso
   };
@@ -744,6 +794,7 @@ async function handleSubscribe(request, env, corsHeaders) {
   await env.HYDRO_PUSH_KV.put(key, JSON.stringify(record), {
     expirationTtl: SUBSCRIPTION_TTL_SECONDS
   });
+  await addKeyToIndex(env, key);
 
   const next = computeNextReminder(record, nowMs);
   return jsonResponse({
@@ -838,6 +889,7 @@ async function handleUnsubscribe(request, env, corsHeaders) {
 
   const key = await endpointKey(endpoint);
   await env.HYDRO_PUSH_KV.delete(key);
+  await removeKeyFromIndex(env, key);
 
   return jsonResponse({
     ok: true,
@@ -875,36 +927,49 @@ async function handleTestPush(request, env, ctx, corsHeaders) {
   });
 
   if (delaySeconds > 0) {
+    // Pre-sign VAPID and pre-encrypt payload BEFORE returning 200 so key issues fail immediately and waitUntil stays ultra-lightweight (no KV writes, no Topic collapse).
+    let preparedHeaders;
+    let preparedBody;
+    try {
+      const [{ authorization }, encryptedBody] = await Promise.all([
+        createVapidAuthHeader(subCheck.subscription.endpoint, vapidConfig),
+        encryptWebPushPayload(subCheck.subscription, payload)
+      ]);
+      preparedHeaders = {
+        'Content-Type': 'application/octet-stream',
+        'Content-Encoding': 'aes128gcm',
+        'TTL': '120',
+        'Urgency': 'high',
+        'Authorization': authorization
+      };
+      preparedBody = encryptedBody;
+    } catch (prepErr) {
+      return jsonResponse({
+        ok: false,
+        error: prepErr instanceof Error ? prepErr.message : 'Gagal mengenkripsi payload push.'
+      }, 400, corsHeaders);
+    }
+
     ctx.waitUntil(
       (async () => {
-        const totalWaitMs = delaySeconds * 1000;
-        const stepMs = 1000;
-        let elapsed = 0;
-        while (elapsed < totalWaitMs) {
-          const chunk = Math.min(stepMs, totalWaitMs - elapsed);
-          await new Promise((resolve) => setTimeout(resolve, chunk));
-          elapsed += chunk;
-        }
-        const result = await sendWebPush(subCheck.subscription, payload, vapidConfig, {
-          ttl: 300,
-          urgency: 'high',
-          topic: 'hydrotrack-test'
-        });
-        if (env.HYDRO_PUSH_KV) {
-          const key = await endpointKey(subCheck.subscription.endpoint);
-          if (result.expired) {
-            await env.HYDRO_PUSH_KV.delete(key);
-          } else {
-            const existing = await env.HYDRO_PUSH_KV.get(key, 'json');
-            if (existing) {
-              existing.lastTestSentAt = new Date().toISOString();
-              existing.lastTestStatus = result.status;
-              existing.lastTestOk = result.ok;
-              await env.HYDRO_PUSH_KV.put(key, JSON.stringify(existing), {
-                expirationTtl: SUBSCRIPTION_TTL_SECONDS
-              });
+        await new Promise((resolve) => setTimeout(resolve, delaySeconds * 1000));
+        try {
+          const res = await fetch(subCheck.subscription.endpoint, {
+            method: 'POST',
+            headers: preparedHeaders,
+            body: preparedBody
+          });
+          if (!res.ok) {
+            const errTxt = (await res.text().catch(() => '')).slice(0, 200);
+            console.error(`Delayed test push failed: HTTP ${res.status} ${errTxt}`);
+            if ((res.status === 404 || res.status === 410) && env.HYDRO_PUSH_KV) {
+              const key = await endpointKey(subCheck.subscription.endpoint);
+              await env.HYDRO_PUSH_KV.delete(key);
+              await removeKeyFromIndex(env, key);
             }
           }
+        } catch (sendErr) {
+          console.error('Delayed test push fetch error:', sendErr);
         }
       })()
     );
@@ -912,19 +977,20 @@ async function handleTestPush(request, env, ctx, corsHeaders) {
     return jsonResponse({
       ok: true,
       scheduledDelaySeconds: delaySeconds,
+      tag: payload.tag,
       message: `Tes notifikasi dijadwalkan ${delaySeconds} detik lagi. Anda dapat menutup tab atau mengunci layar sekarang.`
     }, 200, corsHeaders);
   }
 
   const result = await sendWebPush(subCheck.subscription, payload, vapidConfig, {
     ttl: 120,
-    urgency: 'high',
-    topic: 'hydrotrack-test'
+    urgency: 'high'
   });
 
   if (result.expired && env.HYDRO_PUSH_KV) {
     const key = await endpointKey(subCheck.subscription.endpoint);
     await env.HYDRO_PUSH_KV.delete(key);
+    await removeKeyFromIndex(env, key);
   }
 
   return jsonResponse({
@@ -972,6 +1038,7 @@ async function processSubscriptionKey(keyName, env, vapidConfig, nowMs) {
 
   if (sendResult.expired) {
     await env.HYDRO_PUSH_KV.delete(keyName);
+    await removeKeyFromIndex(env, keyName);
     return;
   }
 
@@ -1003,28 +1070,17 @@ async function runScheduledReminders(env, nowMs) {
     return;
   }
 
-  let cursor = undefined;
-  do {
-    const page = await env.HYDRO_PUSH_KV.list({
-      prefix: SUBSCRIPTION_PREFIX,
-      cursor,
-      limit: 1000
-    });
-
-    const keys = page.keys || [];
-    for (let i = 0; i < keys.length; i += CRON_BATCH_SIZE) {
-      const batch = keys.slice(i, i + CRON_BATCH_SIZE);
-      await Promise.all(
-        batch.map((entry) =>
-          processSubscriptionKey(entry.name, env, vapidConfig, nowMs).catch((err) => {
-            console.error(`Error processing ${entry.name}:`, err);
-          })
-        )
-      );
-    }
-
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
+  const keyNames = await getSubscriptionIndex(env);
+  for (let i = 0; i < keyNames.length; i += CRON_BATCH_SIZE) {
+    const batch = keyNames.slice(i, i + CRON_BATCH_SIZE);
+    await Promise.all(
+      batch.map((keyName) =>
+        processSubscriptionKey(keyName, env, vapidConfig, nowMs).catch((err) => {
+          console.error(`Error processing ${keyName}:`, err);
+        })
+      )
+    );
+  }
 }
 
 export default {

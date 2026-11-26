@@ -2138,19 +2138,18 @@ const HydroNotifications = (() => {
     }).join('');
   }
 
-  async function ensurePushSubscriptionForDemoOnly(serverUrl) {
+  async function ensurePushSubscriptionForDemoOnly(serverUrl, options = {}) {
     const reg = await ensureServiceWorker();
     if (!reg || !reg.pushManager) return null;
 
     try {
-      let subscription = await reg.pushManager.getSubscription();
-      if (subscription) return subscription;
-
       const keyRes = await fetchWithTimeout(`${serverUrl}/vapid-public-key`, {
         method: 'GET',
         headers: { Accept: 'application/json, text/plain' }
       }, 8000);
-      if (!keyRes.ok) return null;
+      if (!keyRes.ok) {
+        return options.forceRefresh ? null : await reg.pushManager.getSubscription();
+      }
 
       const contentType = keyRes.headers.get('content-type') || '';
       let vapidKey = '';
@@ -2160,20 +2159,66 @@ const HydroNotifications = (() => {
       } else {
         vapidKey = (await keyRes.text()).trim();
       }
-      if (!vapidKey) return null;
+      if (!vapidKey) {
+        return options.forceRefresh ? null : await reg.pushManager.getSubscription();
+      }
 
-      subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey)
-      });
+      const appServerKey = urlBase64ToUint8Array(vapidKey);
+      let subscription = await reg.pushManager.getSubscription();
+
+      // Re-subscribe cleanly if forced refresh or VAPID key mismatch (stale subscription on friend/reinstalled devices).
+      if (subscription) {
+        let keyMismatch = false;
+        if (subscription.options && subscription.options.applicationServerKey) {
+          const existingBytes = new Uint8Array(subscription.options.applicationServerKey);
+          keyMismatch = !uint8ArraysEqual(existingBytes, appServerKey);
+        }
+        if (options.forceRefresh || keyMismatch) {
+          await subscription.unsubscribe().catch(() => {});
+          subscription = null;
+        }
+      }
+
+      if (!subscription) {
+        subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: appServerKey
+        });
+      }
       return subscription;
     } catch (err) {
+      if (!options.forceRefresh) {
+        try {
+          return await reg.pushManager.getSubscription();
+        } catch (subErr) {
+          return null;
+        }
+      }
       return null;
     }
   }
 
-  // Isolated Demo Push Notification (instant + ringtone OR 15s closed-app push).
-  // Uses tag "hydrotrack-test" & topic "hydrotrack-test" and NEVER modifies user's scheduled reminders in KV or localStorage.
+  async function postDemoTestToServer(serverUrl, subscription, payloadFields) {
+    const res = await fetchWithTimeout(`${serverUrl}/test-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: subscription.endpoint,
+        subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
+        ...payloadFields
+      })
+    }, 10000);
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (err) {
+      data = null;
+    }
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  // Isolated Demo Push Notification (instant + ringtone OR 10s closed-app push).
+  // Uses unique tag "hydrotrack-test-<timestamp>" (no Topic collapse) and NEVER modifies user's scheduled reminders in KV or localStorage.
   async function sendDemoPushNotification(options = {}) {
     if (isSendingDemoNotif) return { ok: false, reason: 'busy' };
     clearTestTimers();
@@ -2208,6 +2253,18 @@ const HydroNotifications = (() => {
     const demoMsg = getSelectedDemoMessage(config);
     const soundLabel = config.soundType === AUDIO_KEY_UPLOAD ? 'custom-upload' : 'default';
     const serverUrl = config.pushServerUrl || DEFAULT_PUSH_SERVER_URL;
+    const uniqueTestTag = `hydrotrack-test-${Date.now()}`;
+    const commonPayloadFields = {
+      delaySeconds: delaySeconds,
+      userName: appSettings.userName || 'Pengguna',
+      todayTotal: safeGetTodayTotal(),
+      dailyGoal: Number(appSettings.dailyGoal) || 2000,
+      remaining: safeGetTodayRemaining(),
+      percentage: safeGetTodayPercentage(),
+      soundLabel: soundLabel,
+      title: demoMsg.title,
+      body: demoMsg.body
+    };
 
     const nowBtn = document.getElementById('btnDemoTestNow');
     const delayBtn = document.getElementById('btnDemoTestDelayed');
@@ -2226,28 +2283,18 @@ const HydroNotifications = (() => {
         }
 
         if (state.pushSupported && serverUrl && navigator.onLine !== false) {
-          const subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
+          let subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
           if (subscription) {
             try {
-              const res = await fetchWithTimeout(`${serverUrl}/test-push`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  endpoint: subscription.endpoint,
-                  subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
-                  delaySeconds: 0,
-                  userName: appSettings.userName || 'Pengguna',
-                  todayTotal: safeGetTodayTotal(),
-                  dailyGoal: Number(appSettings.dailyGoal) || 2000,
-                  remaining: safeGetTodayRemaining(),
-                  percentage: safeGetTodayPercentage(),
-                  soundLabel: soundLabel,
-                  title: demoMsg.title,
-                  body: demoMsg.body
-                })
-              }, 10000);
-
-              if (res.ok) {
+              let result = await postDemoTestToServer(serverUrl, subscription, commonPayloadFields);
+              // Auto-refresh stale subscription once if push endpoint expired/rejected.
+              if (!result.ok && (result.status === 502 || (result.data && result.data.expired))) {
+                subscription = await ensurePushSubscriptionForDemoOnly(serverUrl, { forceRefresh: true });
+                if (subscription) {
+                  result = await postDemoTestToServer(serverUrl, subscription, commonPayloadFields);
+                }
+              }
+              if (result.ok) {
                 setDemoFeedback('Tes notifikasi & nada dering berhasil dikirim!', 'success');
                 showToastSafe('Tes notifikasi demo berhasil dikirim.', 'success');
                 return { ok: true, mode: 'push' };
@@ -2260,7 +2307,7 @@ const HydroNotifications = (() => {
 
         const localRes = await showHydroNotification({
           isTest: true,
-          tag: 'hydrotrack-test',
+          tag: uniqueTestTag,
           title: demoMsg.title,
           body: demoMsg.body,
           playAudio: true,
@@ -2278,14 +2325,42 @@ const HydroNotifications = (() => {
         return { ok: false };
       }
 
-      // Mode 2: Tes Tutup Aplikasi (15 detik via Cloudflare Web Push + SW fallback)
+      // Mode 2: Tes Tutup Aplikasi (10 detik via Cloudflare Web Push + SW fallback)
       if (config.soundType === AUDIO_KEY_UPLOAD) {
         startSilentAudioKeepAlive(delaySeconds + 8);
       }
 
-      setDemoFeedback(`Menjadwalkan push demo ${delaySeconds} detik di server...`, 'info');
+      setDemoFeedback('Menghubungkan ke server push... (tunggu sebentar sebelum menutup aplikasi)', 'info');
 
-      // Arm SW-level backup timer in case mobile network delays FCM while minimized.
+      let serverScheduled = false;
+      let serverErrorDetail = '';
+      if (state.pushSupported && serverUrl && navigator.onLine !== false) {
+        let subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
+        if (subscription) {
+          try {
+            let result = await postDemoTestToServer(serverUrl, subscription, commonPayloadFields);
+            if (!result.ok) {
+              subscription = await ensurePushSubscriptionForDemoOnly(serverUrl, { forceRefresh: true });
+              if (subscription) {
+                result = await postDemoTestToServer(serverUrl, subscription, commonPayloadFields);
+              }
+            }
+            if (result.ok) {
+              serverScheduled = true;
+            } else {
+              serverErrorDetail = (result.data && result.data.error) || `HTTP ${result.status}`;
+            }
+          } catch (err) {
+            serverErrorDetail = err && err.name === 'AbortError' ? 'Koneksi server lambat/timeout' : 'Server push tidak terjangkau';
+          }
+        } else {
+          serverErrorDetail = 'Langganan push belum siap di browser ini';
+        }
+      } else if (navigator.onLine === false) {
+        serverErrorDetail = 'Perangkat sedang offline';
+      }
+
+      // Arm SW-level backup timer with unique tag after server request completes so timing stays aligned.
       const reg = await ensureServiceWorker();
       const swTarget = (reg && (reg.active || reg.waiting || reg.installing)) || (navigator.serviceWorker && navigator.serviceWorker.controller);
       if (swTarget && typeof swTarget.postMessage === 'function') {
@@ -2296,6 +2371,7 @@ const HydroNotifications = (() => {
             payload: {
               title: demoMsg.title,
               body: demoMsg.body,
+              tag: uniqueTestTag,
               soundLabel: soundLabel,
               silent: false,
               url: './pengaturan.html?from=notification'
@@ -2306,50 +2382,23 @@ const HydroNotifications = (() => {
         }
       }
 
-      let serverScheduled = false;
-      if (state.pushSupported && serverUrl && navigator.onLine !== false) {
-        const subscription = await ensurePushSubscriptionForDemoOnly(serverUrl);
-        if (subscription) {
-          try {
-            const res = await fetchWithTimeout(`${serverUrl}/test-push`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              keepalive: true,
-              body: JSON.stringify({
-                endpoint: subscription.endpoint,
-                subscription: typeof subscription.toJSON === 'function' ? subscription.toJSON() : subscription,
-                delaySeconds: delaySeconds,
-                userName: appSettings.userName || 'Pengguna',
-                todayTotal: safeGetTodayTotal(),
-                dailyGoal: Number(appSettings.dailyGoal) || 2000,
-                remaining: safeGetTodayRemaining(),
-                percentage: safeGetTodayPercentage(),
-                soundLabel: soundLabel,
-                title: demoMsg.title,
-                body: demoMsg.body
-              })
-            }, 10000);
-            if (res.ok) {
-              serverScheduled = true;
-            }
-          } catch (err) {
-            serverScheduled = false;
-          }
-        }
-      }
-
       let remainingSecs = delaySeconds;
       const updateCountdown = () => {
         if (remainingSecs > 0) {
           setDemoFeedback(
             serverScheduled
-              ? `Siap! Tutup aplikasi atau kunci layar sekarang. Push demo masuk dalam ${remainingSecs} detik...`
-              : `Mode lokal: tutup/perkecil aplikasi sekarang. Tes notifikasi masuk dalam ${remainingSecs} detik...`,
+              ? `✓ Server siap! Tekan Home / kunci layar sekarang. Push demo masuk dalam ${remainingSecs} detik...`
+              : `Mode cadangan (${serverErrorDetail || 'lokal'}): tekan Home sekarang (jangan swipe hapus app). Masuk dalam ${remainingSecs} detik...`,
             serverScheduled ? 'success' : 'warning'
           );
         } else {
           clearTestTimers();
-          setDemoFeedback('Tes push notifikasi demo sudah dikirim!', 'success');
+          setDemoFeedback(
+            serverScheduled
+              ? 'Push demo sudah dikirim dari server! (Jika HP mode hemat baterai, push bisa tertahan beberapa detik oleh Android.)'
+              : 'Tes notifikasi cadangan telah dikirim.',
+            'success'
+          );
         }
       };
 
@@ -2359,7 +2408,12 @@ const HydroNotifications = (() => {
         updateCountdown();
       }, 1000);
 
-      showToastSafe(`Tes push tutup aplikasi dijadwalkan (${delaySeconds} detik).`, 'success');
+      showToastSafe(
+        serverScheduled
+          ? `Server siap! Tutup aplikasi sekarang (${delaySeconds} detik).`
+          : `Server gagal (${serverErrorDetail || 'offline'}), memakai cadangan lokal.`,
+        serverScheduled ? 'success' : 'warning'
+      );
       return { ok: true, mode: serverScheduled ? 'server-delayed' : 'sw-delayed' };
     } finally {
       isSendingDemoNotif = false;
@@ -3413,7 +3467,7 @@ const HydroNotifications = (() => {
     const demoTestDelayedBtn = document.getElementById('btnDemoTestDelayed');
     if (demoTestDelayedBtn) {
       demoTestDelayedBtn.addEventListener('click', () => {
-        sendDemoPushNotification({ delaySeconds: 15 });
+        sendDemoPushNotification({ delaySeconds: 10 });
       });
     }
 

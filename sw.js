@@ -1,5 +1,5 @@
-const SW_VERSION = 'hydrotrack-sw-v15';
-const CACHE_NAME = 'hydrotrack-shell-v15';
+const SW_VERSION = 'hydrotrack-sw-v16';
+const CACHE_NAME = 'hydrotrack-shell-v16';
 const NOTIF_STATE_CACHE = 'hydrotrack-notif-state';
 const LAST_REMINDER_STATE_URL = '/__hydrotrack_last_reminder_slot__';
 
@@ -92,7 +92,7 @@ function buildNotificationOptions(payload) {
   const isTest = Boolean(
     payload.isTest ||
     nestedData.type === 'test' ||
-    payload.tag === 'hydrotrack-test'
+    (typeof payload.tag === 'string' && payload.tag.startsWith('hydrotrack-test'))
   );
   const rawUrl = payload.url || nestedData.url || (isTest ? './pengaturan.html?from=notification' : DEFAULT_URL);
   const resolvedUrl = resolveNotificationUrl(rawUrl);
@@ -103,7 +103,7 @@ function buildNotificationOptions(payload) {
     body: payload.body || DEFAULT_BODY,
     icon: iconUrl,
     badge: iconUrl,
-    tag: payload.tag || (isTest ? 'hydrotrack-test' : 'hydrotrack-reminder'),
+    tag: payload.tag || (isTest ? `hydrotrack-test-${Date.now()}` : 'hydrotrack-reminder'),
     renotify: true,
     requireInteraction: true,
     timestamp: typeof sentAt === 'number' ? sentAt : Date.now(),
@@ -363,20 +363,20 @@ self.addEventListener('message', (event) => {
     return;
   }
 
-  // Service-Worker-level background timer backup for 15s test push (survives tab/app minimize without freezing like page setTimeout).
+  // Service-Worker-level background timer backup for delayed demo test push.
   if (data.type === 'SCHEDULE_SW_DELAYED_TEST') {
-    const delayMs = Math.max(1000, Math.min(30000, (Number(data.delaySeconds) || 15) * 1000));
+    const delayMs = Math.max(1000, Math.min(30000, (Number(data.delaySeconds) || 10) * 1000));
     const scheduledAt = Date.now();
     const payload = data.payload || {};
     const title = payload.title || 'Tes Push Latar Belakang Berhasil';
     const options = buildNotificationOptions({
       ...payload,
       isTest: true,
-      tag: 'hydrotrack-test'
+      tag: payload.tag || `hydrotrack-test-${scheduledAt}`
     });
 
     event.waitUntil(
-      new Promise((resolve) => setTimeout(resolve, delayMs + 1500)).then(async () => {
+      new Promise((resolve) => setTimeout(resolve, delayMs + 2500)).then(async () => {
         // If the real Cloudflare Web Push already arrived and showed the test notification, do not duplicate it.
         if (lastTestNotificationShownAt >= scheduledAt) {
           return;
