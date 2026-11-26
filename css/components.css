@@ -5665,12 +5665,6 @@
   display: none;
 }
 
-@media (min-width: 769px) {
-  .history-fab-container {
-    display: none !important;
-  }
-}
-
 .history-drink-log__list {
   flex: 1;
   min-height: 0;
